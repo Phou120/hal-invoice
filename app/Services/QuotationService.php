@@ -52,6 +52,8 @@ class QuotationService
             $sumSubTotal = 0;
             if(!empty($request['quotation_details'])){
                 foreach($request['quotation_details'] as $item){
+                    $total = $item['amount'] * $item['price'];
+
                     $addDetail = new QuotationDetail();
                     $addDetail->order = $item['order'];
                     $addDetail->quotation_id = $addQuotation['id'];
@@ -59,10 +61,10 @@ class QuotationService
                     $addDetail->amount = $item['amount'];
                     $addDetail->price = $item['price'];
                     $addDetail->description = $item['description'];
-                    $addDetail->total = $item['amount'] * $item['price'];
+                    $addDetail->total = $total;
                     $addDetail->save();
 
-                    $sumSubTotal += $item['amount'] * $item['price'];
+                    $sumSubTotal += $total;
                 }
             }
             /**Calculate */
@@ -100,7 +102,6 @@ class QuotationService
     /** add quotation detail */
     public function addQuotationDetail($request)
     {
-
         $addDetail = new QuotationDetail();
         $addDetail->order = $request['order'];
         $addDetail->quotation_id = $request['id'];
@@ -112,10 +113,10 @@ class QuotationService
         $addDetail->save();
 
         /** Update Quotation */
-        $editQuotation = Quotation::find($request['id']);
+        $quotation = Quotation::find($request['id']);
 
         /** Update Calculate quotation */
-        $this->calculateService->calculateTotal_ByEdit($editQuotation);
+        $this->calculateService->calculateTotal_ByEdit($quotation);
 
         return response()->json([
             'success' => true,
@@ -125,8 +126,7 @@ class QuotationService
 
     public function listQuotationDetail($id)
     {
-        $item = Quotation::select('quotations.*')
-        ->orderBy('id', 'desc')->where('id', $id)->first();
+        $item = Quotation::select('quotations.*')->orderBy('id', 'desc')->where('id', $id)->first();
         $item['countDetail'] = QuotationDetail::where('quotation_id', $item['id'])->count();
         $item['customer'] = Customer::where('id', $item['customer_id'])->first();
         $item['company'] = Company::where('id', $item['company_id'])->first();
@@ -156,12 +156,13 @@ class QuotationService
         $editQuotation->currency_id = $request['currency_id'];
         $editQuotation->discount = $request['discount'];
         $editQuotation->tax = $request['tax'];
+        // $editQuotation->updated_by = Auth::user('api')->id;
         $editQuotation->created_by = Auth::user('api')->id;
         $editQuotation->save();
 
 
         /**Update Calculate */
-        $this->calculateService->calculateTotal_ByEdit($request);
+        $this->calculateService->calculateTotal_ByEdit($editQuotation);
 
         return $editQuotation;
     }
@@ -204,7 +205,6 @@ class QuotationService
 
     public function deleteQuotation($request)
     {
-
         try {
 
             DB::beginTransaction();
@@ -221,6 +221,7 @@ class QuotationService
 
         } catch (\Exception $e) {
             DB::rollback();
+            
             return response()->json([
                 'success' => false,
                 'msg' => 'ບໍ່ສາມາດລຶບລາຍການນີ້ໄດ້...'

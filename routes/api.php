@@ -81,7 +81,7 @@ Route::group([
     /** edit-quotation-detail/{id} = {id} = ແມ່ນແກ້ໄຂ id detail  *** And ***  delete-quotation-detail/{id} = {id} = ແມ່ນລຶບ id detail */
     Route::put('edit-quotation-detail/{id}', [QuotationController::class, 'editQuotationDetail'])->name('edit.quotation.detail');
     Route::delete('delete-quotation-detail/{id}', [QuotationController::class, 'deleteQuotationDetail'])->name('delete.quotation.detail');
-
+    
 
     /** CRUD Invoice and CRUD InvoiceDetail */
     Route::post('add-invoice', [InvoiceController::class, 'addInvoice'])->name('add.invoice');

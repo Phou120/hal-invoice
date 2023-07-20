@@ -20,9 +20,9 @@ class CalculateService
     public function calculateTotal($request, $sumSubTotal, $id)
     {
         /** Calculate */
-        $calculateTax = $sumSubTotal * $request['tax'] / 100;
-        $calculateDiscount = $sumSubTotal * $request['discount'] / 100;
-        $sumTotal = ($sumSubTotal - $calculateDiscount) + $calculateTax;
+        $sumTotalTax = $sumSubTotal * $request['tax'] / 100;
+        $sumTotalDiscount = $sumSubTotal * $request['discount'] / 100;
+        $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
 
         /** Update Total Quotation */
         $addQuotation = Quotation::find($id);
@@ -32,16 +32,16 @@ class CalculateService
     }
 
     /** edit calculate quotation */
-    public function calculateTotal_ByEdit($request)
+    public function calculateTotal_ByEdit($quotation)
     {
         /** Calculate */
-        $sumSubTotalPrice = QuotationDetail::where('quotation_id', $request['id'])->get()->sum('total');
-        $calculateTax = $sumSubTotalPrice * $request['tax'] / 100;
-        $calculateDiscount = $sumSubTotalPrice * $request['discount'] / 100;
-        $sumTotal = ($sumSubTotalPrice - $calculateDiscount) + $calculateTax;
+        $sumSubTotalPrice = QuotationDetail::where('quotation_id', $quotation['id'])->get()->sum('total');
+        $sumTotalTax = $sumSubTotalPrice * $quotation['tax'] / 100;
+        $sumTotalDiscount = $sumSubTotalPrice * $quotation['discount'] / 100;
+        $sumTotal = ($sumSubTotalPrice - $sumTotalDiscount) + $sumTotalTax;
 
         /** Update Total Quotation */
-        $editQuotation = Quotation::find($request['id']);
+        $editQuotation = Quotation::find($quotation['id']);
         $editQuotation->sub_total = $sumSubTotalPrice;
         $editQuotation->total = $sumTotal;
         $editQuotation->save();
