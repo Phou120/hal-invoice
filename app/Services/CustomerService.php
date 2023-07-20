@@ -74,7 +74,7 @@ class CustomerService
     public function deleteCustomer($request)
     {
         $deleteCustomer = Customer::findOrFail($request['id']);
-        $deleteCustomer-> logo = CreateFolderImageHelper::deleteCustomer($deleteCustomer);
+        $deleteCustomer->logo = CreateFolderImageHelper::deleteCustomer($deleteCustomer);
         $deleteCustomer->delete();
 
         return $deleteCustomer;

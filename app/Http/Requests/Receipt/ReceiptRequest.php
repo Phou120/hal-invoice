@@ -265,3 +265,4 @@ class ReceiptRequest extends FormRequest
         ];
     }
 }
+
