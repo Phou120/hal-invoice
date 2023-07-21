@@ -201,7 +201,6 @@ class QuotationRequest extends FormRequest
                 ],
                 'note' => [
                     'nullable',
-                        'max:255'
                 ],
                 'customer_id' => [
                     'required',
@@ -250,8 +249,7 @@ class QuotationRequest extends FormRequest
                         'numeric'
                 ],
                 'quotation_details.*.description' => [
-                    'nullable',
-                        'max:255'
+                    'nullable'
                 ]
             ];
         }

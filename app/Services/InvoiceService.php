@@ -32,7 +32,7 @@ class InvoiceService
         DB::beginTransaction();
 
             $addInvoice = new Invoice();
-            $addInvoice->invoice_number = generateHelper::generateInvoiceNumber('IN- ', 8);
+            $addInvoice->invoice_number = generateHelper::generateInvoiceNumber('IV- ', 8);
             $addInvoice->invoice_name = $request['invoice_name'];
             $addInvoice->currency_id = $request['currency_id'];
             $addInvoice->customer_id = $request['customer_id'];
@@ -49,6 +49,8 @@ class InvoiceService
             $sumSubTotal = 0;
             if(!empty($request['invoice_details'])){
                 foreach($request['invoice_details'] as $item){
+                    $total = $item['amount'] * $item['price'];
+
                     $addDetail = new InvoiceDetail();
                     $addDetail->order = $item['order'];
                     $addDetail->invoice_id = $addInvoice['id'];
@@ -56,10 +58,10 @@ class InvoiceService
                     $addDetail->amount = $item['amount'];
                     $addDetail->price = $item['price'];
                     $addDetail->description = $item['description'];
-                    $addDetail->total = $item['amount'] * $item['price'];
+                    $addDetail->total = $total;
                     $addDetail->save();
 
-                    $sumSubTotal += $item['amount'] * $item['price'];
+                    $sumSubTotal += $total;
                 }
             }
 
@@ -158,7 +160,7 @@ class InvoiceService
         $editInvoice->save();
 
         /**Update Calculate */
-        $this->calculateService->calculateTotalInvoice_ByEdit($request);
+        $this->calculateService->calculateTotalInvoice_ByEdit($editInvoice);
 
         return $editInvoice;
     }

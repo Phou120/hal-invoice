@@ -74,8 +74,10 @@ class CompanyService
     public function deleteCompany($request)
     {
         $deleteCompany = Company::findOrFail($request['id']);
-        $deleteCompany->logo = CreateFolderImageHelper::deleteLogoCompany($deleteCompany);
         $deleteCompany->delete();
+
+        /** Delete Image On Folder */
+        CreateFolderImageHelper::deleteLogoCompany($deleteCompany);
 
         return $deleteCompany;
     }

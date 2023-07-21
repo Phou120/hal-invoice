@@ -20,7 +20,7 @@ class CompanyRequest extends FormRequest
     public function prepareForValidation()
     {
         if($this->isMethod('post') && $this->routeIs('edit.company')
-            ||$this->isMethod('delete') && $this->routeIs('delete.company')
+            || $this->isMethod('delete') && $this->routeIs('delete.company')
 
         ){
             $this->merge([
