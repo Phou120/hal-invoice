@@ -18,7 +18,10 @@ class CurrencyService
         $addCurrency->short_name = $request['short_name'];
         $addCurrency->save();
 
-        return $addCurrency;
+        return response()->json([
+            'success' => true,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
 
     }
 
@@ -30,26 +33,34 @@ class CurrencyService
         )
         ->orderBy('currencies.id', 'desc')->get();
 
-        return $listCurrency;
+        return response()->json([
+            'listCurrency' => $listCurrency
+        ]);
     }
 
     /** ແກ້ໄຂສະກຸນເງີນ */
     public function editCurrency($request)
     {
-        $editCurrency = Currency::findOrFail($request['id']);
+        $editCurrency = Currency::find($request['id']);
         $editCurrency->name = $request['name'];
         $editCurrency->short_name = $request['short_name'];
         $editCurrency->save();
 
-        return $editCurrency;
+        return response()->json([
+            'success' => true,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
     }
 
     /** ລຶບສະກຸນເງີນ */
     public function deleteCurrency($request)
     {
-        $deleteCurrency = Currency::findOrFail($request['id']);
+        $deleteCurrency = Currency::find($request['id']);
         $deleteCurrency->delete();
 
-        return $deleteCurrency;
+        return response()->json([
+            'success' => true,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
     }
 }

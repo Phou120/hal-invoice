@@ -8,6 +8,7 @@ use App\Models\Invoice;
 use App\Models\Currency;
 use App\Models\Customer;
 use App\Traits\ResponseAPI;
+use App\Helpers\TableHelper;
 use App\Models\InvoiceDetail;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseDetail;
@@ -36,7 +37,7 @@ class PurchaseOrderService
             )
             ->join('invoices as invoice', 'invoice_details.invoice_id', 'invoice.id')
             ->where('invoice_details.invoice_id', $getInvoice['id'])
-            ->where('invoice.status', 'pending')
+            ->where('invoice.status', 'created')
             ->get();
 
             if(count($getInvoiceDetails) > 0) {
@@ -93,21 +94,27 @@ class PurchaseOrderService
      /** ດຶງໃບສັ່ງຊື້  */
     public function listPurchaseOrders()
     {
-        $listOrder = PurchaseOrder::select(
-            'purchase_orders.*'
-        )->orderBy('purchase_orders.id', 'desc')->get();
+            $orders = DB::table('purchase_orders')
+            ->select(
+                'purchase_orders.*',
+                DB::raw('(SELECT COUNT(*) FROM purchase_details WHERE purchase_details.purchase_id = purchase_orders.id) as count_details')
+            )
+            ->leftJoin('customers', 'purchase_orders.customer_id', 'customers.id')
+            ->leftJoin('currencies', 'purchase_orders.currency_id', 'currencies.id')
+            ->leftJoin('companies', 'purchase_orders.company_id', 'companies.id')
+            ->leftJoin('users', 'purchase_orders.created_by', 'users.id')
+            ->orderBy('purchase_orders.id', 'desc')
+            ->get();
 
-        $listOrder->map(function ($item) {
-            $item['countDetail'] = PurchaseDetail::where('purchase_id', $item['id'])->count();
-            $item['customer'] = Customer::where('id', $item['company_id'])->first();
-            $item['currency'] = Currency::where('id', $item['company_id'])->first();
-            $item['company'] = Company::where('id', $item['currency_id'])->first();
-            $item['user'] = User::where('id', $item['created_by'])->first();
-        });
+        foreach ($orders as $item) {
+            /**  */
+            TableHelper::format($item);
+        }
 
         return response()->json([
-            'listOrder' => $listOrder
+            'listOrder' => $orders
         ]);
+
     }
 
      /** ບັນທຶກລາຍລະອຽດການຈັດຊື້  */
@@ -139,20 +146,20 @@ class PurchaseOrderService
     public function listPurchaseDetail($id)
     {
         $item = DB::table('purchase_orders')
-            ->select('purchase_orders.*')
+            ->select('purchase_orders.*',
+                DB::raw('(SELECT COUNT(*) FROM purchase_details WHERE purchase_details.purchase_id = purchase_orders.id) as details_count')
+            )
             ->leftJoin('customers', 'purchase_orders.customer_id', 'customers.id')
             ->leftJoin('currencies', 'purchase_orders.currency_id', 'currencies.id')
             ->leftJoin('companies', 'purchase_orders.company_id', 'companies.id')
             ->leftJoin('users', 'purchase_orders.created_by', 'users.id')
             ->where('purchase_orders.id', $id)
             ->orderBy('purchase_orders.id', 'desc')
+            ->groupBy('purchase_orders.id')
             ->first();
 
-        $item->countDetail = DB::table('purchase_details')->where('purchase_id', $item->id)->count();
-        $item->customer = DB::table('customers')->where('id', $item->customer_id)->first();
-        $item->currency = DB::table('currencies')->where('id', $item->currency_id)->first();
-        $item->company = DB::table('companies')->where('id', $item->company_id)->first();
-        $item->user = DB::table('users')->where('id', $item->created_by)->first();
+        /**  */
+        TableHelper::format($item);
 
         /** detail */
         $details = DB::table('purchase_details')->where('purchase_id', $id)->get();
@@ -176,7 +183,7 @@ class PurchaseOrderService
         $editOrder->currency_id = $request['currency_id'];
         $editOrder->discount = $request['discount'];
         $editOrder->tax = $request['tax'];
-        $editOrder->created_by = Auth::user('api')->id;
+        $editOrder->updated_by = Auth::user('api')->id;
         $editOrder->save();
 
          /**Update Calculate */
@@ -237,7 +244,13 @@ class PurchaseOrderService
 
             DB::beginTransaction();
 
-                PurchaseOrder::findOrFail($request['id'])->delete();
+                // Find the Receipt model
+                $purchaseOrder = PurchaseOrder::findOrFail($request['id']);
+                $purchaseOrder->updated_by = Auth::user('api')->id;
+                $purchaseOrder->save();
+
+                // Delete the ReceiptDetail and the Receipt model
+                $purchaseOrder->delete();
                 PurchaseDetail::where('purchase_id', $request['id'])->delete();
 
             DB::commit();

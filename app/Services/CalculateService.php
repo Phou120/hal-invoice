@@ -51,9 +51,9 @@ class CalculateService
     public function calculateTotalInvoice($request, $sumSubTotal, $id)
     {
         /** Calculate */
-        $calculateTax = $sumSubTotal * $request['tax'] / 100;
-        $calculateDiscount = $sumSubTotal * $request['discount'] / 100;
-        $sumTotal = ($sumSubTotal - $calculateDiscount) + $calculateTax;
+        $sumTotalTax = $sumSubTotal * $request['tax'] / 100;
+        $sumTotalDiscount = $sumSubTotal * $request['discount'] / 100;
+        $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
 
         /** Update Total Invoice */
         $addQuotation = Invoice::find($id);
@@ -67,9 +67,9 @@ class CalculateService
     {
         /** Calculate */
         $sumSubTotalPrice = InvoiceDetail::where('invoice_id', $request['id'])->get()->sum('total');
-        $calculateTax = $sumSubTotalPrice * $request['tax'] / 100;
-        $calculateDiscount = $sumSubTotalPrice * $request['discount'] / 100;
-        $sumTotal = ($sumSubTotalPrice - $calculateDiscount) + $calculateTax;
+        $sumTotalTax = $sumSubTotalPrice * $request['tax'] / 100;
+        $sumTotalDiscount = $sumSubTotalPrice * $request['discount'] / 100;
+        $sumTotal = ($sumSubTotalPrice - $sumTotalDiscount) + $sumTotalTax;
 
         /** Update Total Invoice */
         $editQuotation = Invoice::find($request['id']);
@@ -82,9 +82,9 @@ class CalculateService
      public function calculateTotalReceipt($request, $sumSubTotal, $id)
      {
          /** Calculate */
-         $calculateTax = $sumSubTotal * $request['tax'] / 100;
-         $calculateDiscount = $sumSubTotal * $request['discount'] / 100;
-         $sumTotal = ($sumSubTotal - $calculateDiscount) + $calculateTax;
+         $sumTotalTax = $sumSubTotal * $request['tax'] / 100;
+         $sumTotalDiscount = $sumSubTotal * $request['discount'] / 100;
+         $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
 
          /** Update Total Receipt */
          $addQuotation = Receipt::find($id);
@@ -98,9 +98,9 @@ class CalculateService
      {
          /** Calculate */
          $sumSubTotalPrice = ReceiptDetail::where('receipt_id', $request['id'])->get()->sum('total');
-         $calculateTax = $sumSubTotalPrice * $request['tax'] / 100;
-         $calculateDiscount = $sumSubTotalPrice * $request['discount'] / 100;
-         $sumTotal = ($sumSubTotalPrice - $calculateDiscount) + $calculateTax;
+         $sumTotalTax = $sumSubTotalPrice * $request['tax'] / 100;
+         $sumTotalDiscount = $sumSubTotalPrice * $request['discount'] / 100;
+         $sumTotal = ($sumSubTotalPrice - $sumTotalDiscount) + $sumTotalTax;
 
          /** Update Total Receipt */
          $editQuotation = Receipt::find($request['id']);
@@ -113,9 +113,9 @@ class CalculateService
      public function calculateTotalOrder($request, $sumSubTotal, $id)
      {
          /** Calculate */
-         $calculateTax = $sumSubTotal * $request['tax'] / 100;
-         $calculateDiscount = $sumSubTotal * $request['discount'] / 100;
-         $sumTotal = ($sumSubTotal - $calculateDiscount) + $calculateTax;
+         $sumTotalTax = $sumSubTotal * $request['tax'] / 100;
+         $sumTotalDiscount = $sumSubTotal * $request['discount'] / 100;
+         $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
 
          /** Update Total PurchaseOrder */
          $addQuotation = PurchaseOrder::find($id);
@@ -129,9 +129,9 @@ class CalculateService
      {
          /** Calculate */
          $sumSubTotalPrice = PurchaseDetail::where('purchase_id', $request['id'])->get()->sum('total');
-         $calculateTax = $sumSubTotalPrice * $request['tax'] / 100;
-         $calculateDiscount = $sumSubTotalPrice * $request['discount'] / 100;
-         $sumTotal = ($sumSubTotalPrice - $calculateDiscount) + $calculateTax;
+         $sumTotalTax = $sumSubTotalPrice * $request['tax'] / 100;
+         $sumTotalDiscount = $sumSubTotalPrice * $request['discount'] / 100;
+         $sumTotal = ($sumSubTotalPrice - $sumTotalDiscount) + $sumTotalTax;
 
          /** Update Total PurchaseOrder */
          $editQuotation = PurchaseOrder::find($request['id']);

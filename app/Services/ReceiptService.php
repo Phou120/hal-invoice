@@ -9,6 +9,7 @@ use App\Models\Receipt;
 use App\Models\Currency;
 use App\Models\Customer;
 use App\Traits\ResponseAPI;
+use App\Helpers\TableHelper;
 use App\Models\InvoiceDetail;
 use App\Models\ReceiptDetail;
 use App\Services\CalculateService;
@@ -36,7 +37,7 @@ class ReceiptService
             )
             ->join('invoices as invoice', 'invoice_details.invoice_id', 'invoice.id')
             ->where('invoice_details.invoice_id', $getInvoice['id'])
-            ->where('invoice.status', 'pending')
+            ->where('invoice.status', 'created')
             ->get();
 
             if(count($getInvoiceDetail) > 0) {
@@ -90,17 +91,22 @@ class ReceiptService
     /** ດຶງຂໍມູນໃບຮັບເງິນ */
     public function listReceipts()
     {
-        $listReceipt = Receipt::select(
-            'receipts.*'
-        )->orderBy('receipts.id', 'desc')->get();
+        $listReceipt = DB::table('Receipts')
+        ->select(
+            'receipts.*',
+            DB::raw('(SELECT COUNT(*) FROM receipt_details WHERE receipt_details.receipt_id = Receipts.id) as count_details')
+        )
+        ->leftJoin('customers', 'receipts.customer_id', '=', 'customers.id')
+        ->leftJoin('currencies', 'receipts.currency_id', '=', 'currencies.id')
+        ->leftJoin('companies', 'receipts.company_id', '=', 'companies.id')
+        ->leftJoin('users', 'receipts.created_by', '=', 'users.id')
+        ->orderBy('receipts.id', 'desc')->get();
 
-        $listReceipt->map(function ($item) {
-            $item['countDetail'] = ReceiptDetail::where('receipt_id', $item['id'])->count();
-            $item['customer'] = Customer::where('id', $item['company_id'])->first();
-            $item['currency'] = Currency::where('id', $item['company_id'])->first();
-            $item['company'] = Company::where('id', $item['currency_id'])->first();
-            $item['user'] = User::where('id', $item['created_by'])->first();
-        });
+        foreach ($listReceipt as $item) {
+             /** loop data */
+            TableHelper::format($item);
+        }
+
 
         return response()->json([
             'listReceipt' => $listReceipt
@@ -136,7 +142,9 @@ class ReceiptService
     public function listReceiptDetail($id)
     {
         $item = DB::table('receipts')
-            ->select('receipts.*')
+            ->select('receipts.*',
+            DB::raw('(SELECT COUNT(*) FROM receipt_details WHERE receipt_details.receipt_id = Receipts.id) as count_details')
+            )
             ->leftJoin('customers', 'receipts.customer_id', 'customers.id')
             ->leftJoin('currencies', 'receipts.currency_id', 'currencies.id')
             ->leftJoin('companies', 'receipts.company_id', 'companies.id')
@@ -145,12 +153,8 @@ class ReceiptService
             ->orderBy('receipts.id', 'desc')
             ->first();
 
-        $item->countDetail = DB::table('receipt_details')->where('receipt_id', $item->id)->count();
-        $item->customer = DB::table('customers')->where('id', $item->customer_id)->first();
-        $item->currency = DB::table('currencies')->where('id', $item->currency_id)->first();
-        $item->company = DB::table('companies')->where('id', $item->company_id)->first();
-        $item->user = DB::table('users')->where('id', $item->created_by)->first();
-
+        /** loop data */
+        TableHelper::format($item);
 
         /**Detail */
         $details = DB::table('receipt_details')->where('receipt_id', $id)->get();
@@ -175,7 +179,7 @@ class ReceiptService
         $editReceipt->customer_id = $request['customer_id'];
         $editReceipt->discount = $request['discount'];
         $editReceipt->tax = $request['tax'];
-        $editReceipt->created_by = Auth::user('api')->id;
+        $editReceipt->updated_by = Auth::user('api')->id;
         $editReceipt->save();
 
         /**Update Calculate */
@@ -236,7 +240,13 @@ class ReceiptService
 
             DB::beginTransaction();
 
-                Receipt::findOrFail($request['id'])->delete();
+                // Find the Receipt model
+                $receipt = Receipt::findOrFail($request['id']);
+                $receipt->updated_by = Auth::user('api')->id;
+                $receipt->save();
+
+                // Delete the ReceiptDetail and the Receipt model
+                $receipt->delete();
                 ReceiptDetail::where('receipt_id', $request['id'])->delete();
 
             DB::commit();

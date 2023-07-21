@@ -129,11 +129,13 @@ class InvoiceRequest extends FormRequest
                 ],
                 'start_date' => [
                     'required',
-                        'date'
+                        'date',
+                            'after_or_equal:today',
                 ],
                 'end_date' => [
                     'required',
-                        'date'
+                        'date',
+                            'after_or_equal:start_date'
                 ],
                 'note' => [
                     'nullable',
@@ -209,11 +211,13 @@ class InvoiceRequest extends FormRequest
                 ],
                 'start_date' => [
                     'required',
-                        'date'
+                        'date',
+                            'after_or_equal:today',
                 ],
                 'end_date' => [
                     'required',
-                        'date'
+                        'date',
+                            'after_or_equal:start_date'
                 ],
                 'note' => [
                     'nullable',
@@ -282,8 +286,10 @@ class InvoiceRequest extends FormRequest
 
             'start_date.required' => 'ກະລຸນາປ້ອນວັນທີກ່ອນ...',
             'start_date.date' => 'ຄວນເປັນວັນທີ...',
+            'start_date.after_or_equal' => 'ວັນທີເລີ່ມຄວນເປັນວັນທີປັດຈຸບັນ...',
             'end_date.required' => 'ກະລຸນາປ້ອນວັນທີກ່ອນ...',
             'end_date.date' => 'ຄວນເປັນວັນທີ...',
+            'end_date.after_or_equal' => 'ວັນທີສິ້ນສຸດຄວນໃຫ່ຍກວ່າວັນທີເລີ່ມ...',
 
             'note.max' => 'ຄຳອະທິບາຍບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
 

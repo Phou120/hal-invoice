@@ -23,7 +23,10 @@ class CustomerService
         $addCustomer->address = $request['address'];
         $addCustomer->save();
 
-        return $addCustomer;
+        return response()->json([
+            'success' => true,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
 
     }
 
@@ -38,13 +41,15 @@ class CustomerService
             return $item->format();
         });
 
-        return $listCustomers;
+        return response()->json([
+            'listCustomers' => $listCustomers
+        ]);
     }
 
     /** ແກ້ໄຂຂໍ້ມູນລູກຄ້າ */
     public function editCustomer($request)
     {
-        $editCustomer = Customer::findOrFail($request['id']);
+        $editCustomer = Customer::find($request['id']);
         $editCustomer->company_name = $request['company_name'];
         $editCustomer->phone = $request['phone'];
         $editCustomer->email = $request['email'];
@@ -67,22 +72,24 @@ class CustomerService
 
         $editCustomer->save();
 
-        return $editCustomer;
+        return response()->json([
+            'success' => true,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
     }
 
     /** ລຶບຂໍ້ມູນລູກຄ້າ */
     public function deleteCustomer($request)
     {
-        $deleteCustomer = Customer::findOrFail($request['id']);
-<<<<<<< HEAD
-        $deleteCustomer->logo = CreateFolderImageHelper::deleteCustomer($deleteCustomer);
-=======
->>>>>>> 9d13d387379fe5463403cf1ed68bb820bfefd651
+        $deleteCustomer = Customer::find($request['id']);
         $deleteCustomer->delete();
 
         /** Delete Image On Folder */
         CreateFolderImageHelper::deleteCustomer($deleteCustomer);
 
-        return $deleteCustomer;
+        return response()->json([
+            'success' => true,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
     }
 }

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('company_id');
             $table->unsignedBigInteger('currency_id');
             $table->unsignedBigInteger('created_by');
+            $table->unsignedBigInteger('updated_by')->nullable();
             $table->string('invoice_name');
             $table->dateTime('start_date');
             $table->dateTime('end_date');
@@ -28,7 +29,7 @@ return new class extends Migration
             $table->double('discount')->default(0);
             $table->double('tax')->default(0);
             $table->double('total')->default(0);
-            $table->enum('status', ['created', 'pending', 'paid', 'canceled'])->default('pending');
+            $table->enum('status', ['created', 'pending', 'paid', 'canceled'])->default('created');
             $table->timestamps();
             $table->softDeletes();
 
@@ -36,6 +37,7 @@ return new class extends Migration
             $table->foreign('customer_id')->references('id')->on('customers')->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('company_id')->references('id')->on('companies')->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign('updated_by')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

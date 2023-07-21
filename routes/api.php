@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Invoice\InvoiceController;
 use App\Http\Controllers\Receipt\ReceiptController;
@@ -33,6 +34,7 @@ Route::group([
 ], function ($router) {
 
     Route::post('login', [AuthController::class, 'login']);
+    Route::post('logout', [AuthController::class, 'logout']);
 
 });
 
@@ -81,7 +83,7 @@ Route::group([
     /** edit-quotation-detail/{id} = {id} = ແມ່ນແກ້ໄຂ id detail  *** And ***  delete-quotation-detail/{id} = {id} = ແມ່ນລຶບ id detail */
     Route::put('edit-quotation-detail/{id}', [QuotationController::class, 'editQuotationDetail'])->name('edit.quotation.detail');
     Route::delete('delete-quotation-detail/{id}', [QuotationController::class, 'deleteQuotationDetail'])->name('delete.quotation.detail');
-    
+
 
     /** CRUD Invoice and CRUD InvoiceDetail */
     Route::post('add-invoice', [InvoiceController::class, 'addInvoice'])->name('add.invoice');
@@ -130,4 +132,14 @@ Route::group([
     Route::put('edit-purchase-detail/{id}', [PurchaseOrderController::class, 'editPurchaseDetail'])->name('edit.purchase.detail');
     Route::delete('delete-purchase-detail/{id}', [PurchaseOrderController::class, 'deletePurchaseDetail'])->name('delete.purchase.detail');
 
+    /** CRUD of User */
+    Route::post('add-user', [UserController::class, 'addUser'])->name('add.user');
+    Route::get('list-users', [UserController::class, 'listUser']);
+    Route::put('edit-user/{id}', [UserController::class, 'editUser'])->name('edit.user');
+    Route::delete('delete-user/{id}', [UserController::class, 'deleteUser'])->name('delete.user');
+
+    /** change password */
+    Route::put('change-password/{id}', [UserController::class, 'changePassword'])->name('change.password');
+
 });
+

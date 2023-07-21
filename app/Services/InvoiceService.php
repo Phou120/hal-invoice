@@ -8,6 +8,7 @@ use App\Models\Invoice;
 use App\Models\Currency;
 use App\Models\Customer;
 use App\Traits\ResponseAPI;
+use App\Helpers\TableHelper;
 use App\Models\InvoiceDetail;
 use App\Helpers\generateHelper;
 use App\Models\QuotationDetail;
@@ -80,15 +81,18 @@ class InvoiceService
     public function listInvoices()
     {
         $listInvoice = Invoice::select(
-            'invoices.*'
-        )->orderBy('invoices.id', 'desc')->get();
+            'invoices.*',
+            DB::raw('(SELECT COUNT(*) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as count_details')
+        )
+        ->leftJoin('customers', 'invoices.customer_id', 'customers.id')
+        ->leftJoin('currencies', 'invoices.currency_id', 'currencies.id')
+        ->leftJoin('companies', 'invoices.company_id', 'companies.id')
+        ->leftJoin('users', 'invoices.created_by', 'users.id')
+        ->orderBy('invoices.id', 'desc')->get();
 
         $listInvoice->map(function ($item){
-            $item['countDetail'] = InvoiceDetail::where('invoice_id', $item['id'])->count();
-            $item['customer'] = Customer::where('id', $item['customer_id'])->first();
-            $item['company'] = Company::where('id', $item['company_id'])->first();
-            $item['currency'] = Currency::where('id', $item['currency_id'])->first();
-            $item['user'] = User::where('id', $item['created_by'])->first();
+            /** loop data */
+            TableHelper::format($item);
         });
 
         return response()->json([
@@ -125,12 +129,20 @@ class InvoiceService
     /** ດຶງລາຍລະອຽດໃບບິນ */
     public function listInvoiceDetail($id)
     {
-        $item = Invoice::select('invoices.*')->orderBy('id', 'desc')->where('id', $id)->first();
-        $item['countDetail'] = InvoiceDetail::where('invoice_id', $item['id'])->count();
-        $item['customer'] = Customer::where('id', $item['customer_id'])->first();
-        $item['currency'] = Currency::where('id', $item['currency_id'])->first();
-        $item['company'] = Company::where('id', $item['company_id'])->first();
-        $item['user'] = User::where('id', $item['created_by'])->first();
+        $item = DB::table('invoices')
+        ->select(
+            'invoices.*',
+            DB::raw('(SELECT COUNT(*) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as count_details')
+        )
+        ->leftJoin('customers', 'invoices.customer_id', 'customers.id')
+        ->leftJoin('currencies', 'invoices.currency_id', 'currencies.id')
+        ->leftJoin('companies', 'invoices.company_id', 'companies.id')
+        ->leftJoin('users', 'invoices.created_by', 'users.id')
+        ->where('invoices.id', $id)
+        ->orderBy('id', 'desc')->first();
+
+        /** loop data */
+        TableHelper::format($item);
 
         /**Detail */
         $details = InvoiceDetail::where('invoice_id', $id)->get();
@@ -156,13 +168,16 @@ class InvoiceService
         $editInvoice->end_date = $request['end_date'];
         $editInvoice->note = $request['note'];
         $editInvoice->tax = $request['tax'];
-        $editInvoice->created_by = Auth::user('api')->id;
+        $editInvoice->updated_by = Auth::user('api')->id;
         $editInvoice->save();
 
         /**Update Calculate */
         $this->calculateService->calculateTotalInvoice_ByEdit($editInvoice);
 
-        return $editInvoice;
+        return response()->json([
+            'success' => true,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
     }
 
     /** ແກ້ໄຂລາຍລະອຽດໃບບິນ */
@@ -201,7 +216,10 @@ class InvoiceService
         /**Update Calculate */
         $this->calculateService->calculateTotalInvoice_ByEdit($editInvoice);
 
-        return $deleteDetail;
+        return response()->json([
+            'success' => true,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
     }
 
     /** ລຶບໃບບິນເກັບເງິນ */
@@ -211,7 +229,13 @@ class InvoiceService
 
             DB::beginTransaction();
 
-                Invoice::findOrFail($request['id'])->delete();
+                // Find the Invoice model
+                $invoice = Invoice::findOrFail($request['id']);
+                $invoice->updated_by = Auth::user('api')->id;
+                $invoice->save();
+
+                 // Delete the InvoiceDetails and the Invoice model
+                $invoice->delete();
                 InvoiceDetail::where('invoice_id', $request['id'])->delete();
 
             DB::commit();
@@ -237,6 +261,9 @@ class InvoiceService
         $updateStatus->status = $request['status'];
         $updateStatus->save();
 
-        return $updateStatus;
+        return response()->json([
+            'success' => true,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
     }
 }

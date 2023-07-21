@@ -23,7 +23,10 @@ class CompanyService
         $addCompany->logo = CreateFolderImageHelper::saveLogoCompany($request);
         $addCompany->save();
 
-        return $addCompany;
+        return response()->json([
+            'success' => true,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
     }
 
     /** ດຶງຂໍ້ມູນບໍລິສັດ */
@@ -38,13 +41,15 @@ class CompanyService
             return $item->format();
         });
 
-        return $listCompanies;
+        return response()->json([
+            'listCompanies' => $listCompanies
+        ]);
     }
 
     /** ແກ້ໄຂຂໍ້ມູນບໍລິສັດ */
     public function editCompany($request)
     {
-        $editCompany = Company::findOrFail($request['id']);
+        $editCompany = Company::find($request['id']);
         $editCompany->company_name = $request['company_name'];
         $editCompany->phone = $request['phone'];
         $editCompany->email = $request['email'];
@@ -67,18 +72,24 @@ class CompanyService
 
         $editCompany->save();
 
-        return $editCompany;
+        return response()->json([
+            'success' => true,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
     }
 
     /** ລຶບຂໍ້ມູນບໍລິສັດ */
     public function deleteCompany($request)
     {
-        $deleteCompany = Company::findOrFail($request['id']);
+        $deleteCompany = Company::find($request['id']);
         $deleteCompany->delete();
 
         /** Delete Image On Folder */
         CreateFolderImageHelper::deleteLogoCompany($deleteCompany);
 
-        return $deleteCompany;
+        return response()->json([
+            'success' => true,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
     }
 }

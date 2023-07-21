@@ -8,6 +8,7 @@ use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
+use App\Helpers\TableHelper;
 use App\Helpers\generateHelper;
 use App\Models\QuotationDetail;
 use App\Services\CalculateService;
@@ -31,21 +32,20 @@ class QuotationService
     {
 
         DB::beginTransaction();
-
-            /** add quotation */
-            $addQuotation = new Quotation();
-            $addQuotation->quotation_number = generateHelper::generateQuotationNumber('QT- ', 8);
-            $addQuotation->quotation_name = $request['quotation_name'];
-            $addQuotation->start_date = $request['start_date'];
-            $addQuotation->end_date = $request['end_date'];
-            $addQuotation->note = $request['note'];
-            $addQuotation->customer_id = $request['customer_id'];
-            $addQuotation->company_id = $request['company_id'];
-            $addQuotation->currency_id = $request['currency_id'];
-            $addQuotation->discount = $request['discount'];
-            $addQuotation->tax = $request['tax'];
-            $addQuotation->created_by = Auth::user('api')->id;
-            $addQuotation->save();
+        /** add quotation */
+        $addQuotation = new Quotation();
+        $addQuotation->quotation_number = generateHelper::generateQuotationNumber('QT- ', 8);
+        $addQuotation->quotation_name = $request['quotation_name'];
+        $addQuotation->start_date = $request['start_date'];
+        $addQuotation->end_date = $request['end_date'];
+        $addQuotation->note = $request['note'];
+        $addQuotation->customer_id = $request['customer_id'];
+        $addQuotation->company_id = $request['company_id'];
+        $addQuotation->currency_id = $request['currency_id'];
+        $addQuotation->discount = $request['discount'];
+        $addQuotation->tax = $request['tax'];
+        $addQuotation->created_by = Auth::user('api')->id;
+        $addQuotation->save();
 
 
             /** add detail */
@@ -81,17 +81,19 @@ class QuotationService
     /** list quotation */
     public function listQuotations()
     {
-        $listQuotations = Quotation::select(
-            'quotations.*'
+        $listQuotations = DB::table('quotations')
+        ->select('quotations.*',
+        DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details')
         )
+        ->leftJoin('customers', 'quotations.customer_id', '=', 'customers.id')
+        ->leftJoin('currencies', 'quotations.currency_id', '=', 'currencies.id')
+        ->leftJoin('companies', 'quotations.company_id', '=', 'companies.id')
+        ->leftJoin('users', 'quotations.created_by', '=', 'users.id')
         ->orderBy('quotations.id', 'desc')->get();
 
         $listQuotations->map(function ($item) {
-            $item['countDetail'] = QuotationDetail::where('quotation_id', $item['id'])->count();
-            $item['customer'] = Customer::where('id', $item['customer_id'])->first();
-            $item['company'] = Company::where('id', $item['company_id'])->first();
-            $item['currency'] = Currency::where('id', $item['currency_id'])->first();
-            $item['user'] = User::where('id', $item['created_by'])->first();
+            /** loop data */
+            TableHelper::format($item);
         });
 
         return response()->json([
@@ -126,12 +128,19 @@ class QuotationService
 
     public function listQuotationDetail($id)
     {
-        $item = Quotation::select('quotations.*')->orderBy('id', 'desc')->where('id', $id)->first();
-        $item['countDetail'] = QuotationDetail::where('quotation_id', $item['id'])->count();
-        $item['customer'] = Customer::where('id', $item['customer_id'])->first();
-        $item['company'] = Company::where('id', $item['company_id'])->first();
-        $item['currency'] = Currency::where('id', $item['currency_id'])->first();
-        $item['user'] = User::where('id', $item['created_by'])->first();
+        $item = DB::table('quotations')
+        ->select('quotations.*',
+        DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_id = quotations.id) AS count_detail')
+        )
+        ->leftJoin('customers', 'quotations.customer_id', 'customers.id')
+        ->leftJoin('currencies', 'quotations.currency_id', 'currencies.id')
+        ->leftJoin('companies', 'quotations.company_id', 'companies.id')
+        ->leftJoin('users', 'quotations.created_by', 'users.id')
+        ->where('quotations.id', $id)
+        ->orderBy('id', 'desc')->first();
+
+        /** loop data */
+        TableHelper::format($item);
 
         /**Detail */
         $details = QuotationDetail::where('quotation_id', $id)->get();
@@ -156,15 +165,17 @@ class QuotationService
         $editQuotation->currency_id = $request['currency_id'];
         $editQuotation->discount = $request['discount'];
         $editQuotation->tax = $request['tax'];
-        // $editQuotation->updated_by = Auth::user('api')->id;
-        $editQuotation->created_by = Auth::user('api')->id;
+        $editQuotation->updated_by = Auth::user('api')->id;
         $editQuotation->save();
 
 
         /**Update Calculate */
         $this->calculateService->calculateTotal_ByEdit($editQuotation);
 
-        return $editQuotation;
+        return response()->json([
+            'success' => true,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
     }
 
     /** edit detail */
@@ -185,7 +196,10 @@ class QuotationService
         /**Update Calculate quotation */
         $this->calculateService->calculateTotal_ByEdit($editQuotation);
 
-        return $editDetail;
+        return response()->json([
+            'success' => true,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
     }
 
     /** delete detail */
@@ -195,22 +209,30 @@ class QuotationService
         $deleteDetail->delete();
 
          /**Update Quotation */
-         $editQuotation = Quotation::find($deleteDetail['quotation_id']);
+        $editQuotation = Quotation::find($deleteDetail['quotation_id']);
 
          /**Update Calculate */
          $this->calculateService->calculateTotal_ByEdit($editQuotation);
 
-         return $deleteDetail;
+         return response()->json([
+            'success' => true,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
     }
 
     public function deleteQuotation($request)
     {
         try {
-
             DB::beginTransaction();
 
-                Quotation::findOrFail($request['id'])->delete();
-                QuotationDetail::where('quotation_id', $request['id'])->delete();
+            // Find the Quotation model
+            $quotation = Quotation::findOrFail($request['id']);
+            $quotation->updated_by = Auth::user('api')->id;
+            $quotation->save();
+
+            // Delete the Quotation details and the Quotation model
+            $quotation->delete();
+            QuotationDetail::where('quotation_id', $request['id'])->delete();
 
             DB::commit();
 
@@ -218,13 +240,12 @@ class QuotationService
                 'success' => true,
                 'msg' => 'ສຳເລັດແລ້ວ'
             ]);
-
         } catch (\Exception $e) {
             DB::rollback();
-            
+
             return response()->json([
                 'success' => false,
-                'msg' => 'ບໍ່ສາມາດລຶບລາຍການນີ້ໄດ້...'
+                'msg' => 'ບໍ່ສາມາດລຶບລາຍກນ້ໄດ້...'
             ]);
         }
     }
