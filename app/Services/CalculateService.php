@@ -19,7 +19,7 @@ class CalculateService
     /** calculate quotation */
     public function calculateTotal($request, $sumSubTotal, $id)
     {
-        /** Calculate 1 **/
+        /** Calculate **/
         $sumTotalTax = $sumSubTotal * $request['tax'] / 100;
         $sumTotalDiscount = $sumSubTotal * $request['discount'] / 100;
         $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
