@@ -43,6 +43,7 @@ class CurrencyRequest extends FormRequest
                     'required',
                     'numeric',
                     Rule::exists('currencies', 'id')
+                    ->whereNull('deleted_at')
                 ]
             ];
         }
@@ -54,6 +55,7 @@ class CurrencyRequest extends FormRequest
                     'required',
                     'numeric',
                     Rule::exists('currencies', 'id')
+                        ->whereNull('deleted_at')
                 ],
                 'name' =>[
                     'required',

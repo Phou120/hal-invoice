@@ -3,11 +3,8 @@
 namespace App\Helpers;
 
 use Illuminate\Support\Facades\DB;
-
-
 class TableHelper
 {
-
     public static function format($item)
     {
         $item->customer = DB::table('customers')->where('id', $item->customer_id)->first();

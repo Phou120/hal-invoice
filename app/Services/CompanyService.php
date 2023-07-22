@@ -24,7 +24,7 @@ class CompanyService
         $addCompany->save();
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -73,7 +73,7 @@ class CompanyService
         $editCompany->save();
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -88,7 +88,7 @@ class CompanyService
         CreateFolderImageHelper::deleteLogoCompany($deleteCompany);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }

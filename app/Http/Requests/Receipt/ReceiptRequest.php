@@ -25,6 +25,7 @@ class ReceiptRequest extends FormRequest
             ||$this->isMethod('post') && $this->routeIs('add.receipt.detail')
             ||$this->isMethod('put') && $this->routeIs('edit.receipt.detail')
             ||$this->isMethod('delete') && $this->routeIs('delete.receipt.detail')
+            ||$this->isMethod('get') && $this->routeIs('list.receipt.detail')
 
         ){
             $this->merge([
@@ -41,6 +42,18 @@ class ReceiptRequest extends FormRequest
      */
     public function rules()
     {
+        if($this->isMethod('get') && $this->routeIs('list.receipt.detail'))
+        {
+            return [
+                'id' =>[
+                    'required',
+                        'numeric',
+                            Rule::exists('receipts', 'id')
+                                ->whereNull('deleted_at')
+                ],
+            ];
+        }
+
         if($this->isMethod('delete') && $this->routeIs('delete.receipt'))
         {
             return [

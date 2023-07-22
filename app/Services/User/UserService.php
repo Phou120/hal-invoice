@@ -25,7 +25,7 @@ class UserService
         $addUser->attachRoles([$roleAdmin]);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -39,7 +39,7 @@ class UserService
             DB::raw('GROUP_CONCAT(DISTINCT roles.name) as roles')
         )
         ->groupBy('users.id')
-        ->orderBy('users.id')
+        ->orderBy('users.id', 'desc')
         ->get();
 
         $userData = collect($listUser)->map(function ($user) {
@@ -65,7 +65,7 @@ class UserService
         $editUser->save();
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -82,7 +82,7 @@ class UserService
         $user->delete();
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -93,7 +93,7 @@ class UserService
 
         if (!$user) {
             return response()->json([
-                'success' => false,
+                'error' => true,
                 'msg' => 'ບໍ່ພົບ user...',
             ]);
         }
@@ -101,7 +101,7 @@ class UserService
         $user->save();
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }

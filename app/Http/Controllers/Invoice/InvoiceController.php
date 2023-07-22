@@ -27,9 +27,9 @@ class InvoiceController extends Controller
         return $this->invoiceService->listInvoices();
     }
 
-    public function listInvoiceDetail($id)
+    public function listInvoiceDetail(InvoiceRequest $request)
     {
-        return $this->invoiceService->listInvoiceDetail($id);
+        return $this->invoiceService->listInvoiceDetail($request);
     }
 
     public function addInvoiceDetail(InvoiceRequest $request)

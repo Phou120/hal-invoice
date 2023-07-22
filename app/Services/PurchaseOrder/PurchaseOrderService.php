@@ -77,7 +77,7 @@ class PurchaseOrderService
                 DB::commit();
 
                 return response()->json([
-                    'success' => true,
+                    'error' => false,
                     'msg' => 'ສຳເລັດແລ້ວ'
                 ]);
             }
@@ -86,7 +86,7 @@ class PurchaseOrderService
         }
 
         return response()->json([
-            'success' => false,
+            'error' => true,
             'msg' => 'ຜິດພາດ'
         ]);
     }
@@ -137,23 +137,24 @@ class PurchaseOrderService
         $this->calculateService->calculateTotalOrder_ByEdit($editOrder);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
 
      /** ດຶງລາຍລະອຽດການຈັດຊື້  */
-    public function listPurchaseDetail($id)
+    public function listPurchaseDetail($request)
     {
         $item = DB::table('purchase_orders')
-            ->select('purchase_orders.*',
+            ->select(
+                'purchase_orders.*',
                 DB::raw('(SELECT COUNT(*) FROM purchase_details WHERE purchase_details.purchase_id = purchase_orders.id) as details_count')
             )
             ->leftJoin('customers', 'purchase_orders.customer_id', 'customers.id')
             ->leftJoin('currencies', 'purchase_orders.currency_id', 'currencies.id')
             ->leftJoin('companies', 'purchase_orders.company_id', 'companies.id')
             ->leftJoin('users', 'purchase_orders.created_by', 'users.id')
-            ->where('purchase_orders.id', $id)
+            ->where('purchase_orders.id', $request->id)
             ->orderBy('purchase_orders.id', 'desc')
             ->groupBy('purchase_orders.id')
             ->first();
@@ -162,7 +163,7 @@ class PurchaseOrderService
         TableHelper::format($item);
 
         /** detail */
-        $details = DB::table('purchase_details')->where('purchase_id', $id)->get();
+        $details = DB::table('purchase_details')->where('purchase_id', $request->id)->get();
 
         return response()->json([
             'order' => $item,
@@ -189,10 +190,10 @@ class PurchaseOrderService
          /**Update Calculate */
          $this->calculateService->calculateTotalOrder_ByEdit($request);
 
-         return response()->json([
-             'success' => true,
-             'msg' => 'ສຳເລັດແລ້ວ'
-         ]);
+        return response()->json([
+            'error' => false,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ]);
     }
 
      /** ແກ້ໄຂລາຍລະອຽດການຈັດຊື້ */
@@ -214,7 +215,7 @@ class PurchaseOrderService
         $this->calculateService->calculateTotalOrder_ByEdit($editOrder);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -232,7 +233,7 @@ class PurchaseOrderService
         $this->calculateService->calculateTotalOrder_ByEdit($editReceipt);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -256,14 +257,14 @@ class PurchaseOrderService
             DB::commit();
 
             return response()->json([
-                'success' => true,
+                'error' => false,
                 'msg' => 'ສຳເລັດແລ້ວ'
             ]);
 
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'success' => false,
+                'error' => true,
                 'msg' => 'ບໍ່ສາມາດລຶບລາຍການນີ້ໄດ້...'
             ]);
         }

@@ -7,8 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class UserHelper
 {
-
-    public static function AuthUser($user)
+    public static function AuthUser()
     {
         $user = auth()->user();
 
@@ -19,11 +18,11 @@ class UserHelper
         $roleUsers = $checkRoleUsers->pluck('roleName');
 
         $permissionRoles = DB::table('permission_role')
-        ->select('permission.name as permissionName')
-        ->leftJoin('permissions as permission', 'permission.id', '=', 'permission_role.permission_id')
+        ->select('permissions.name as permissionName')
+        ->leftJoin('permissions', 'permissions.id', '=', 'permission_role.permission_id')
         ->whereIn('permission_role.role_id', $checkRoleUsers->pluck('roleId'))
-        ->groupBy('permission_role.permission_id')
-        ->get()->pluck('permissionName');
+        ->groupBy('permission_role.permission_id')->get()
+        ->pluck('permissionName');
 
         return [
             'user' => $user,

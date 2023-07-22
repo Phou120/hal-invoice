@@ -25,7 +25,7 @@ class QuotationRequest extends FormRequest
             ||$this->isMethod('post') && $this->routeIs('add.quotation.detail')
             ||$this->isMethod('put') && $this->routeIs('edit.quotation.detail')
             ||$this->isMethod('delete') && $this->routeIs('delete.quotation')
-
+            ||$this->isMethod('get') && $this->routeIs('list.quotation.detail')
         ){
             $this->merge([
                 'id' => $this->route()->parameters['id'],
@@ -41,6 +41,18 @@ class QuotationRequest extends FormRequest
      */
     public function rules()
     {
+        if($this->isMethod('get') && $this->routeIs('list.quotation.detail'))
+        {
+            return [
+                'id' =>[
+                    'required',
+                        'numeric',
+                            Rule::exists('quotations', 'id')
+                                ->whereNull('deleted_at')
+                ],
+            ];
+        }
+
         if($this->isMethod('delete') && $this->routeIs('delete.quotation'))
         {
             return [
@@ -49,7 +61,6 @@ class QuotationRequest extends FormRequest
                         'numeric',
                             Rule::exists('quotations', 'id')
                             ->whereNull('deleted_at')
-
                 ]
             ];
         }

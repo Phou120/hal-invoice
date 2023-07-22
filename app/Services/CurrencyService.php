@@ -19,7 +19,7 @@ class CurrencyService
         $addCurrency->save();
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
 
@@ -47,7 +47,7 @@ class CurrencyService
         $editCurrency->save();
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -59,7 +59,7 @@ class CurrencyService
         $deleteCurrency->delete();
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }

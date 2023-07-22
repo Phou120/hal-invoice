@@ -24,7 +24,7 @@ class CustomerService
         $addCustomer->save();
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
 
@@ -73,7 +73,7 @@ class CustomerService
         $editCustomer->save();
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -88,7 +88,7 @@ class CustomerService
         CreateFolderImageHelper::deleteCustomer($deleteCustomer);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }

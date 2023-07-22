@@ -25,7 +25,7 @@ class PurchaseOrderRequest extends FormRequest
             ||$this->isMethod('post') && $this->routeIs('add.purchase.detail')
             ||$this->isMethod('put') && $this->routeIs('edit.purchase.detail')
             ||$this->isMethod('delete') && $this->routeIs('delete.purchase.detail')
-
+            ||$this->isMethod('get') && $this->routeIs('list.purchase.detail')
 
         ){
             $this->merge([
@@ -42,6 +42,18 @@ class PurchaseOrderRequest extends FormRequest
      */
     public function rules()
     {
+        if($this->isMethod('get') && $this->routeIs('list.purchase.detail'))
+        {
+            return [
+                'id' =>[
+                    'required',
+                        'numeric',
+                            Rule::exists('purchase_orders', 'id')
+                                ->whereNull('deleted_at')
+                ],
+            ];
+        }
+
         if($this->isMethod('delete') && $this->routeIs('delete.purchase.order'))
         {
             return [

@@ -26,6 +26,7 @@ class InvoiceRequest extends FormRequest
             ||$this->isMethod('post') && $this->routeIs('add.invoice.detail')
             ||$this->isMethod('put') && $this->routeIs('update.invoice.status')
             ||$this->isMethod('delete') && $this->routeIs('delete.invoice.detail')
+            ||$this->isMethod('get') && $this->routeIs('list.invoice.detail')
 
         ){
             $this->merge([
@@ -42,6 +43,18 @@ class InvoiceRequest extends FormRequest
      */
     public function rules()
     {
+        if($this->isMethod('get') && $this->routeIs('list.invoice.detail'))
+        {
+            return [
+                'id' =>[
+                    'required',
+                        'numeric',
+                            Rule::exists('invoices', 'id')
+                                ->whereNull('deleted_at')
+                ],
+            ];
+        }
+
         if($this->isMethod('put') && $this->routeIs('update.invoice.status'))
         {
             return [
@@ -65,7 +78,10 @@ class InvoiceRequest extends FormRequest
                     'required',
                         'numeric',
                             Rule::exists('invoices', 'id')
-                                ->whereNull('deleted_at')
+                                ->where(function ($q){
+                                    $q->whereNull('deleted_at');
+                                    $q->whereNot('status', 'paid');
+                                })
                 ],
             ];
         }
@@ -77,7 +93,10 @@ class InvoiceRequest extends FormRequest
                     'required',
                         'numeric',
                             Rule::exists('invoice_details', 'id')
-                                ->whereNull('deleted_at')
+                                ->where(function ($query) {
+                                    $query->whereRaw('invoice_id IN (SELECT id FROM invoices WHERE status != "paid")');
+                                    $query->whereNull('deleted_at');
+                                })
                 ],
             ];
         }
@@ -89,7 +108,10 @@ class InvoiceRequest extends FormRequest
                     'required',
                         'numeric',
                             Rule::exists('invoice_details', 'id')
-                                ->whereNull('deleted_at')
+                                ->where(function ($query) {
+                                    $query->whereRaw('invoice_id IN (SELECT id FROM invoices WHERE status != "paid")');
+                                    $query->whereNull('deleted_at');
+                                })
                 ],
                 'order' => [
                     'required',
@@ -121,7 +143,10 @@ class InvoiceRequest extends FormRequest
                     'required',
                         'numeric',
                             Rule::exists('invoices', 'id')
-                                ->whereNull('deleted_at')
+                                ->where(function ($q){
+                                    $q->whereNull('deleted_at');
+                                    $q->whereNot('status', 'paid');
+                                })
                 ],
                 'invoice_name' =>[
                     'required',
@@ -330,7 +355,7 @@ class InvoiceRequest extends FormRequest
 
             'id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
             'id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
-            'id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
+            'id.exists' => 'id ບໍ່ມີໃນລະບົບ ຫຼື ສະຖານະເທົ່າຈ່າຍເງິນແລ້ວ...',
 
             'order.required' => 'ກະລຸນາປ້ອນ order ກ່ອນ...',
             'order.numeric' => 'order ຄວນເປັນໂຕເລກ...',

@@ -44,6 +44,7 @@ class CompanyRequest extends FormRequest
                     'required',
                     'numeric',
                     Rule::exists('companies', 'id')
+                        ->whereNull('deleted_at')
                 ]
             ];
         }
@@ -55,6 +56,7 @@ class CompanyRequest extends FormRequest
                     'required',
                     'numeric',
                     Rule::exists('companies', 'id')
+                    ->whereNull('deleted_at')
                 ],
                 'company_name' =>[
                     'required',

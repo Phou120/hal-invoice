@@ -32,7 +32,7 @@ class CompanyController extends Controller
         return $this->companyService->editCompany($request);
     }
 
-    public function deleteCompany(Request $request)
+    public function deleteCompany(CompanyRequest $request)
     {
         return $this->companyService->deleteCompany($request);
     }

@@ -32,9 +32,9 @@ class PurchaseOrderController extends Controller
         return $this->purchaseOrderService->addPurchaseDetail($request);
     }
 
-    public function listPurchaseDetail($id)
+    public function listPurchaseDetail(PurchaseOrderRequest $request)
     {
-        return $this->purchaseOrderService->listPurchaseDetail($id);
+        return $this->purchaseOrderService->listPurchaseDetail($request);
     }
 
     public function editPurchaseOrder(PurchaseOrderRequest $request)

@@ -32,9 +32,9 @@ class ReceiptController extends Controller
         return $this->receiptService->addReceiptDetail($request);
     }
 
-    public function listReceiptDetail($id)
+    public function listReceiptDetail(ReceiptRequest $request)
     {
-        return $this->receiptService->listReceiptDetail($id);
+        return $this->receiptService->listReceiptDetail($request);
     }
 
     public function editReceipt(ReceiptRequest $request)

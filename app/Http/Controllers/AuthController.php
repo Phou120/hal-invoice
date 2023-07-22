@@ -74,13 +74,11 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token)
     {
-        $authUser = new UserHelper();
-
         return response()->json([
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 1200000,
             'access_token' => $token,
-            'auth' => UserHelper::AuthUser($authUser)
+            'auth' => UserHelper::AuthUser()
         ]);
     }
 }

@@ -72,7 +72,7 @@ class InvoiceService
         DB::commit();
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -121,13 +121,13 @@ class InvoiceService
         $this->calculateService->calculateTotalInvoice_ByEdit($editInvoice);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
 
     /** ດຶງລາຍລະອຽດໃບບິນ */
-    public function listInvoiceDetail($id)
+    public function listInvoiceDetail($request)
     {
         $item = DB::table('invoices')
         ->select(
@@ -138,14 +138,14 @@ class InvoiceService
         ->leftJoin('currencies', 'invoices.currency_id', 'currencies.id')
         ->leftJoin('companies', 'invoices.company_id', 'companies.id')
         ->leftJoin('users', 'invoices.created_by', 'users.id')
-        ->where('invoices.id', $id)
+        ->where('invoices.id', $request->id)
         ->orderBy('id', 'desc')->first();
 
         /** loop data */
         TableHelper::format($item);
 
         /**Detail */
-        $details = InvoiceDetail::where('invoice_id', $id)->get();
+        $details = InvoiceDetail::where('invoice_id', $request->id)->get();
 
 
         return response()->json([
@@ -175,7 +175,7 @@ class InvoiceService
         $this->calculateService->calculateTotalInvoice_ByEdit($editInvoice);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -199,7 +199,7 @@ class InvoiceService
         $this->calculateService->calculateTotalInvoice_ByEdit($editInvoice);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -217,7 +217,7 @@ class InvoiceService
         $this->calculateService->calculateTotalInvoice_ByEdit($editInvoice);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -241,14 +241,14 @@ class InvoiceService
             DB::commit();
 
             return response()->json([
-                'success' => true,
+                'error' => false,
                 'msg' => 'ສຳເລັດແລ້ວ'
             ]);
 
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'success' => false,
+                'error' => true,
                 'msg' => 'ບໍ່ສາມາດລຶບລາຍການນີ້ໄດ້...'
             ]);
         }
@@ -259,10 +259,11 @@ class InvoiceService
     {
         $updateStatus = Invoice::find($request['id']);
         $updateStatus->status = $request['status'];
+        $updateStatus->updated_by = Auth::user('api')->id;
         $updateStatus->save();
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }

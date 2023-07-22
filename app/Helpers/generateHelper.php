@@ -3,8 +3,6 @@
 namespace App\Helpers;
 
 use Illuminate\Support\Facades\DB;
-
-
 class generateHelper
 {
     public static function generateQuotationNumber($prefix, $length)

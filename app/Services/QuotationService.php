@@ -73,7 +73,7 @@ class QuotationService
         DB::commit();
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -121,12 +121,12 @@ class QuotationService
         $this->calculateService->calculateTotal_ByEdit($quotation);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
 
-    public function listQuotationDetail($id)
+    public function listQuotationDetail($request)
     {
         $item = DB::table('quotations')
         ->select('quotations.*',
@@ -136,14 +136,14 @@ class QuotationService
         ->leftJoin('currencies', 'quotations.currency_id', 'currencies.id')
         ->leftJoin('companies', 'quotations.company_id', 'companies.id')
         ->leftJoin('users', 'quotations.created_by', 'users.id')
-        ->where('quotations.id', $id)
+        ->where('quotations.id', $request->id)
         ->orderBy('id', 'desc')->first();
 
         /** loop data */
         TableHelper::format($item);
 
         /**Detail */
-        $details = QuotationDetail::where('quotation_id', $id)->get();
+        $details = QuotationDetail::where('quotation_id', $request->id)->get();
 
 
         return response()->json([
@@ -173,7 +173,7 @@ class QuotationService
         $this->calculateService->calculateTotal_ByEdit($editQuotation);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -197,7 +197,7 @@ class QuotationService
         $this->calculateService->calculateTotal_ByEdit($editQuotation);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -215,7 +215,7 @@ class QuotationService
          $this->calculateService->calculateTotal_ByEdit($editQuotation);
 
          return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -237,14 +237,14 @@ class QuotationService
             DB::commit();
 
             return response()->json([
-                'success' => true,
+                'error' => false,
                 'msg' => 'ສຳເລັດແລ້ວ'
             ]);
         } catch (\Exception $e) {
             DB::rollback();
 
             return response()->json([
-                'success' => false,
+                'error' => true,
                 'msg' => 'ບໍ່ສາມາດລຶບລາຍກນ້ໄດ້...'
             ]);
         }

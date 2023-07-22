@@ -78,7 +78,7 @@ Route::group([
 
     /** list-quotation-detail/{id} = {id} = ແມ່ນ id quotation  *** And ***  add-quotation-detail/{id} = {id} = ແມ່ນ id quotation */
     Route::post('add-quotation-detail/{id}', [QuotationController::class, 'addQuotationDetail'])->name('add.quotation.detail');
-    Route::get('list-quotation-details/{id}', [QuotationController::class, 'listQuotationDetail']);
+    Route::get('list-quotation-details/{id}', [QuotationController::class, 'listQuotationDetail'])->name('list.quotation.detail');
 
     /** edit-quotation-detail/{id} = {id} = ແມ່ນແກ້ໄຂ id detail  *** And ***  delete-quotation-detail/{id} = {id} = ແມ່ນລຶບ id detail */
     Route::put('edit-quotation-detail/{id}', [QuotationController::class, 'editQuotationDetail'])->name('edit.quotation.detail');
@@ -93,7 +93,7 @@ Route::group([
 
     /** list-invoice-detail/{id} = {id} = ແມ່ນ id invoice  *** And ***  add-invoice-detail/{id} = {id} = ແມ່ນ id invoice */
     Route::post('add-invoice-detail/{id}', [InvoiceController::class, 'addInvoiceDetail'])->name('add.invoice.detail');
-    Route::get('list-invoice-detail/{id}', [InvoiceController::class, 'listInvoiceDetail']);
+    Route::get('list-invoice-detail/{id}', [InvoiceController::class, 'listInvoiceDetail'])->name('list.invoice.detail');
 
     /** edit-invoice-detail/{id} = {id} = ແມ່ນແກ້ໄຂ id detail  *** And ***  delete-invoice-detail/{id} = {id} = ແມ່ນລຶບ id detail */
     Route::put('edit-invoice-detail/{id}', [InvoiceController::class, 'editInvoiceDetail'])->name('edit.invoice.detail');
@@ -111,7 +111,7 @@ Route::group([
 
     /** list-receipt-detail/{id} => {id} = ແມ່ນ id receipt  *** And ***  add-receipt-detail/{id} => {id} = ແມ່ນ id receipt */
     Route::post('add-receipt-detail/{id}', [ReceiptController::class, 'addReceiptDetail'])->name('add.receipt.detail');
-    Route::get('list-receipt-detail/{id}', [ReceiptController::class, 'listReceiptDetail']);
+    Route::get('list-receipt-detail/{id}', [ReceiptController::class, 'listReceiptDetail'])->name('list.receipt.detail');
 
     /** edit-receipt-detail/{id} => {id} = ແກ້ ໄຂ id detail  *** And ***  delete-receipt-detail/{id} => {id} = ແມ່ນ ລຶບ id detail */
     Route::put('edit-receipt-detail/{id}', [ReceiptController::class, 'editReceiptDetail'])->name('edit.receipt.detail');
@@ -126,7 +126,7 @@ Route::group([
 
     /** list-purchase-detail/{id} => {id} = ແມ່ນ id purchase  *** And ***  add-purchase-detail/{id} = {id} = ແມ່ນ id purchase */
     Route::post('add-purchase-detail/{id}', [PurchaseOrderController::class, 'addPurchaseDetail'])->name('add.purchase.detail');
-    Route::get('list-purchase-detail/{id}', [PurchaseOrderController::class, 'listPurchaseDetail']);
+    Route::get('list-purchase-detail/{id}', [PurchaseOrderController::class, 'listPurchaseDetail'])->name('list.purchase.detail');
 
     /** edit-purchase-detail/{id} => {id} = ແກ້ ໄຂ id detail  *** And ***  delete-purchase-detail/{id} => {id} = ແມ່ນ ລຶບ id detail */
     Route::put('edit-purchase-detail/{id}', [PurchaseOrderController::class, 'editPurchaseDetail'])->name('edit.purchase.detail');

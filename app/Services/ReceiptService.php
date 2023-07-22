@@ -37,7 +37,7 @@ class ReceiptService
             )
             ->join('invoices as invoice', 'invoice_details.invoice_id', 'invoice.id')
             ->where('invoice_details.invoice_id', $getInvoice['id'])
-            ->where('invoice.status', 'created')
+            ->where('invoice.status', 'paid')
             ->get();
 
             if(count($getInvoiceDetail) > 0) {
@@ -74,7 +74,7 @@ class ReceiptService
                 DB::commit();
 
                 return response()->json([
-                    'success' => true,
+                    'error' => false,
                     'msg' => 'ສຳເລັດແລ້ວ'
                 ]);
             }
@@ -83,7 +83,7 @@ class ReceiptService
         }
 
         return response()->json([
-            'success' => false,
+            'error' => true,
             'msg' => 'ຜິດພາດ'
         ]);
     }
@@ -102,8 +102,8 @@ class ReceiptService
         ->leftJoin('users', 'receipts.created_by', '=', 'users.id')
         ->orderBy('receipts.id', 'desc')->get();
 
+        /** loop data */
         foreach ($listReceipt as $item) {
-             /** loop data */
             TableHelper::format($item);
         }
 
@@ -133,13 +133,13 @@ class ReceiptService
         $this->calculateService->calculateTotalReceipt_ByEdit($editReceipt);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
 
     /** ດຶງຂໍມູນລາຍລະອຽດໃບຮັບເງິນ */
-    public function listReceiptDetail($id)
+    public function listReceiptDetail($request)
     {
         $item = DB::table('receipts')
             ->select('receipts.*',
@@ -149,7 +149,7 @@ class ReceiptService
             ->leftJoin('currencies', 'receipts.currency_id', 'currencies.id')
             ->leftJoin('companies', 'receipts.company_id', 'companies.id')
             ->leftJoin('users', 'receipts.created_by', 'users.id')
-            ->where('receipts.id', $id)
+            ->where('receipts.id', $request->id)
             ->orderBy('receipts.id', 'desc')
             ->first();
 
@@ -157,7 +157,7 @@ class ReceiptService
         TableHelper::format($item);
 
         /**Detail */
-        $details = DB::table('receipt_details')->where('receipt_id', $id)->get();
+        $details = DB::table('receipt_details')->where('receipt_id', $request->id)->get();
 
 
         return response()->json([
@@ -186,7 +186,7 @@ class ReceiptService
         $this->calculateService->calculateTotalReceipt_ByEdit($request);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -210,7 +210,7 @@ class ReceiptService
         $this->calculateService->calculateTotalReceipt_ByEdit($editReceipt);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -228,7 +228,7 @@ class ReceiptService
         $this->calculateService->calculateTotalReceipt_ByEdit($editReceipt);
 
         return response()->json([
-            'success' => true,
+            'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
@@ -252,14 +252,14 @@ class ReceiptService
             DB::commit();
 
             return response()->json([
-                'success' => true,
+                'error' => false,
                 'msg' => 'ສຳເລັດແລ້ວ'
             ]);
 
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'success' => false,
+                'error' => true,
                 'msg' => 'ບໍ່ສາມາດລຶບລາຍການນີ້ໄດ້...'
             ]);
         }
