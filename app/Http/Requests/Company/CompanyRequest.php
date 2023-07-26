@@ -71,7 +71,7 @@ class CompanyRequest extends FormRequest
                     ->whereNull('deleted_at')
                 ],
                 'email' => [
-                    'required',
+                    'nullable',
                     'email',
                     'max:255',
                     'min:5',
@@ -79,11 +79,8 @@ class CompanyRequest extends FormRequest
                     ->ignore($this->id)
                     ->whereNull('deleted_at')
                 ],
-                'address' =>[
-                    'required'
-                ],
                 'logo' =>[
-                    'nullable',
+                    'required',
                     'mimes:jpg,png,jpeg,gif',
                     'max:2048',
                 ]
@@ -105,18 +102,15 @@ class CompanyRequest extends FormRequest
                     ->whereNull('deleted_at')
                 ],
                 'email' => [
-                    'required',
+                    'nullable',
                     'email',
                     'max:255',
                     'min:5',
                     Rule::unique('companies', 'email')
                     ->whereNull('deleted_at')
                 ],
-                'address' =>[
-                    'required'
-                ],
                 'logo' =>[
-                    'nullable',
+                    'required',
                     'mimes:jpg,png,jpeg,gif',
                     'max:2048',
                 ]
@@ -136,16 +130,14 @@ class CompanyRequest extends FormRequest
             'phone.digits_between' => 'ບໍ່ຄວນສັ້ນກວ່າ 6 ເເລະ ເກີນ 15 ໂຕເລກ...',
             'phone.unique' => 'ເບີໂທລະສັບນີ້ມີໃນລະບົບເເລ້ວ...',
 
-            'email.required' => 'ກະລຸນາປ້ອນອີເມວກ່ອນ...',
             'email.email' => 'ອີເມວບໍ່ຖືກຕ້ອງ...',
             'email.max' => 'ອີເມວບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
             'email.min' => 'ອີເມວບໍ່ຄວນສັ້ນກວ່າ 5 ໂຕອັກສອນ...',
             'email.unique' => 'ອີເມວນີ້ມີໃນລະບົບເເລ້ວ',
 
+            'logo.required' => 'ກະລຸນາປ້ອນ logo ກ່ອນ....',
             'logo.mimes' => 'ຄວນເປັນນາມສະກຸນໄຟລ jpeg,jpg,png,gif',
             'logo.max' => 'ຂະໜາດບໍ່ຄວນເກີນ 2048',
-
-            'address.required' => 'ກະລຸນາປ້ອນທີ່ຢູ່ກ່ອນ...',
 
             'id.required' => 'ກະລຸນາປ້ອນ ID ກ່ອນ...',
             'id.numeric' => 'ID ຄວນເປັນໂຕເລກ...',

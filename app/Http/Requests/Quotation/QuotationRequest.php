@@ -26,6 +26,7 @@ class QuotationRequest extends FormRequest
             ||$this->isMethod('put') && $this->routeIs('edit.quotation.detail')
             ||$this->isMethod('delete') && $this->routeIs('delete.quotation')
             ||$this->isMethod('get') && $this->routeIs('list.quotation.detail')
+            ||$this->isMethod('put') && $this->routeIs('update.quotation.status')
         ){
             $this->merge([
                 'id' => $this->route()->parameters['id'],
@@ -41,6 +42,21 @@ class QuotationRequest extends FormRequest
      */
     public function rules()
     {
+        if($this->isMethod('put') && $this->routeIs('update.quotation.status'))
+        {
+            return [
+                'id' =>[
+                    'required',
+                        'numeric',
+                            Rule::exists('quotations', 'id')->whereNull('deleted_at')
+                ],
+                'status' =>[
+                    'required',
+                        Rule::in('created', 'approved', 'inprogress', 'completed', 'canceled')
+                ]
+            ];
+        }
+
         if($this->isMethod('get') && $this->routeIs('list.quotation.detail'))
         {
             return [
@@ -142,21 +158,11 @@ class QuotationRequest extends FormRequest
                             Rule::exists('customers', 'id')
                                 ->whereNull('deleted_at')
                 ],
-                'company_id' => [
-                    'required',
-                        'numeric',
-                            Rule::exists('companies', 'id')
-                                ->whereNull('deleted_at')
-                ],
                 'currency_id' => [
                     'required',
                         'numeric',
                             Rule::exists('currencies', 'id')
                                 ->whereNull('deleted_at')
-                ],
-                'tax' => [
-                    'required',
-                        'numeric'
                 ],
                 'discount' => [
                     'required',
@@ -223,21 +229,11 @@ class QuotationRequest extends FormRequest
                             Rule::exists('customers', 'id')
                                 ->whereNull('deleted_at')
                 ],
-                'company_id' => [
-                    'required',
-                        'numeric',
-                            Rule::exists('companies', 'id')
-                                ->whereNull('deleted_at')
-                ],
                 'currency_id' => [
                     'required',
                         'numeric',
                             Rule::exists('currencies', 'id')
                                 ->whereNull('deleted_at')
-                ],
-                'tax' => [
-                    'required',
-                        'numeric'
                 ],
                 'discount' => [
                     'required',
@@ -290,16 +286,9 @@ class QuotationRequest extends FormRequest
             'customer_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
             'customer_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
 
-            'company_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
-            'company_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
-            'company_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
-
             'currency_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
             'currency_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
             'currency_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
-
-            'tax.required' => 'ກະລຸນາປ້ອນກ່ອນ...',
-            'tax.numeric' => 'ຄວນເປັນໂຕເລກ...',
 
             'discount.required' => 'ກະລຸນາປ້ອນກ່ອນ...',
             'discount.numeric' => 'ຄວນເປັນໂຕເລກ...',
@@ -339,6 +328,8 @@ class QuotationRequest extends FormRequest
 
             'description.max' => 'ລາຍລະອຽດບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
 
+            'status.required' => 'ກະລຸນາປ້ອນສະຖານະກ່ອນ...',
+            'status.in' => 'ສະຖານະຄວນມີຢູ່ໃນນີ້: created, approved, inprogress, completed, canceled...'
         ];
     }
 }

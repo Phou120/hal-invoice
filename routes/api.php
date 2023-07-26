@@ -10,6 +10,7 @@ use App\Http\Controllers\Receipt\ReceiptController;
 use App\Http\Controllers\Currency\CurrencyController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Quotation\QuotationController;
+use App\Http\Controllers\CompanyUser\CompanyUserController;
 use App\Http\Controllers\PurchaseOrder\PurchaseOrderController;
 
 /*
@@ -84,6 +85,9 @@ Route::group([
     Route::put('edit-quotation-detail/{id}', [QuotationController::class, 'editQuotationDetail'])->name('edit.quotation.detail');
     Route::delete('delete-quotation-detail/{id}', [QuotationController::class, 'deleteQuotationDetail'])->name('delete.quotation.detail');
 
+    /** update status quotation */
+    Route::put('update-quotation-status/{id}', [QuotationController::class, 'updateQuotationStatus'])->name('update.quotation.status');
+
 
     /** CRUD Invoice and CRUD InvoiceDetail */
     Route::post('add-invoice', [InvoiceController::class, 'addInvoice'])->name('add.invoice');
@@ -105,24 +109,22 @@ Route::group([
 
     /** CRUD Receipt */
     Route::post('add-receipt', [ReceiptController::class, 'addReceipt'])->name('add.receipt');
+    Route::get('list-receipts', [ReceiptController::class, 'listReceipts']);
     Route::put('edit-receipt/{id}', [ReceiptController::class, 'editReceipt'])->name('edit.receipt');
     Route::delete('delete-receipt/{id}', [ReceiptController::class, 'deleteReceipt'])->name('delete.receipt');
-    Route::get('list-receipts', [ReceiptController::class, 'listReceipts']);
 
-    /** list-receipt-detail/{id} => {id} = ແມ່ນ id receipt  *** And ***  add-receipt-detail/{id} => {id} = ແມ່ນ id receipt */
-    Route::post('add-receipt-detail/{id}', [ReceiptController::class, 'addReceiptDetail'])->name('add.receipt.detail');
+    /** list-receipt-detail/{id} => {id} = ແມ່ນ id receipt  */
     Route::get('list-receipt-detail/{id}', [ReceiptController::class, 'listReceiptDetail'])->name('list.receipt.detail');
 
-    /** edit-receipt-detail/{id} => {id} = ແກ້ ໄຂ id detail  *** And ***  delete-receipt-detail/{id} => {id} = ແມ່ນ ລຶບ id detail */
-    Route::put('edit-receipt-detail/{id}', [ReceiptController::class, 'editReceiptDetail'])->name('edit.receipt.detail');
+    /** delete-receipt-detail/{id} => {id} = ແມ່ນ ລຶບ id detail */
     Route::delete('delete-receipt-detail/{id}', [ReceiptController::class, 'deleteReceiptDetail'])->name('delete.receipt.detail');
 
 
     /** CRUD Purchaser Order */
     Route::post('add-purchase-order', [PurchaseOrderController::class, 'addPurchaseOrder'])->name('add.purchase.order');
+    Route::get('list-purchase-orders', [PurchaseOrderController::class, 'listPurchaseOrders']);
     Route::put('edit-purchase-order/{id}', [PurchaseOrderController::class, 'editPurchaseOrder'])->name('edit.purchase.order');
     Route::delete('delete-purchase-order/{id}', [PurchaseOrderController::class, 'deletePurchaseOrder'])->name('delete.purchase.order');
-    Route::get('list-purchase-orders', [PurchaseOrderController::class, 'listPurchaseOrders']);
 
     /** list-purchase-detail/{id} => {id} = ແມ່ນ id purchase  *** And ***  add-purchase-detail/{id} = {id} = ແມ່ນ id purchase */
     Route::post('add-purchase-detail/{id}', [PurchaseOrderController::class, 'addPurchaseDetail'])->name('add.purchase.detail');
@@ -141,5 +143,11 @@ Route::group([
     /** change password */
     Route::put('change-password/{id}', [UserController::class, 'changePassword'])->name('change.password');
 
+
+    /** CRUD CompanyUser */
+    Route::post('create-company-user', [CompanyUserController::class, 'createCompanyUser'])->name('create.company.user');
+    Route::put('update-company-user/{id}', [CompanyUserController::class, 'updateCompanyUser'])->name('update.company.user');
+    Route::delete('delete-company-user/{id}', [CompanyUserController::class, 'deleteCompanyUser'])->name('delete.company.user');
+    Route::get('list-company-users', [CompanyUserController::class, 'listCompanyUser']);
 });
 

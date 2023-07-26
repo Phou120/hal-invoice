@@ -8,6 +8,7 @@ use App\Models\Invoice;
 use App\Models\Receipt;
 use App\Models\Currency;
 use App\Models\Customer;
+use App\Helpers\myHelper;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
 use App\Models\InvoiceDetail;
@@ -37,7 +38,7 @@ class ReceiptService
             )
             ->join('invoices as invoice', 'invoice_details.invoice_id', 'invoice.id')
             ->where('invoice_details.invoice_id', $getInvoice['id'])
-            ->where('invoice.status', 'paid')
+            ->where('status', myHelper::INVOICE_STATUS['APPROVED'])
             ->get();
 
             if(count($getInvoiceDetail) > 0) {
@@ -48,7 +49,6 @@ class ReceiptService
                     $addReceipt->invoice_id = $getInvoice['id'];
                     $addReceipt->customer_id = $getInvoice['customer_id'];
                     $addReceipt->currency_id = $getInvoice['currency_id'];
-                    $addReceipt->company_id = $getInvoice['company_id'];
                     $addReceipt->receipt_name = $request['receipt_name'];
                     $addReceipt->receipt_date = $request['receipt_date'];
                     $addReceipt->created_by = Auth::user('api')->id;
@@ -98,7 +98,6 @@ class ReceiptService
         )
         ->leftJoin('customers', 'receipts.customer_id', '=', 'customers.id')
         ->leftJoin('currencies', 'receipts.currency_id', '=', 'currencies.id')
-        ->leftJoin('companies', 'receipts.company_id', '=', 'companies.id')
         ->leftJoin('users', 'receipts.created_by', '=', 'users.id')
         ->orderBy('receipts.id', 'desc')->get();
 
@@ -113,31 +112,6 @@ class ReceiptService
         ]);
     }
 
-    /** ບັນທຶກລາຍລະອຽດໃບຮັບເງິນ */
-    public function addReceiptDetail($request)
-    {
-        $addDetail = new ReceiptDetail();
-        $addDetail->description = $request['description'];
-        $addDetail->receipt_id = $request['id'];
-        $addDetail->amount = $request['amount'];
-        $addDetail->price = $request['price'];
-        $addDetail->order = $request['order'];
-        $addDetail->name = $request['name'];
-        $addDetail->total = $request['amount'] * $request['price'];
-        $addDetail->save();
-
-        /**Update Receipt */
-        $editReceipt = Receipt::find($request['id']);
-
-        /**Update Calculate */
-        $this->calculateService->calculateTotalReceipt_ByEdit($editReceipt);
-
-        return response()->json([
-            'error' => false,
-            'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
-    }
-
     /** ດຶງຂໍມູນລາຍລະອຽດໃບຮັບເງິນ */
     public function listReceiptDetail($request)
     {
@@ -147,7 +121,6 @@ class ReceiptService
             )
             ->leftJoin('customers', 'receipts.customer_id', 'customers.id')
             ->leftJoin('currencies', 'receipts.currency_id', 'currencies.id')
-            ->leftJoin('companies', 'receipts.company_id', 'companies.id')
             ->leftJoin('users', 'receipts.created_by', 'users.id')
             ->where('receipts.id', $request->id)
             ->orderBy('receipts.id', 'desc')
@@ -174,58 +147,11 @@ class ReceiptService
         $editReceipt->receipt_name = $request['receipt_name'];
         $editReceipt->receipt_date = $request['receipt_date'];
         $editReceipt->note = $request['note'];
-        $editReceipt->company_id = $request['company_id'];
-        $editReceipt->currency_id = $request['currency_id'];
-        $editReceipt->customer_id = $request['customer_id'];
-        $editReceipt->discount = $request['discount'];
-        $editReceipt->tax = $request['tax'];
         $editReceipt->updated_by = Auth::user('api')->id;
         $editReceipt->save();
 
         /**Update Calculate */
         $this->calculateService->calculateTotalReceipt_ByEdit($request);
-
-        return response()->json([
-            'error' => false,
-            'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
-    }
-
-    /** ແກ້ໄຂລາຍລະອຽດໃບຮັບເງິນ */
-    public function editReceiptDetail($request)
-    {
-        $editDetail = ReceiptDetail::find($request['id']);
-        $editDetail->name = $request['name'];
-        $editDetail->order = $request['order'];
-        $editDetail->price = $request['price'];
-        $editDetail->amount = $request['amount'];
-        $editDetail->description = $request['description'];
-        $editDetail->total = $request['amount'] * $request['price'];
-        $editDetail->save();
-
-        /**Update Receipt */
-        $editReceipt = Receipt::find($editDetail['receipt_id']);
-
-        /**Update Calculate Receipt */
-        $this->calculateService->calculateTotalReceipt_ByEdit($editReceipt);
-
-        return response()->json([
-            'error' => false,
-            'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
-    }
-
-    /** ລຶບລາຍລະອຽດໃບຮັບເງິນ */
-    public function deleteReceiptDetail($request)
-    {
-        $deleteDetail = ReceiptDetail::find($request['id']);
-        $deleteDetail->delete();
-
-        /**Update Receipt */
-        $editReceipt = Receipt::find($deleteDetail['receipt_id']);
-
-        /**Update Calculate Receipt */
-        $this->calculateService->calculateTotalReceipt_ByEdit($editReceipt);
 
         return response()->json([
             'error' => false,
@@ -244,9 +170,9 @@ class ReceiptService
                 $receipt = Receipt::findOrFail($request['id']);
                 $receipt->updated_by = Auth::user('api')->id;
                 $receipt->save();
-
-                // Delete the ReceiptDetail and the Receipt model
                 $receipt->delete();
+
+                // Delete the ReceiptDetail
                 ReceiptDetail::where('receipt_id', $request['id'])->delete();
 
             DB::commit();

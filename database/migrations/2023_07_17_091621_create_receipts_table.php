@@ -17,7 +17,6 @@ return new class extends Migration
             $table->id();
             $table->string('invoice_id');
             $table->unsignedBigInteger('customer_id');
-            $table->unsignedBigInteger('company_id');
             $table->unsignedBigInteger('currency_id');
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable();
@@ -33,7 +32,6 @@ return new class extends Migration
 
             $table->foreign('currency_id')->references('id')->on('currencies')->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('customer_id')->references('id')->on('customers')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreign('company_id')->references('id')->on('companies')->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('updated_by')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
         });

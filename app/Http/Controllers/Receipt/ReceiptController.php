@@ -27,11 +27,6 @@ class ReceiptController extends Controller
         return $this->receiptService->listReceipts();
     }
 
-    public function addReceiptDetail(ReceiptRequest $request)
-    {
-        return $this->receiptService->addReceiptDetail($request);
-    }
-
     public function listReceiptDetail(ReceiptRequest $request)
     {
         return $this->receiptService->listReceiptDetail($request);
@@ -40,16 +35,6 @@ class ReceiptController extends Controller
     public function editReceipt(ReceiptRequest $request)
     {
         return $this->receiptService->editReceipt($request);
-    }
-
-    public function editReceiptDetail(ReceiptRequest $request)
-    {
-        return $this->receiptService->editReceiptDetail($request);
-    }
-
-    public function deleteReceiptDetail(ReceiptRequest $request)
-    {
-        return $this->receiptService->deleteReceiptDetail($request);
     }
 
     public function deleteReceipt(ReceiptRequest $request)

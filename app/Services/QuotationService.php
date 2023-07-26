@@ -2,10 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Models\Company;
-use App\Models\Currency;
-use App\Models\Customer;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
@@ -40,10 +36,8 @@ class QuotationService
         $addQuotation->end_date = $request['end_date'];
         $addQuotation->note = $request['note'];
         $addQuotation->customer_id = $request['customer_id'];
-        $addQuotation->company_id = $request['company_id'];
         $addQuotation->currency_id = $request['currency_id'];
         $addQuotation->discount = $request['discount'];
-        $addQuotation->tax = $request['tax'];
         $addQuotation->created_by = Auth::user('api')->id;
         $addQuotation->save();
 
@@ -87,7 +81,6 @@ class QuotationService
         )
         ->leftJoin('customers', 'quotations.customer_id', '=', 'customers.id')
         ->leftJoin('currencies', 'quotations.currency_id', '=', 'currencies.id')
-        ->leftJoin('companies', 'quotations.company_id', '=', 'companies.id')
         ->leftJoin('users', 'quotations.created_by', '=', 'users.id')
         ->orderBy('quotations.id', 'desc')->get();
 
@@ -134,7 +127,6 @@ class QuotationService
         )
         ->leftJoin('customers', 'quotations.customer_id', 'customers.id')
         ->leftJoin('currencies', 'quotations.currency_id', 'currencies.id')
-        ->leftJoin('companies', 'quotations.company_id', 'companies.id')
         ->leftJoin('users', 'quotations.created_by', 'users.id')
         ->where('quotations.id', $request->id)
         ->orderBy('id', 'desc')->first();
@@ -160,11 +152,9 @@ class QuotationService
         $editQuotation->start_date = $request['start_date'];
         $editQuotation->end_date = $request['end_date'];
         $editQuotation->note = $request['note'];
-        $editQuotation->company_id = $request['company_id'];
         $editQuotation->customer_id = $request['customer_id'];
         $editQuotation->currency_id = $request['currency_id'];
         $editQuotation->discount = $request['discount'];
-        $editQuotation->tax = $request['tax'];
         $editQuotation->updated_by = Auth::user('api')->id;
         $editQuotation->save();
 
@@ -248,5 +238,18 @@ class QuotationService
                 'msg' => 'ບໍ່ສາມາດລຶບລາຍກນ້ໄດ້...'
             ]);
         }
+    }
+
+    public function updateQuotationStatus($request)
+    {
+        $updateStatus = Quotation::find($request['id']);
+        $updateStatus->status = $request['status'];
+        $updateStatus->updated_by = Auth::user('api')->id;
+        $updateStatus->save();
+
+        return response()->json([
+            'errors' => false,
+            'msg' => 'ສຳເລັດແລ້ວ',
+        ], 200);
     }
 }

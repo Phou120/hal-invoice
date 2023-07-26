@@ -14,7 +14,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'logout']]);
     }
 
     /**
@@ -76,7 +76,7 @@ class AuthController extends Controller
     {
         return response()->json([
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 1200000,
+            'expires_in' => auth()->factory()->getTTL() * 1999 * 2999,
             'access_token' => $token,
             'auth' => UserHelper::AuthUser()
         ]);

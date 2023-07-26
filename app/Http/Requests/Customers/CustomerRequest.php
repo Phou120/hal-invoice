@@ -72,7 +72,7 @@ class CustomerRequest extends FormRequest
                     ->whereNull('deleted_at')
                 ],
                 'email' => [
-                    'required',
+                    'nullable',
                     'email',
                     'max:255',
                     'min:5',
@@ -81,14 +81,10 @@ class CustomerRequest extends FormRequest
                     ->whereNull('deleted_at')
                 ],
                 'logo' =>[
-                    'nullable',
+                    'required',
                     'mimes:jpg,png,jpeg,gif',
                     'max:2048',
-                ],
-                'address' =>[
-                    'required'
                 ]
-
             ];
         }
 
@@ -108,7 +104,7 @@ class CustomerRequest extends FormRequest
                     ->whereNull('deleted_at')
                 ],
                 'email' => [
-                    'required',
+                    'nullable',
                     'email',
                     'max:255',
                     'min:5',
@@ -116,12 +112,9 @@ class CustomerRequest extends FormRequest
                     ->whereNull('deleted_at')
                 ],
                 'logo' =>[
-                    'nullable',
+                    'required',
                     'mimes:jpg,png,jpeg,gif',
                     'max:2048',
-                ],
-                'address' =>[
-                    'required'
                 ]
             ];
         }
@@ -146,6 +139,7 @@ class CustomerRequest extends FormRequest
             'email.min' => 'ອີເມວບໍ່ຄວນສັ້ນກວ່າ 5 ໂຕອັກສອນ...',
             'email.unique' => 'ອີເມວນີ້ມີໃນລະບົບເເລ້ວ',
 
+            'logo.required' => 'ກະລຸນາປ້ອນ logo ກ່ອນ...',
             'logo.mimes' => 'ຄວນເປັນນາມສະກຸນໄຟລ jpeg,jpg,png,gif',
             'logo.max' => 'ຂະໜາດບໍ່ຄວນເກີນ 2048',
 

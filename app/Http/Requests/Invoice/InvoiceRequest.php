@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Invoice;
 
+use App\Models\Invoice;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -66,7 +67,7 @@ class InvoiceRequest extends FormRequest
                 ],
                 'status' =>[
                     'required',
-                        Rule::in('pending', 'paid', 'created', 'cancelled')
+                        Rule::in('created', 'approved', 'inprogress', 'completed', 'canceled')
                 ]
             ];
         }
@@ -80,8 +81,13 @@ class InvoiceRequest extends FormRequest
                             Rule::exists('invoices', 'id')
                                 ->where(function ($q){
                                     $q->whereNull('deleted_at');
-                                    $q->whereNot('status', 'paid');
-                                })
+                                }),
+                                function($attribute, $value, $fail){
+                                    $checkItem = Invoice::where('id', $value)->where('status', 'approved')->exists();
+                                    if($checkItem){
+                                        $fail('ບໍ່ສາມາດລຶບໃບເກັບເງິນນີ້ໄດ້ເພາະວ່າຖືກອະນຸມັດແລ້ວ...');
+                                    }
+                                }
                 ],
             ];
         }
@@ -94,9 +100,14 @@ class InvoiceRequest extends FormRequest
                         'numeric',
                             Rule::exists('invoice_details', 'id')
                                 ->where(function ($query) {
-                                    $query->whereRaw('invoice_id IN (SELECT id FROM invoices WHERE status != "paid")');
                                     $query->whereNull('deleted_at');
-                                })
+                                }),
+                                function($attribute, $value, $fail){
+                                    $checkItem = Invoice::where('id', $value)->where('status', 'approved')->exists();
+                                    if($checkItem){
+                                        $fail('ບໍ່ສາມາດລຶບລາຍລະອຽດໃບເກັບເງິນນີ້ໄດ້ເພາະວ່າຖືກອະນຸມັດແລ້ວ...');
+                                    }
+                                }
                 ],
             ];
         }
@@ -109,9 +120,14 @@ class InvoiceRequest extends FormRequest
                         'numeric',
                             Rule::exists('invoice_details', 'id')
                                 ->where(function ($query) {
-                                    $query->whereRaw('invoice_id IN (SELECT id FROM invoices WHERE status != "paid")');
                                     $query->whereNull('deleted_at');
-                                })
+                                }),
+                                function($attribute, $value, $fail){
+                                    $checkItem = Invoice::where('id', $value)->where('status', 'approved')->exists();
+                                    if($checkItem){
+                                        $fail('ບໍ່ສາມາດແກ້ໄຂລາຍລະອຽດໃບເກັບເງິນນີ້ໄດ້ເພາະວ່າຖືກອະນຸມັດແລ້ວ...');
+                                    }
+                                }
                 ],
                 'order' => [
                     'required',
@@ -128,10 +144,6 @@ class InvoiceRequest extends FormRequest
                 'price' => [
                     'required',
                         'numeric'
-                ],
-                'description' => [
-                    'nullable',
-                        'max:255'
                 ]
             ];
         }
@@ -145,8 +157,13 @@ class InvoiceRequest extends FormRequest
                             Rule::exists('invoices', 'id')
                                 ->where(function ($q){
                                     $q->whereNull('deleted_at');
-                                    $q->whereNot('status', 'paid');
-                                })
+                                }),
+                            function($attribute, $value, $fail){
+                                $checkItem = Invoice::where('id', $value)->where('status', 'approved')->exists();
+                                if($checkItem){
+                                    $fail('ບໍ່ສາມາດແກ້ໄຂໃບເກັບເງິນນີ້ໄດ້ເພາະວ່າຖືກອະນຸມັດແລ້ວ...');
+                                }
+                            }
                 ],
                 'invoice_name' =>[
                     'required',
@@ -162,20 +179,10 @@ class InvoiceRequest extends FormRequest
                         'date',
                             'after_or_equal:start_date'
                 ],
-                'note' => [
-                    'nullable',
-                        'max:255'
-                ],
                 'customer_id' => [
                     'required',
                         'numeric',
                             Rule::exists('customers', 'id')
-                                ->whereNull('deleted_at')
-                ],
-                'company_id' => [
-                    'required',
-                        'numeric',
-                            Rule::exists('companies', 'id')
                                 ->whereNull('deleted_at')
                 ],
                 'currency_id' => [
@@ -183,14 +190,6 @@ class InvoiceRequest extends FormRequest
                         'numeric',
                             Rule::exists('currencies', 'id')
                                 ->whereNull('deleted_at')
-                ],
-                'tax' => [
-                    'required',
-                        'numeric'
-                ],
-                'discount' => [
-                    'required',
-                        'numeric'
                 ]
             ];
         }
@@ -219,10 +218,6 @@ class InvoiceRequest extends FormRequest
                 'price' => [
                     'required',
                         'numeric'
-                ],
-                'description' => [
-                    'nullable',
-                        'max:255'
                 ]
             ];
         }
@@ -244,20 +239,16 @@ class InvoiceRequest extends FormRequest
                         'date',
                             'after_or_equal:start_date'
                 ],
-                'note' => [
-                    'nullable',
-                        'max:255'
-                ],
                 'customer_id' => [
                     'required',
                         'numeric',
                             Rule::exists('customers', 'id')
                                 ->whereNull('deleted_at')
                 ],
-                'company_id' => [
-                    'required',
+                'quotation_id' => [
+                    'nullable',
                         'numeric',
-                            Rule::exists('companies', 'id')
+                            Rule::exists('quotations', 'id')
                                 ->whereNull('deleted_at')
                 ],
                 'currency_id' => [
@@ -265,10 +256,6 @@ class InvoiceRequest extends FormRequest
                         'numeric',
                             Rule::exists('currencies', 'id')
                                 ->whereNull('deleted_at')
-                ],
-                'tax' => [
-                    'required',
-                        'numeric'
                 ],
                 'discount' => [
                     'required',
@@ -293,10 +280,6 @@ class InvoiceRequest extends FormRequest
                 'invoice_details.*.price' => [
                     'required',
                         'numeric'
-                ],
-                'invoice_details.*.description' => [
-                    'nullable',
-                        'max:255'
                 ]
             ];
         }
@@ -316,22 +299,16 @@ class InvoiceRequest extends FormRequest
             'end_date.date' => 'ຄວນເປັນວັນທີ...',
             'end_date.after_or_equal' => 'ວັນທີສິ້ນສຸດຄວນໃຫ່ຍກວ່າວັນທີເລີ່ມ...',
 
-            'note.max' => 'ຄຳອະທິບາຍບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
-
             'customer_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
             'customer_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
             'customer_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
 
-            'company_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
-            'company_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
-            'company_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
+            'quotation_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
+            'quotation_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
 
             'currency_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
             'currency_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
             'currency_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
-
-            'tax.required' => 'ກະລຸນາປ້ອນກ່ອນ...',
-            'tax.numeric' => 'ຄວນເປັນໂຕເລກ...',
 
             'discount.required' => 'ກະລຸນາປ້ອນກ່ອນ...',
             'discount.numeric' => 'ຄວນເປັນໂຕເລກ...',
@@ -351,11 +328,9 @@ class InvoiceRequest extends FormRequest
             'invoice_details.*.price.required' => 'ກະລຸນາປ້ອນລາຄາກ່ອນ...',
             'invoice_details.*.price.numeric' => 'ລາຄາຄວນເປັນໂຕເລກ...',
 
-            'invoice_details.*.description.max' => 'ລາຍລະອຽດບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
-
             'id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
             'id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
-            'id.exists' => 'id ບໍ່ມີໃນລະບົບ ຫຼື ສະຖານະເທົ່າຈ່າຍເງິນແລ້ວ...',
+            'id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
 
             'order.required' => 'ກະລຸນາປ້ອນ order ກ່ອນ...',
             'order.numeric' => 'order ຄວນເປັນໂຕເລກ...',
@@ -372,7 +347,7 @@ class InvoiceRequest extends FormRequest
             'description.max' => 'ລາຍລະອຽດບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
 
             'status.required' => 'ກະລຸນາປ້ອນສະຖານະກ່ອນ...',
-            'status.in' => 'ສະຖານະຄວນມີຢູ່ໃນນີ້: pending, paid, created, cancelled...'
+            'status.in' => 'ສະຖານະຄວນມີຢູ່ໃນນີ້: created, approved, inprogress, completed, canceled...'
         ];
     }
 }

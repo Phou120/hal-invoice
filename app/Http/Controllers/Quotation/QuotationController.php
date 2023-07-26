@@ -56,4 +56,9 @@ class QuotationController extends Controller
     {
         return $this->quotationService->deleteQuotation($request);
     }
+
+    public function updateQuotationStatus(QuotationRequest $request)
+    {
+        return $this->quotationService->updateQuotationStatus($request);
+    }
 }

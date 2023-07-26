@@ -1,11 +1,14 @@
 <?php
 
-namespace App\Http\Requests\User;
+namespace App\Http\Requests\ComapnyUser;
 
+use App\Models\User;
+use App\Models\CompanyUser;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserRequest extends FormRequest
+class CompanyUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -17,16 +20,15 @@ class UserRequest extends FormRequest
         return auth('api')->user()->hasRole('superAdmin|admin');
     }
 
-
     public function prepareForValidation()
     {
-        if($this->isMethod('put') && $this->routeIs('edit.user')
-             ||$this->isMethod('delete') && $this->routeIs('delete.user')
-             ||$this->isMethod('put') && $this->routeIs('change.password')
+        if($this->isMethod('put') && $this->routeIs('update.company.user')
+            || $this->isMethod('delete') && $this->routeIs('delete.company.user')
 
         ){
             $this->merge([
                 'id' => $this->route()->parameters['id'],
+                'user_id' => $this->getUserId($this->route()->parameters['id'])
 
             ]);
         }
@@ -39,43 +41,48 @@ class UserRequest extends FormRequest
      */
     public function rules()
     {
-        if($this->isMethod('put') && $this->routeIs('change.password'))
+        if($this->isMethod('delete') && $this->routeIs('delete.company.user'))
         {
             return [
                 'id' =>[
                     'required',
                         'numeric',
-                            Rule::exists('users', 'id')
-                            ->whereNull('deleted_at')
+                            Rule::exists('company_users', 'id')->whereNull('deleted_at')
+                ]
+            ];
+        }
+
+        if($this->isMethod('put') && $this->routeIs('update.company.user'))
+        {
+            return [
+                'id' =>[
+                    'required',
+                        'numeric',
+                            Rule::exists('company_users', 'id')
+                                ->whereNull('deleted_at')
                 ],
-                'password' =>[
+                'name' =>[
                     'required',
-                        'min:6',
-                            'max:15'
+                        'max:255'
+                ],
+                'email' => [
+                    'required',
+                        'max:255',
+                            'email',
+                                'min:5',
+                                Rule::unique('users', 'email')->ignore($this->id)->whereNull('deleted_at')
                 ]
             ];
         }
 
-        if($this->isMethod('delete') && $this->routeIs('delete.user'))
+        if($this->isMethod('post') && $this->routeIs('create.company.user'))
         {
             return [
-                'id' =>[
+                'company_id' =>[
                     'required',
                         'numeric',
-                            Rule::exists('users', 'id')
-                            ->whereNull('deleted_at')
-                ]
-            ];
-        }
-
-        if($this->isMethod('put') && $this->routeIs('edit.user'))
-        {
-            return [
-                'id' =>[
-                    'required',
-                        'numeric',
-                            Rule::exists('users', 'id')
-                            ->whereNull('deleted_at')
+                            Rule::exists('companies', 'id')
+                                ->whereNull('deleted_at')
                 ],
                 'name' =>[
                     'required',
@@ -87,28 +94,7 @@ class UserRequest extends FormRequest
                             'email',
                                 'min:5',
                                     Rule::unique('users', 'email')
-                                        ->ignore($this->id)
                                         ->whereNull('deleted_at')
-
-                ]
-            ];
-        }
-
-        if($this->isMethod('post') && $this->routeIs('add.user'))
-        {
-            return [
-                'name' =>[
-                    'required',
-                        'max:255'
-                ],
-                'email' => [
-                    'required',
-                        'max:255',
-                            'email',
-                                'min:5',
-                                    Rule::unique('users', 'email')
-                                        ->whereNull('deleted_at')
-
                 ],
                 'password' =>[
                     'required',
@@ -122,6 +108,10 @@ class UserRequest extends FormRequest
     public function messages()
     {
         return [
+            'company_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
+            'company_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
+            'company_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
+
             'name.required' => 'ກະລຸນາປ້ອນຊື່ກ່ອນ...',
             'name.max' => 'ຊື່ບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
 
@@ -139,5 +129,10 @@ class UserRequest extends FormRequest
             'id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
             'id.exists' => 'id ບໍ່ມີໃນລະບົບ...'
         ];
+    }
+
+    public function getUserId($companyUserId){
+        $companyUser = CompanyUser::find($companyUserId);
+        return $companyUser ? $companyUser['user_id'] : null;
     }
 }

@@ -5,6 +5,7 @@ namespace App\Services\User;
 use App\Models\Role;
 use App\Models\User;
 use App\Traits\ResponseAPI;
+use Illuminate\Support\Str;
 use PhpParser\Node\Expr\FuncCall;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -18,7 +19,7 @@ class UserService
         $addUser = new User();
         $addUser->name = $request['name'];
         $addUser->email = $request['email'];
-        $addUser->password = Hash::make('password');
+        $addUser->password = Hash::make($request['password']);
         $addUser->save();
 
         $roleAdmin = Role::where('name', '=', 'admin')->first();
@@ -73,12 +74,8 @@ class UserService
     public function deleteUser($request)
     {
         $user = User::find($request['id']);
-        if (!$user) {
-            return response()->json([
-                'message' => 'ບໍ່ພົບ user...'
-            ], 404);
-        }
-        $user->roles()->detach();
+        $user->email = $user->email . '_deleted_' . Str::random(6);
+        $user->save();
         $user->delete();
 
         return response()->json([
