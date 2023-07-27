@@ -30,8 +30,9 @@ class CalculateService
         $totalQuotation = Quotation::where('id', $data['quotation_id'])->sum('total');
         $invoice = Invoice::where('quotation_id', $data['quotation_id'])->get();
         $totalInvoice = InvoiceDetail::whereIn('invoice_id', $invoice->pluck('id'))->sum('total');
-        $sumTotal = $totalQuotation - $totalInvoice;
-        
+        $discountInvoice = $totalInvoice * $data['discount'] / 100;
+        $sumTotal = ($totalQuotation) - ($totalInvoice - $discountInvoice);
+
         if($sumTotal >= $total) {
             return null;
         }
@@ -46,7 +47,8 @@ class CalculateService
         $invoices = Invoice::select('id')->where('quotation_id', $invoice['quotation_id']);
         $totalInvoice = InvoiceDetail::whereIn('invoice_id', $invoices)->sum('total');
         $totalQuotation = Quotation::where('id', $invoice['quotation_id'])->sum('total');
-        $sumTotal = $totalQuotation - $totalInvoice;
+        $discountInvoice = $totalInvoice * $invoice['discount'] / 100;
+        $sumTotal = ($totalQuotation) - ($totalInvoice - $discountInvoice);
 
         if($sumTotal >= $total) {
             return null;
@@ -62,7 +64,8 @@ class CalculateService
         $totalQuotation = Quotation::where('id', $invoice['quotation_id'])->sum('total');
         $invoices = Invoice::select('id')->where('quotation_id', $invoice['quotation_id']);
         $totalInvoice = InvoiceDetail::whereIn('invoice_id', $invoices)->where('id', '!=', $detail['id'])->sum('total');
-        $sumTotal = $totalQuotation - $totalInvoice;
+        $discountInvoice = $totalInvoice * $invoice['discount'] / 100;
+        $sumTotal = ($totalQuotation) - ($totalInvoice - $discountInvoice);
 
         if($sumTotal >= $total) {
             return null;
@@ -79,7 +82,7 @@ class CalculateService
         $sumTotalTax = $sumSubTotal * myHelper::TAX / 100;
         $sumTotalDiscount = $sumSubTotal * $request['discount'] / 100;
         $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
-
+        
         /** Update Total Quotation */
         $addQuotation = Quotation::find($id);
         $addQuotation->tax = myHelper::TAX;

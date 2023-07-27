@@ -151,7 +151,7 @@ class InvoiceService
 
         /**Detail */
         $details = InvoiceDetail::where('invoice_id', $request->id)->get();
-        
+
 
         return response()->json([
             'invoice' => $item,
