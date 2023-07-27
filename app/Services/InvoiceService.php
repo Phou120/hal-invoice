@@ -37,8 +37,8 @@ class InvoiceService
     {
         DB::beginTransaction();
 
-            $checkItem = $this->calculateService->checkInvoice($request);
-            if(!$checkItem){
+            $getTotalQuotation = $this->calculateService->sumTotalQuotation($request);
+            if(!$getTotalQuotation){
                 $addInvoice = new Invoice();
                 $addInvoice->invoice_number = generateHelper::generateInvoiceNumber('IV- ', 8);
                 $addInvoice->invoice_name = $request['invoice_name'];
@@ -50,13 +50,11 @@ class InvoiceService
                 $addInvoice->end_date = $request['end_date'];
                 $addInvoice->note = $request['note'];
                 $addInvoice->created_by = Auth::user('api')->id;
+                $addInvoice->tax = myHelper::TAX;
                 $addInvoice->save();
 
-                $sumSubTotal = 0;
-            if(!empty($request['invoice_details'])){
-                foreach($request['invoice_details'] as $item){
-                        $total = $item['amount'] * $item['price'];
-
+                if(!empty($request['invoice_details'])){
+                    foreach($request['invoice_details'] as $item){
                         $addDetail = new InvoiceDetail();
                         $addDetail->order = $item['order'];
                         $addDetail->invoice_id = $addInvoice['id'];
@@ -64,15 +62,10 @@ class InvoiceService
                         $addDetail->amount = $item['amount'];
                         $addDetail->price = $item['price'];
                         $addDetail->description = $item['description'];
-                        $addDetail->total = $total;
+                        $addDetail->total = $item['amount'] * $item['price'];
                         $addDetail->save();
-
-                        $sumSubTotal += $total;
                     }
                 }
-
-                /**Calculate */
-                $this->calculateService->calculateTotalInvoice($request, $sumSubTotal, $addInvoice['id']);
 
                 DB::commit();
 
@@ -83,7 +76,7 @@ class InvoiceService
             }else{
                 return response()->json([
                     'error' => false,
-                    'msg' => 'ທ່ານບໍ່ສາມາດສ້າງໃບເກັບເງິນເກີນນີ້ໄດ້: ' . $checkItem
+                    'msg' => 'ທ່ານບໍ່ສາມາດສ້າງໃບເກັບເງິນເກີນນີ້ໄດ້: ' . $getTotalQuotation
                 ], 422);
             }
     }
@@ -114,8 +107,8 @@ class InvoiceService
     /** ບັນທຶກລາຍລະອຽດໃບບິນ */
     public function addInvoiceDetail($request)
     {
-        $checkItem = $this->calculateService->checkDetail($request);
-        if($checkItem === null){
+        $checkBalance = $this->calculateService->checkBalanceInvoice($request);
+        if(!$checkBalance){
             $addDetail = new InvoiceDetail();
             $addDetail->description = $request['description'];
             $addDetail->invoice_id = $request['id'];
@@ -126,21 +119,14 @@ class InvoiceService
             $addDetail->total = $request['amount'] * $request['price'];
             $addDetail->save();
 
-            /** Update Invoice */
-            $editInvoice = Invoice::find($request['id']);
-
-            /** Update Calculate Invoice */
-            $this->calculateService->calculateTotalInvoice_ByEdit($editInvoice);
-
             return response()->json([
                 'error' => false,
                 'msg' => 'ສຳເລັດແລ້ວ'
             ]);
-
         }else{
             return response()->json([
                 'error' => false,
-                'msg' => 'ທ່ານບໍ່ສາມາດສ້າງໃບເກັບເງິນເກີນນີ້ໄດ້: ' . $checkItem
+                'msg' => 'ທ່ານບໍ່ສາມາດສ້າງໃບເກັບເງິນເກີນນີ້ໄດ້: ' . $checkBalance
             ], 422);
         }
     }
@@ -165,7 +151,7 @@ class InvoiceService
 
         /**Detail */
         $details = InvoiceDetail::where('invoice_id', $request->id)->get();
-
+        
 
         return response()->json([
             'invoice' => $item,
@@ -178,23 +164,12 @@ class InvoiceService
     {
         $editInvoice = Invoice::find($request['id']);
         $editInvoice->invoice_name = $request['invoice_name'];
-        $editInvoice->currency_id = $request['currency_id'];
-        $editInvoice->customer_id = $request['customer_id'];
         $editInvoice->start_date = $request['start_date'];
-        $editInvoice->discount = $request['discount'];
         $editInvoice->end_date = $request['end_date'];
         $editInvoice->note = $request['note'];
         $editInvoice->updated_by = Auth::user('api')->id;
         $editInvoice->save();
 
-        /**Update Calculate */
-        $result = $this->calculateService->calculateTotalInvoice_ByEdit($editInvoice);
-        if($result){
-            return response()->json([
-                'error' => false,
-                'msg' => 'ທ່ານບໍ່ສາມາດແກ້ໄຂໃບເກັບເງິນນີ້ໄດ້: ' . $result
-            ], 422);
-        }
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
@@ -204,10 +179,9 @@ class InvoiceService
     /** ແກ້ໄຂລາຍລະອຽດໃບບິນ */
     public function editInvoiceDetail($request)
     {
-        $checkItem = $this->calculateService->checkBalanceByDetail($request);
-        if(!$checkItem){
+        $checkBalance = $this->calculateService->checkBalanceInvoiceByEdit($request);
+        if(!$checkBalance){
             $editDetail = InvoiceDetail::find($request['id']);
-            $total = $editDetail['total'];
             $editDetail->order = $request['order'];
             $editDetail->name = $request['name'];
             $editDetail->amount = $request['amount'];
@@ -216,11 +190,6 @@ class InvoiceService
             $editDetail->total = $request['amount'] * $request['price'];
             $editDetail->save();
 
-            /**Update Invoice */
-            $editInvoice = Invoice::find($editDetail['invoice_id']);
-
-            $this->calculateService->calculateTotalInvoice_ByEdit($editInvoice, $editDetail, $total);
-
             return response()->json([
                 'error' => false,
                 'msg' => 'ສຳເລັດແລ້ວ'
@@ -228,7 +197,7 @@ class InvoiceService
         }else{
             return response()->json([
                 'error' => false,
-                'msg' => 'ທ່ານບໍ່ສາມາດສ້າງໃບເກັບເງິນເກີນນີ້ໄດ້: ' . $checkItem
+                'msg' => 'ທ່ານບໍ່ສາມາດສ້າງໃບເກັບເງິນເກີນນີ້ໄດ້: ' . $checkBalance
             ], 422);
         }
     }
@@ -238,12 +207,6 @@ class InvoiceService
     {
         $deleteDetail = InvoiceDetail::find($request['id']);
         $deleteDetail->delete();
-
-        /**Update Quotation */
-        $editInvoice = Invoice::find($deleteDetail['invoice_id']);
-
-        /**Update Calculate */
-        $this->calculateService->calculateTotalInvoice_ByEdit($editInvoice);
 
         return response()->json([
             'error' => false,
