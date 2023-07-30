@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ExportPDFController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Invoice\InvoiceController;
@@ -149,5 +150,7 @@ Route::group([
     Route::put('update-company-user/{id}', [CompanyUserController::class, 'updateCompanyUser'])->name('update.company.user');
     Route::delete('delete-company-user/{id}', [CompanyUserController::class, 'deleteCompanyUser'])->name('delete.company.user');
     Route::get('list-company-users', [CompanyUserController::class, 'listCompanyUser']);
+
+    Route::post('export-pdf', [ExportPDFController::class, 'exportPDF']);
 });
 

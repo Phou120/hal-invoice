@@ -104,7 +104,7 @@ table {
         <hr>
         <p class="total">Total: 200,000 Kip</p>
         <p style="text-align: right">Tax: 200,000 Kip</p>
-        <p style="text-align: right">Discount: 200,000 Kip</p>
+        <p style="text-align: right">Discount: 200,000 Kip</p> 
     </di>
   </div>
 </body>
