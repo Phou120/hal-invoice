@@ -7,7 +7,6 @@ use App\Traits\ResponseAPI;
 use Illuminate\Support\Facades\Storage;
 use App\Helpers\CreateFolderImageHelper;
 
-
 class CompanyService
 {
     use ResponseAPI;
@@ -26,7 +25,7 @@ class CompanyService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     /** ດຶງຂໍ້ມູນບໍລິສັດ */
@@ -43,7 +42,7 @@ class CompanyService
 
         return response()->json([
             'listCompanies' => $listCompanies
-        ]);
+        ], 200);
     }
 
     /** ແກ້ໄຂຂໍ້ມູນບໍລິສັດ */
@@ -75,7 +74,7 @@ class CompanyService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     /** ລຶບຂໍ້ມູນບໍລິສັດ */
@@ -90,6 +89,6 @@ class CompanyService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 }

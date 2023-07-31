@@ -118,7 +118,7 @@ Route::group([
     Route::get('list-receipt-detail/{id}', [ReceiptController::class, 'listReceiptDetail'])->name('list.receipt.detail');
 
     /** delete-receipt-detail/{id} => {id} = ແມ່ນ ລຶບ id detail */
-    Route::delete('delete-receipt-detail/{id}', [ReceiptController::class, 'deleteReceiptDetail'])->name('delete.receipt.detail');
+    // Route::delete('delete-receipt-detail/{id}', [ReceiptController::class, 'deleteReceiptDetail'])->name('delete.receipt.detail');
 
 
     /** CRUD Purchaser Order */
@@ -151,6 +151,6 @@ Route::group([
     Route::delete('delete-company-user/{id}', [CompanyUserController::class, 'deleteCompanyUser'])->name('delete.company.user');
     Route::get('list-company-users', [CompanyUserController::class, 'listCompanyUser']);
 
-    Route::post('export-pdf', [ExportPDFController::class, 'exportPDF']);
+    Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
 });
 

@@ -40,7 +40,7 @@ class CompanyUserService
         return response()->json([
             'errors' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     public function listCompanyUser()
@@ -57,7 +57,7 @@ class CompanyUserService
 
         return response()->json([
             'listCompanyUser' => $listCompanyUser
-        ]);
+        ], 200);
     }
 
     public function updateCompanyUser($request)
@@ -72,10 +72,10 @@ class CompanyUserService
             $getUser->email = $request['email'];
             $getUser->save();
         }else{
-            return response()->json(['msg' =>'ບໍ່ພົບ user...']);
+            return response()->json(['msg' =>'ບໍ່ພົບ user...'], 422);
         }
 
-        return response()->json(['errors' => false, 'msg' => 'ສຳເລັດແລ້ວ']);
+        return response()->json(['errors' => false, 'msg' => 'ສຳເລັດແລ້ວ'], 200);
     }
 
     public function deleteCompanyUser($request)
@@ -99,14 +99,14 @@ class CompanyUserService
             return response()->json([
                 'error' => false,
                 'msg' => 'ສຳເລັດແລ້ວ'
-            ]);
+            ], 200);
 
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
                 'error' => true,
                 'msg' => 'ບໍ່ສາມາດລຶບລາຍການນີ້ໄດ້...'
-            ]);
+            ], 422);
         }
     }
 }

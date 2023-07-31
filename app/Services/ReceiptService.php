@@ -52,9 +52,7 @@ class ReceiptService
                     $addReceipt->receipt_name = $request['receipt_name'];
                     $addReceipt->receipt_date = $request['receipt_date'];
                     $addReceipt->created_by = Auth::user('api')->id;
-                    $addReceipt->sub_total = $getInvoice['sub_total'];
                     $addReceipt->discount = $getInvoice['discount'];
-                    $addReceipt->total = $getInvoice['total'];
                     $addReceipt->tax = $getInvoice['tax'];
                     $addReceipt->note = $request['note'];
                     $addReceipt->save();
@@ -76,16 +74,18 @@ class ReceiptService
                 return response()->json([
                     'error' => false,
                     'msg' => 'ສຳເລັດແລ້ວ'
-                ]);
+                ], 200);
             }
 
-            return $getInvoiceDetail;
+            return response()->json([
+                'msg' => 'ສະຖານະຂອງໃບເກັບເງິນຄວນເປັນ approved ພວກເຮົາຈື່ງສາມາດອອກໃບຮັບເງິນໄດ້'
+            ], 422);
         }
 
         return response()->json([
             'error' => true,
             'msg' => 'ຜິດພາດ'
-        ]);
+        ], 500);
     }
 
     /** ດຶງຂໍມູນໃບຮັບເງິນ */
@@ -110,7 +110,7 @@ class ReceiptService
 
         return response()->json([
             'listReceipt' => $listReceipt
-        ]);
+        ], 200);
     }
 
     /** ດຶງຂໍມູນລາຍລະອຽດໃບຮັບເງິນ */
@@ -134,31 +134,26 @@ class ReceiptService
         /**Detail */
         $details = DB::table('receipt_details')->where('receipt_id', $request->id)->get();
 
-
         return response()->json([
             'receipt' => $item,
             'details' => $details,
-        ]);
+        ], 200);
     }
 
     /** ແກ້ໄຂໃບຮັບເງິນ */
     public function editReceipt($request)
     {
         $editReceipt = Receipt::find($request['id']);
-        $editReceipt->invoice_id = $request['invoice_id'];
         $editReceipt->receipt_name = $request['receipt_name'];
         $editReceipt->receipt_date = $request['receipt_date'];
         $editReceipt->note = $request['note'];
         $editReceipt->updated_by = Auth::user('api')->id;
         $editReceipt->save();
 
-        /**Update Calculate */
-        $this->calculateService->calculateTotalReceipt_ByEdit($request);
-
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     /** ລຶບໃບຮັບເງິນ */
@@ -182,14 +177,14 @@ class ReceiptService
             return response()->json([
                 'error' => false,
                 'msg' => 'ສຳເລັດແລ້ວ'
-            ]);
+            ], 200);
 
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
                 'error' => true,
                 'msg' => 'ບໍ່ສາມາດລຶບລາຍການນີ້ໄດ້...'
-            ]);
+            ], 422);
         }
     }
 }

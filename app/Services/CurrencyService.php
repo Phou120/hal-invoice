@@ -21,7 +21,7 @@ class CurrencyService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
 
     }
 
@@ -35,7 +35,7 @@ class CurrencyService
 
         return response()->json([
             'listCurrency' => $listCurrency
-        ]);
+        ], 200);
     }
 
     /** ແກ້ໄຂສະກຸນເງີນ */
@@ -49,7 +49,7 @@ class CurrencyService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     /** ລຶບສະກຸນເງີນ */
@@ -61,6 +61,6 @@ class CurrencyService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 }

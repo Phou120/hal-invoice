@@ -69,7 +69,7 @@ class QuotationService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     /** list quotation */
@@ -91,7 +91,7 @@ class QuotationService
 
         return response()->json([
             'listQuotations' => $listQuotations,
-        ]);
+        ], 200);
     }
 
     /** add quotation detail */
@@ -116,7 +116,7 @@ class QuotationService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     public function listQuotationDetail($request)
@@ -141,7 +141,7 @@ class QuotationService
         return response()->json([
             'quotation' => $item,
             'details' => $details,
-        ]);
+        ], 200);
     }
 
     /** edit quotation */
@@ -165,7 +165,7 @@ class QuotationService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     /** edit detail */
@@ -189,7 +189,7 @@ class QuotationService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     /** delete detail */
@@ -207,7 +207,7 @@ class QuotationService
          return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     public function deleteQuotation($request)
@@ -229,14 +229,14 @@ class QuotationService
             return response()->json([
                 'error' => false,
                 'msg' => 'ສຳເລັດແລ້ວ'
-            ]);
+            ], 200);
         } catch (\Exception $e) {
             DB::rollback();
 
             return response()->json([
                 'error' => true,
                 'msg' => 'ບໍ່ສາມາດລຶບລາຍກນ້ໄດ້...'
-            ]);
+            ], 422);
         }
     }
 

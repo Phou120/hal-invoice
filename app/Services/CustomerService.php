@@ -26,7 +26,7 @@ class CustomerService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
 
     }
 
@@ -43,7 +43,7 @@ class CustomerService
 
         return response()->json([
             'listCustomers' => $listCustomers
-        ]);
+        ], 200);
     }
 
     /** ແກ້ໄຂຂໍ້ມູນລູກຄ້າ */
@@ -75,7 +75,7 @@ class CustomerService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     /** ລຶບຂໍ້ມູນລູກຄ້າ */
@@ -90,6 +90,6 @@ class CustomerService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 }

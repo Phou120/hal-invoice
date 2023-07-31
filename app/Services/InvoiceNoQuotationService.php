@@ -115,7 +115,7 @@ class InvoiceNoQuotationService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     /** update invoice detail ທີ່ບໍ່ມີ id quotation */
@@ -182,7 +182,7 @@ class InvoiceNoQuotationService
             return response()->json([
                 'error' => true,
                 'msg' => 'ບໍ່ສາມາດລຶບລາຍການນີ້ໄດ້...'
-            ]);
+            ], 422);
         }
     }
 

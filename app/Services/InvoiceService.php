@@ -72,7 +72,7 @@ class InvoiceService
                 return response()->json([
                     'error' => false,
                     'msg' => 'ສຳເລັດແລ້ວ'
-                ]);
+                ], 200);
             }else{
                 return response()->json([
                     'error' => true,
@@ -101,7 +101,7 @@ class InvoiceService
 
         return response()->json([
             'listInvoice' => $listInvoice
-        ]);
+        ], 200);
     }
 
     /** ບັນທຶກລາຍລະອຽດໃບບິນ */
@@ -122,7 +122,7 @@ class InvoiceService
             return response()->json([
                 'error' => false,
                 'msg' => 'ສຳເລັດແລ້ວ'
-            ]);
+            ], 200);
         }else{
             return response()->json([
                 'error' => false,
@@ -156,7 +156,7 @@ class InvoiceService
         return response()->json([
             'invoice' => $item,
             'details' => $details,
-        ]);
+        ], 200);
     }
 
     /** ແກ້ໄຂໃບບິນເກັບເງິນ */
@@ -173,7 +173,7 @@ class InvoiceService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     /** ແກ້ໄຂລາຍລະອຽດໃບບິນ */
@@ -193,7 +193,7 @@ class InvoiceService
             return response()->json([
                 'error' => false,
                 'msg' => 'ສຳເລັດແລ້ວ'
-            ]);
+            ], 200);
         }else{
             return response()->json([
                 'error' => false,
@@ -211,7 +211,7 @@ class InvoiceService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     /** ລຶບໃບບິນເກັບເງິນ */
@@ -244,14 +244,14 @@ class InvoiceService
             return response()->json([
                 'error' => false,
                 'msg' => 'ສຳເລັດແລ້ວ'
-            ]);
+            ], 200);
 
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
                 'error' => true,
                 'msg' => 'ບໍ່ສາມາດລຶບລາຍການນີ້ໄດ້...'
-            ]);
+            ], 422);
         }
     }
 
@@ -266,6 +266,6 @@ class InvoiceService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 }

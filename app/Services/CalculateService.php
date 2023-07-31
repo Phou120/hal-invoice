@@ -19,7 +19,6 @@ class CalculateService
 {
     use ResponseAPI;
 
-
       /** Sum Total Quotation */
     public function sumTotalQuotation($data)
       {
@@ -87,6 +86,7 @@ class CalculateService
         return $sumTotal;
     }
 
+    /** edit calculate invoice ທີ່ບໍ່ມີ id quotation */
     public function calculateInvoiceNoQuotationID_ByEdit($invoice)
     {
         $sumSubTotal = InvoiceDetail::where('invoice_id', $invoice['id'])->get()->sum('total');
@@ -96,7 +96,6 @@ class CalculateService
 
         return $sumTotal;
     }
-
 
     /** calculate quotation */
     public function calculateTotal($request, $sumSubTotal, $id)
@@ -132,35 +131,35 @@ class CalculateService
     }
 
      /** calculate Receipt */
-     public function calculateTotalReceipt($request, $sumSubTotal, $id)
-     {
-         /** Calculate */
-         $sumTotalTax = $sumSubTotal * myHelper::TAX / 100;
-         $sumTotalDiscount = $sumSubTotal * $request['discount'] / 100;
-         $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
+    //  public function calculateTotalReceipt($request, $sumSubTotal, $id)
+    //  {
+    //      /** Calculate */
+    //     $sumTotalTax = $sumSubTotal * myHelper::TAX / 100;
+    //     $sumTotalDiscount = $sumSubTotal * $request['discount'] / 100;
+    //     $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
 
-         /** Update Total Receipt */
-         $addQuotation = Receipt::find($id);
-         $addQuotation->sub_total = $sumSubTotal;
-         $addQuotation->total = $sumTotal;
-         $addQuotation->save();
-     }
+    //     /** Update Total Receipt */
+    //     $addQuotation = Receipt::find($id);
+    //     $addQuotation->sub_total = $sumSubTotal;
+    //     $addQuotation->total = $sumTotal;
+    //     $addQuotation->save();
+    //  }
 
      /** edit calculate Receipt */
-     public function calculateTotalReceipt_ByEdit($request)
-     {
-         /** Calculate */
-         $sumSubTotalPrice = ReceiptDetail::where('receipt_id', $request['id'])->get()->sum('total');
-         $sumTotalTax = $sumSubTotalPrice * myHelper::TAX / 100;
-         $sumTotalDiscount = $sumSubTotalPrice * $request['discount'] / 100;
-         $sumTotal = ($sumSubTotalPrice - $sumTotalDiscount) + $sumTotalTax;
+    //  public function calculateTotalReceipt_ByEdit($request)
+    //  {
+    //      /** Calculate */
+    //      $sumSubTotalPrice = ReceiptDetail::where('receipt_id', $request['id'])->get()->sum('total');
+    //      $sumTotalTax = $sumSubTotalPrice * myHelper::TAX / 100;
+    //      $sumTotalDiscount = $sumSubTotalPrice * $request['discount'] / 100;
+    //      $sumTotal = ($sumSubTotalPrice - $sumTotalDiscount) + $sumTotalTax;
 
-         /** Update Total Receipt */
-         $editQuotation = Receipt::find($request['id']);
-         $editQuotation->sub_total = $sumSubTotalPrice;
-         $editQuotation->total = $sumTotal;
-         $editQuotation->save();
-     }
+    //      /** Update Total Receipt */
+    //      $editQuotation = Receipt::find($request['id']);
+    //      $editQuotation->sub_total = $sumSubTotalPrice;
+    //      $editQuotation->total = $sumTotal;
+    //      $editQuotation->save();
+    //  }
 
      /** calculate PurchaseOrder */
      public function calculateTotalOrder($request, $sumSubTotal, $id)

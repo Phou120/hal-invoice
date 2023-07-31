@@ -28,7 +28,7 @@ class UserService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     public function listUser()
@@ -55,7 +55,7 @@ class UserService
 
         return response()->json([
             'items' => $userData
-        ]);
+        ], 200);
     }
 
     public function editUser($request)
@@ -68,7 +68,7 @@ class UserService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     public function deleteUser($request)
@@ -81,7 +81,7 @@ class UserService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 
     public function changePassword($request)
@@ -92,7 +92,7 @@ class UserService
             return response()->json([
                 'error' => true,
                 'msg' => 'ບໍ່ພົບ user...',
-            ]);
+            ], 422);
         }
         $user->password = Hash::make($request->password);
         $user->save();
@@ -100,6 +100,6 @@ class UserService
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
-        ]);
+        ], 200);
     }
 }
