@@ -75,7 +75,7 @@ class InvoiceService
                 ]);
             }else{
                 return response()->json([
-                    'error' => false,
+                    'error' => true,
                     'msg' => 'ທ່ານບໍ່ສາມາດສ້າງໃບເກັບເງິນເກີນນີ້ໄດ້: ' . $getTotalQuotation
                 ], 422);
             }
@@ -86,7 +86,7 @@ class InvoiceService
     {
         $listInvoice = Invoice::select(
             'invoices.*',
-            DB::raw('(SELECT COUNT(*) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as count_details')
+            DB::raw('(SELECT COUNT(*) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as count_details'),
         )
         ->leftJoin('customers', 'invoices.customer_id', 'customers.id')
         ->leftJoin('currencies', 'invoices.currency_id', 'currencies.id')
@@ -96,11 +96,11 @@ class InvoiceService
 
         $listInvoice->map(function ($item){
             /** loop data */
-            TableHelper::format($item);
+            TableHelper::formatDataInvoice($item);
         });
 
         return response()->json([
-            'listInvoice' => $listInvoice,
+            'listInvoice' => $listInvoice
         ]);
     }
 
@@ -147,7 +147,7 @@ class InvoiceService
         ->orderBy('id', 'desc')->first();
 
         /** loop data */
-        TableHelper::format($item);
+        TableHelper::formatDataInvoice($item);
 
         /**Detail */
         $details = InvoiceDetail::where('invoice_id', $request->id)->get();

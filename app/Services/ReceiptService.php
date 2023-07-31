@@ -96,6 +96,7 @@ class ReceiptService
             'receipts.*',
             DB::raw('(SELECT COUNT(*) FROM receipt_details WHERE receipt_details.receipt_id = Receipts.id) as count_details')
         )
+        ->leftJoin('invoices', 'receipts.invoice_id', 'invoices.id')
         ->leftJoin('customers', 'receipts.customer_id', '=', 'customers.id')
         ->leftJoin('currencies', 'receipts.currency_id', '=', 'currencies.id')
         ->leftJoin('users', 'receipts.created_by', '=', 'users.id')
@@ -103,7 +104,7 @@ class ReceiptService
 
         /** loop data */
         foreach ($listReceipt as $item) {
-            TableHelper::format($item);
+            TableHelper::loopDataOfReceipt($item);
         }
 
 
@@ -119,6 +120,7 @@ class ReceiptService
             ->select('receipts.*',
             DB::raw('(SELECT COUNT(*) FROM receipt_details WHERE receipt_details.receipt_id = Receipts.id) as count_details')
             )
+            ->leftJoin('invoices', 'receipts.invoice_id', 'invoices.id')
             ->leftJoin('customers', 'receipts.customer_id', 'customers.id')
             ->leftJoin('currencies', 'receipts.currency_id', 'currencies.id')
             ->leftJoin('users', 'receipts.created_by', 'users.id')
@@ -127,7 +129,7 @@ class ReceiptService
             ->first();
 
         /** loop data */
-        TableHelper::format($item);
+        TableHelper::loopDataOfReceipt($item);
 
         /**Detail */
         $details = DB::table('receipt_details')->where('receipt_id', $request->id)->get();

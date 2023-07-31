@@ -86,7 +86,7 @@ class QuotationService
 
         $listQuotations->map(function ($item) {
             /** loop data */
-            TableHelper::format($item);
+            TableHelper::loopDataInQuotation($item);
         });
 
         return response()->json([
@@ -132,7 +132,7 @@ class QuotationService
         ->orderBy('id', 'desc')->first();
 
         /** loop data */
-        TableHelper::format($item);
+        TableHelper::loopDataInQuotation($item);
 
         /**Detail */
         $details = QuotationDetail::where('quotation_id', $request->id)->get();
