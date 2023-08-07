@@ -92,6 +92,7 @@ Route::group([
 
     /** CRUD Invoice and CRUD InvoiceDetail */
     Route::post('add-invoice', [InvoiceController::class, 'addInvoice'])->name('add.invoice');
+    // ->middleware('role:superAdmin');
     Route::get('list-invoices', [InvoiceController::class, 'listInvoices']);
     Route::put('edit-invoice/{id}', [InvoiceController::class, 'editInvoice'])->name('edit.invoice');
     Route::delete('delete-invoice/{id}', [InvoiceController::class, 'deleteInvoice'])->name('delete.invoice');

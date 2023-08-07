@@ -31,7 +31,6 @@ class CalculateService
         $totalInvoice = InvoiceDetail::whereIn('invoice_id', $invoice->pluck('id'))->sum('total');
         $discountInvoice = $totalInvoice * $data['discount'] / 100;
         $sumTotal = ($totalQuotation) - ($totalInvoice - $discountInvoice);
-
         if($sumTotal >= $total) {
             return null;
         }
@@ -65,7 +64,7 @@ class CalculateService
         $totalInvoice = InvoiceDetail::whereIn('invoice_id', $invoices)->where('id', '!=', $detail['id'])->sum('total');
         $discountInvoice = $totalInvoice * $invoice['discount'] / 100;
         $sumTotal = ($totalQuotation) - ($totalInvoice - $discountInvoice);
-
+        
         if($sumTotal >= $total) {
             return null;
         }

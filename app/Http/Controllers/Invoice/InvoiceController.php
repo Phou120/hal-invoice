@@ -27,6 +27,7 @@ class InvoiceController extends Controller
 
     public function addInvoice(InvoiceRequest $request)
     {
+        return $request->all();
         if($request['quotation_id']){
             return $this->invoiceService->addInvoice($request);
         } else {
