@@ -57,9 +57,6 @@ class InvoiceNoQuotationService
                 }
             }
 
-            /**Calculate */
-            $this->calculateService->calculateInvoiceNoQuotationID($request);
-
         DB::commit();
 
         return response()->json([
@@ -80,13 +77,6 @@ class InvoiceNoQuotationService
         $addDetail->name = $request['name'];
         $addDetail->total = $request['amount'] * $request['price'];
         $addDetail->save();
-
-
-        /** Update Invoice */
-        $invoice = Invoice::find($request['id']);
-
-        /** Update Calculate invoice */
-        $this->calculateService->calculateInvoiceNoQuotationID_ByEdit($invoice);
 
         return response()->json([
             'error' => false,
@@ -109,9 +99,6 @@ class InvoiceNoQuotationService
         $editInvoice->updated_by = Auth::user('api')->id;
         $editInvoice->save();
 
-        /**Calculate */
-        $this->calculateService->calculateInvoiceNoQuotationID_ByEdit($request);
-
         return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
@@ -129,12 +116,6 @@ class InvoiceNoQuotationService
         $editDetail->description = $request['description'];
         $editDetail->total = $request['amount'] * $request['price'];
         $editDetail->save();
-
-         /** Update Invoice */
-         $invoice = Invoice::find($editDetail['invoice_id']);
-
-         /** Update Calculate invoice */
-         $this->calculateService->calculateInvoiceNoQuotationID_ByEdit($invoice);
 
         return response()->json([
             'error' => false,

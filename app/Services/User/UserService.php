@@ -34,8 +34,8 @@ class UserService
     public function listUser()
     {
         $listUser = DB::table('users')
-        ->leftJoin('role_user', 'role_user.user_id', '=', '.id')
-        ->leftJoin('roles', 'roles.id', '=', 'role_user.role_id')
+        ->leftJoin('role_user', 'role_user.user_id', 'users.id')
+        ->leftJoin('roles', 'roles.id', 'role_user.role_id')
         ->select('users.id', 'users.name', 'users.email', 'users.created_at',
             DB::raw('GROUP_CONCAT(DISTINCT roles.name) as roles')
         )

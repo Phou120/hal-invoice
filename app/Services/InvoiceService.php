@@ -88,15 +88,25 @@ class InvoiceService
             'invoices.*',
             DB::raw('(SELECT COUNT(*) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as count_details'),
         )
-        ->leftJoin('customers', 'invoices.customer_id', 'customers.id')
-        ->leftJoin('currencies', 'invoices.currency_id', 'currencies.id')
-        ->leftJoin('quotations as quotation', 'invoices.quotation_id', 'quotation.id')
-        ->leftJoin('users', 'invoices.created_by', 'users.id')
         ->orderBy('invoices.id', 'desc')->get();
 
-        $listInvoice->map(function ($item){
-            /** loop data */
+        $listInvoice->transform(function ($item) {
+            $invoiceDetail = InvoiceDetail::where('invoice_id', $item['id'])
+                ->select(DB::raw("IFNULL(sum(total), 0) as total"))
+                ->first()->total;
+
+            $tax = $item['tax'];
+            $discount = $item['discount'];
+
+            $sumTotal = (new CalculateService())->calculateTotalInvoice($invoiceDetail, $tax, $discount);
+
+            // Update the item with the calculated total
+            $item['total'] = $sumTotal;
+
+             /** loop data */
             TableHelper::formatDataInvoice($item);
+
+            return $item;
         });
 
         return response()->json([

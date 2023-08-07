@@ -64,34 +64,17 @@ class CalculateService
         $totalInvoice = InvoiceDetail::whereIn('invoice_id', $invoices)->where('id', '!=', $detail['id'])->sum('total');
         $discountInvoice = $totalInvoice * $invoice['discount'] / 100;
         $sumTotal = ($totalQuotation) - ($totalInvoice - $discountInvoice);
-        
+
         if($sumTotal >= $total) {
             return null;
         }
         return $sumTotal;
     }
 
-    /** calculate invoice ທີ່ບໍ່ມີ id quotation */
-    public function calculateInvoiceNoQuotationID($data)
-    {
-        $total = collect($data['invoice_details'])->sum(function ($detail) {
-            return $detail['amount'] * $detail['price'];
-        });
-
-        $discountInvoice = $total * $data['discount'] / 100;
-        $taxInvoice = $total * myHelper::TAX / 100;
-        $sumTotal = ($total - $discountInvoice) + $taxInvoice;
-
-        return $sumTotal;
-    }
-
-    /** edit calculate invoice ທີ່ບໍ່ມີ id quotation */
-    public function calculateInvoiceNoQuotationID_ByEdit($invoice)
-    {
-        $sumSubTotal = InvoiceDetail::where('invoice_id', $invoice['id'])->get()->sum('total');
-        $discountInvoice = $sumSubTotal * $invoice['discount'] / 100;
-        $taxInvoice = $sumSubTotal * myHelper::TAX / 100;
-        $sumTotal = ($sumSubTotal - $discountInvoice) + $taxInvoice;
+    public function calculateTotalInvoice($invoiceDetail, $tax, $discount) {
+        $calculateTax = $invoiceDetail * $tax / 100;
+        $calculateDiscount = $invoiceDetail * $discount / 100;
+        $sumTotal = ($invoiceDetail - $calculateDiscount) + $calculateTax;
 
         return $sumTotal;
     }

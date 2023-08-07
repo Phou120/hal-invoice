@@ -1,8 +1,6 @@
 <?php
 
 namespace App\Helpers;
-
-use Illuminate\Support\Facades\DB;
 class myHelper
 {
     const TAX = 7;
