@@ -90,10 +90,9 @@ class InvoiceService
         )
         ->orderBy('invoices.id', 'desc')->get();
 
-        $listInvoice->transform(function ($item) {
+        $listInvoice->transform(function($item) {
             $invoiceDetail = InvoiceDetail::where('invoice_id', $item['id'])
-                ->select(DB::raw("IFNULL(sum(total), 0) as total"))
-                ->first()->total;
+                ->select(DB::raw("IFNULL(sum(total), 0) as total"))->first()->total;
 
             $tax = $item['tax'];
             $discount = $item['discount'];
@@ -144,24 +143,39 @@ class InvoiceService
     /** ດຶງລາຍລະອຽດໃບບິນ */
     public function listInvoiceDetail($request)
     {
+        $invoiceId = $request->id;
+
         $item = DB::table('invoices')
-        ->select(
-            'invoices.*',
-            DB::raw('(SELECT COUNT(*) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as count_details')
-        )
-        ->leftJoin('customers', 'invoices.customer_id', 'customers.id')
-        ->leftJoin('currencies', 'invoices.currency_id', 'currencies.id')
-        ->leftJoin('quotations as quotation', 'invoices.quotation_id', 'quotation.id')
-        ->leftJoin('users', 'invoices.created_by', 'users.id')
-        ->where('invoices.id', $request->id)
-        ->orderBy('id', 'desc')->first();
+            ->select(
+                'invoices.*',
+                DB::raw('(SELECT COUNT(*) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as count_details'),
+                DB::raw('(SELECT SUM(invoice_details.total) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as total')
+            )
+            ->where('invoices.id', $invoiceId)
+            ->first();
+
+        $total = $item->total;
+
+        $tax = $item->tax;
+        $discount = $item->discount;
+
+        // Calculate the tax amount
+        $taxAmount = ($total * $tax) / 100;
+
+        // Calculate the discount amount
+        $discountAmount = ($total * $discount) / 100;
+
+        // Calculate the final payable amount
+        $sumTotal = ($total - $discountAmount) + $taxAmount;
+
+        // Update the item with the calculated total
+        $item->total = $sumTotal;
 
         /** loop data */
         TableHelper::formatDataInvoice($item);
 
         /**Detail */
-        $details = InvoiceDetail::where('invoice_id', $request->id)->get();
-
+        $details = InvoiceDetail::where('invoice_id', $invoiceId)->get();
 
         return response()->json([
             'invoice' => $item,
