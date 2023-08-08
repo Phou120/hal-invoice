@@ -22,9 +22,9 @@ class CompanyUserController extends Controller
         return $this->companyUserService->createCompanyUser($request);
     }
 
-    public function listCompanyUser()
+    public function listCompanyUser(Request $request)
     {
-        return $this->companyUserService->listCompanyUser();
+        return $this->companyUserService->listCompanyUser($request);
     }
 
     public function updateCompanyUser(CompanyUserRequest $request)

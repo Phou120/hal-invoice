@@ -89,18 +89,16 @@ class ReceiptService
     }
 
     /** ດຶງຂໍມູນໃບຮັບເງິນ */
-    public function listReceipts()
+    public function listReceipts($request)
     {
+        $perPage = $request->per_page;
+
         $listReceipt = DB::table('Receipts')
         ->select(
             'receipts.*',
             DB::raw('(SELECT COUNT(*) FROM receipt_details WHERE receipt_details.receipt_id = Receipts.id) as count_details')
         )
-        ->leftJoin('invoices', 'receipts.invoice_id', 'invoices.id')
-        ->leftJoin('customers', 'receipts.customer_id', '=', 'customers.id')
-        ->leftJoin('currencies', 'receipts.currency_id', '=', 'currencies.id')
-        ->leftJoin('users', 'receipts.created_by', '=', 'users.id')
-        ->orderBy('receipts.id', 'desc')->get();
+        ->orderBy('receipts.id', 'asc')->paginate($perPage);
 
         /** loop data */
         foreach ($listReceipt as $item) {

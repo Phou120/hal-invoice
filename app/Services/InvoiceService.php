@@ -82,13 +82,24 @@ class InvoiceService
     }
 
     /** ດຶງໃບບິນເກັບເງິນ */
-    public function listInvoices()
+    public function listInvoices($request)
     {
-        $listInvoice = Invoice::select(
+        $perPage = $request->per_page;
+
+        $query = Invoice::select(
             'invoices.*',
             DB::raw('(SELECT COUNT(*) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as count_details'),
-        )
-        ->orderBy('invoices.id', 'desc')->get();
+        );
+
+        if ($request->start_date && $request->end_date) {
+            $query->whereBetween('start_date', [$request->start_date, $request->end_date]);
+        }
+
+        if($request->status !== null) {
+            $query->where('status', $request->status);
+        }
+
+        $listInvoice = (clone $query)->orderBy('invoices.id', 'asc')->paginate($perPage);
 
         $listInvoice->transform(function($item) {
             $invoiceDetail = InvoiceDetail::where('invoice_id', $item['id'])
@@ -143,6 +154,7 @@ class InvoiceService
     /** ດຶງລາຍລະອຽດໃບບິນ */
     public function listInvoiceDetail($request)
     {
+        //$perPage = $request->per_page;
         $invoiceId = $request->id;
 
         $item = DB::table('invoices')

@@ -22,9 +22,9 @@ class CompanyController extends Controller
         return $this->companyService->addCompany($request);
     }
 
-    public function listCompanies()
+    public function listCompanies(Request $request)
     {
-        return $this->companyService->listCompanies();
+        return $this->companyService->listCompanies($request);
     }
 
     public function editCompany(CompanyRequest $request)

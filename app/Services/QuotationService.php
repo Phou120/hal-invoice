@@ -73,19 +73,27 @@ class QuotationService
     }
 
     /** list quotation */
-    public function listQuotations()
+    public function listQuotations($request)
     {
-        $listQuotations = DB::table('quotations')
-        ->select('quotations.*',
-        DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details')
-        )
-        ->leftJoin('customers', 'quotations.customer_id', '=', 'customers.id')
-        ->leftJoin('currencies', 'quotations.currency_id', '=', 'currencies.id')
-        ->leftJoin('users', 'quotations.created_by', '=', 'users.id')
-        ->orderBy('quotations.id', 'desc')->get();
+        $perPage = $request->per_page;
 
-        $listQuotations->map(function ($item) {
-            /** loop data */
+
+        $query = Quotation::select(
+            'quotations.*',
+            DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details')
+        );
+
+        if ($request->status !== null) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->start_date && $request->end_date) {
+            $query->whereRaw("DATE(quotations.start_date) BETWEEN ? AND ?", [$request->start_date, $request->end_date]);
+        }
+
+        $listQuotations = (clone $query)->orderBy('id', 'asc')->paginate($perPage);
+
+        $listQuotations->each(function ($item) {
             TableHelper::loopDataInQuotation($item);
         });
 

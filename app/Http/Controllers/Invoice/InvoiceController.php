@@ -34,9 +34,9 @@ class InvoiceController extends Controller
         }
     }
 
-    public function listInvoices()
+    public function listInvoices(Request $request)
     {
-        return $this->invoiceService->listInvoices();
+        return $this->invoiceService->listInvoices($request);
     }
 
     public function listInvoiceDetail(InvoiceRequest $request)

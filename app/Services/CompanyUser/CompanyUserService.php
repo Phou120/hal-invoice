@@ -43,12 +43,11 @@ class CompanyUserService
         ], 200);
     }
 
-    public function listCompanyUser()
+    public function listCompanyUser($request)
     {
-        $listCompanyUser = CompanyUser::select('company_users.*')
-        ->leftJoin('companies as company', 'company_users.company_id', 'company.id')
-        ->leftJoin('users as user', 'company_users.user_id', 'user.id')
-        ->orderBy('id', 'desc')->get();
+        $perPage = $request->per_page;
+
+        $listCompanyUser = CompanyUser::paginate($perPage);
 
         $listCompanyUser->map(function ($item){
             /** loop data */

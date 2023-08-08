@@ -22,9 +22,9 @@ class CustomerController extends Controller
         return $this->customerService->addCustomer($request);
     }
 
-    public function listCustomers()
+    public function listCustomers(Request $request)
     {
-        return $this->customerService->listCustomers();
+        return $this->customerService->listCustomers($request);
     }
 
     public function editCustomer(CustomerRequest $request)

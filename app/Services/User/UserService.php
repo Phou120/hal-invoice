@@ -31,19 +31,19 @@ class UserService
         ], 200);
     }
 
-    public function listUser()
+    public function listUser($request)
     {
-        $listUser = DB::table('users')
-        ->leftJoin('role_user', 'role_user.user_id', 'users.id')
-        ->leftJoin('roles', 'roles.id', 'role_user.role_id')
-        ->select('users.id', 'users.name', 'users.email', 'users.created_at',
-            DB::raw('GROUP_CONCAT(DISTINCT roles.name) as roles')
-        )
-        ->groupBy('users.id')
-        ->orderBy('users.id', 'desc')
-        ->get();
+        $perPage = $request->per_page;
 
-        $userData = collect($listUser)->map(function ($user) {
+        $listUser = User::leftJoin('role_user', 'role_user.user_id', '=', 'users.id')
+            ->leftJoin('roles', 'roles.id', '=', 'role_user.role_id')
+            ->select('users.id', 'users.name', 'users.email', 'users.created_at')
+            ->selectRaw('GROUP_CONCAT(DISTINCT roles.name) as roles')
+            ->groupBy('users.id')
+            ->orderByDesc('users.id')
+            ->paginate($perPage);
+
+        $userData = $listUser->map(function ($user) {
             return [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -51,10 +51,10 @@ class UserService
                 'created_at' => $user->created_at,
                 'roles' => explode(',', $user->roles)
             ];
-        })->values()->all();
+        })->values();
 
         return response()->json([
-            'items' => $userData
+            'listUser' => $userData
         ], 200);
     }
 

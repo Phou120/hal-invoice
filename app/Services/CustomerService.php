@@ -31,12 +31,12 @@ class CustomerService
     }
 
     /** ດຶງ ຂໍ້ມູນລູກຄ້າ */
-    public function listCustomers()
+    public function listCustomers($request)
     {
-        $listCustomers = Customer::select(
-            'customers.*'
-        )
-        ->orderBy('customers.id', 'desc')->get();
+        $perPage = $request->per_page;
+
+        $listCustomers = Customer::orderBy('id', 'asc')->paginate($perPage);
+
         $listCustomers->transform(function ($item){
             return $item->format();
         });

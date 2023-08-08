@@ -22,9 +22,9 @@ class UserController extends Controller
         return $this->userService->addUser($request);
     }
 
-    public function listUser()
+    public function listUser(Request $request)
     {
-        return $this->userService->listUser();
+        return $this->userService->listUser($request);
     }
 
     public function editUser(UserRequest $request)
