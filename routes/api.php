@@ -8,6 +8,7 @@ use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Invoice\InvoiceController;
 use App\Http\Controllers\Receipt\ReceiptController;
+use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Currency\CurrencyController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Quotation\QuotationController;
@@ -138,13 +139,15 @@ Route::group([
 
     /** CRUD of User */
     Route::post('add-user', [UserController::class, 'addUser'])->name('add.user');
-    Route::get('list-users', [UserController::class, 'listUser']);
-    Route::put('edit-user/{id}', [UserController::class, 'editUser'])->name('edit.user');
+    Route::get('list-users', [UserController::class, 'listUsers']);
+    Route::post('edit-user/{id}', [UserController::class, 'editUser'])->name('edit.user');
     Route::delete('delete-user/{id}', [UserController::class, 'deleteUser'])->name('delete.user');
 
     /** change password */
     Route::put('change-password/{id}', [UserController::class, 'changePassword'])->name('change.password');
 
+    /** Get User profile */
+    Route::get('user-profile', [UserProfileController::class, 'ListUserProfile'])->middleware('auth');
 
     /** CRUD CompanyUser */
     Route::post('create-company-user', [CompanyUserController::class, 'createCompanyUser'])->name('create.company.user');

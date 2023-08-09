@@ -91,13 +91,8 @@ class InvoiceService
             DB::raw('(SELECT COUNT(*) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as count_details'),
         );
 
-        if ($request->start_date && $request->end_date) {
-            $query->whereBetween('start_date', [$request->start_date, $request->end_date]);
-        }
-
-        if($request->status !== null) {
-            $query->where('status', $request->status);
-        }
+         /** query: status, start_date and end_date */
+        $query = myHelper::invoiceFilter($query, $request);
 
         $listInvoice = (clone $query)->orderBy('invoices.id', 'asc')->paginate($perPage);
 

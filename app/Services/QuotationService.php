@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Helpers\myHelper;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
+use Illuminate\Support\Carbon;
 use App\Helpers\generateHelper;
 use App\Models\QuotationDetail;
 use App\Services\CalculateService;
@@ -83,13 +85,8 @@ class QuotationService
             DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details')
         );
 
-        if ($request->status !== null) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->start_date && $request->end_date) {
-            $query->whereRaw("DATE(quotations.start_date) BETWEEN ? AND ?", [$request->start_date, $request->end_date]);
-        }
+        /** query: status, start_date and end_date */
+        $query = myHelper::quotationFilter($query, $request);
 
         $listQuotations = (clone $query)->orderBy('id', 'asc')->paginate($perPage);
 

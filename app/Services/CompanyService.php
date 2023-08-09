@@ -55,7 +55,6 @@ class CompanyService
         $editCompany->address = $request['address'];
 
             if (isset($request['logo'])) {
-
                 // Upload File
                 $fileName = CreateFolderImageHelper::saveLogoCompany($request);
 

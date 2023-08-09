@@ -35,8 +35,13 @@ return [
     'destination_path' => [
         'customer_logo' => "$public_url/images/Customer/Logo/",
     ],
+
     'file_path' => [
         'company_logo' => "$public_url/images/Company/Logo/",
+    ],
+
+    'master_path' => [
+        'user_profile' => "$public_url/images/User/Profile/",
     ],
 
 ];
