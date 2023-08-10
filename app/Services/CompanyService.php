@@ -29,12 +29,12 @@ class CompanyService
     }
 
     /** ດຶງຂໍ້ມູນບໍລິສັດ */
-    public function listCompanies()
+    public function listCompanies($request)
     {
-        $listCompanies = Company::select(
-            'companies.*'
-        )
-        ->orderBy('companies.id', 'desc')->get();
+        $perPage = $request->per_page;
+
+        $query = Company::select('companies.*')->orderBy('companies.id', 'asc');
+        $listCompanies = (clone $query)->paginate($perPage);
 
         $listCompanies->transform(function($item){
             return $item->format();
@@ -55,7 +55,6 @@ class CompanyService
         $editCompany->address = $request['address'];
 
             if (isset($request['logo'])) {
-
                 // Upload File
                 $fileName = CreateFolderImageHelper::saveLogoCompany($request);
 

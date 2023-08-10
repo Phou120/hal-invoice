@@ -40,6 +40,20 @@ class CalculateService
     /** Check Balance Invoice */
     public function checkBalanceInvoice($data)
     {
+        // $total = $data['amount'] * $data['price'];
+
+        // $invoice = Invoice::find($data['id']);
+        // $invoiceId = $invoice->id;
+        // $quotationId = $invoice->quotation_id;
+
+        // $adjustedTotalInvoice = InvoiceDetail::whereIn('invoice_id', function ($query) use ($quotationId) {
+        //     $query->select('id')->from('invoices')->where('quotation_id', $quotationId);
+        // })->sum('total') * (1 - $invoice->discount / 100);
+
+        // $remainingAmount = Quotation::where('id', $quotationId)->value('total') - $adjustedTotalInvoice;
+
+        // return $remainingAmount >= $total ? null : $remainingAmount;
+
         $total = $data['amount'] * $data['price'];
         $invoice = Invoice::where('id', $data->id)->first();
         $invoices = Invoice::select('id')->where('quotation_id', $invoice['quotation_id']);
@@ -64,34 +78,18 @@ class CalculateService
         $totalInvoice = InvoiceDetail::whereIn('invoice_id', $invoices)->where('id', '!=', $detail['id'])->sum('total');
         $discountInvoice = $totalInvoice * $invoice['discount'] / 100;
         $sumTotal = ($totalQuotation) - ($totalInvoice - $discountInvoice);
-        
+
         if($sumTotal >= $total) {
             return null;
         }
         return $sumTotal;
     }
 
-    /** calculate invoice ທີ່ບໍ່ມີ id quotation */
-    public function calculateInvoiceNoQuotationID($data)
-    {
-        $total = collect($data['invoice_details'])->sum(function ($detail) {
-            return $detail['amount'] * $detail['price'];
-        });
-
-        $discountInvoice = $total * $data['discount'] / 100;
-        $taxInvoice = $total * myHelper::TAX / 100;
-        $sumTotal = ($total - $discountInvoice) + $taxInvoice;
-
-        return $sumTotal;
-    }
-
-    /** edit calculate invoice ທີ່ບໍ່ມີ id quotation */
-    public function calculateInvoiceNoQuotationID_ByEdit($invoice)
-    {
-        $sumSubTotal = InvoiceDetail::where('invoice_id', $invoice['id'])->get()->sum('total');
-        $discountInvoice = $sumSubTotal * $invoice['discount'] / 100;
-        $taxInvoice = $sumSubTotal * myHelper::TAX / 100;
-        $sumTotal = ($sumSubTotal - $discountInvoice) + $taxInvoice;
+    /**  */
+    public function calculateTotalInvoice($invoiceDetail, $tax, $discount) {
+        $calculateTax = $invoiceDetail * $tax / 100;
+        $calculateDiscount = $invoiceDetail * $discount / 100;
+        $sumTotal = ($invoiceDetail - $calculateDiscount) + $calculateTax;
 
         return $sumTotal;
     }
@@ -128,37 +126,6 @@ class CalculateService
         $editQuotation->total = $sumTotal;
         $editQuotation->save();
     }
-
-     /** calculate Receipt */
-    //  public function calculateTotalReceipt($request, $sumSubTotal, $id)
-    //  {
-    //      /** Calculate */
-    //     $sumTotalTax = $sumSubTotal * myHelper::TAX / 100;
-    //     $sumTotalDiscount = $sumSubTotal * $request['discount'] / 100;
-    //     $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
-
-    //     /** Update Total Receipt */
-    //     $addQuotation = Receipt::find($id);
-    //     $addQuotation->sub_total = $sumSubTotal;
-    //     $addQuotation->total = $sumTotal;
-    //     $addQuotation->save();
-    //  }
-
-     /** edit calculate Receipt */
-    //  public function calculateTotalReceipt_ByEdit($request)
-    //  {
-    //      /** Calculate */
-    //      $sumSubTotalPrice = ReceiptDetail::where('receipt_id', $request['id'])->get()->sum('total');
-    //      $sumTotalTax = $sumSubTotalPrice * myHelper::TAX / 100;
-    //      $sumTotalDiscount = $sumSubTotalPrice * $request['discount'] / 100;
-    //      $sumTotal = ($sumSubTotalPrice - $sumTotalDiscount) + $sumTotalTax;
-
-    //      /** Update Total Receipt */
-    //      $editQuotation = Receipt::find($request['id']);
-    //      $editQuotation->sub_total = $sumSubTotalPrice;
-    //      $editQuotation->total = $sumTotal;
-    //      $editQuotation->save();
-    //  }
 
      /** calculate PurchaseOrder */
      public function calculateTotalOrder($request, $sumSubTotal, $id)

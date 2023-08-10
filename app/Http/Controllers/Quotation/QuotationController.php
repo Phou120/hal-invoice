@@ -22,9 +22,9 @@ class QuotationController extends Controller
         return $this->quotationService->addQuotation($request);
     }
 
-    public function listQuotations()
+    public function listQuotations(Request $request)
     {
-        return $this->quotationService->listQuotations();
+        return $this->quotationService->listQuotations($request);
     }
 
     public function listQuotationDetail(QuotationRequest $request)

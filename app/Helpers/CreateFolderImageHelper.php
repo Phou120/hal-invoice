@@ -67,4 +67,33 @@ class CreateFolderImageHelper
         }
     }
 
+
+    public static function saveUserProfile($request)
+    {
+        if ($request->hasFile('profile')) {
+            $master_path = '/images/User/Profile';
+            $imageFile = $request->file('profile');
+
+            //get just text
+            $extension = $imageFile->getClientOriginalExtension();
+
+            //Filename to storage
+            $filename = 'user_profile' . '_' . time() . '.' . $extension;
+            Storage::disk('public')->putFileAs($master_path, $imageFile, $filename);
+
+            return $filename;
+        }
+    }
+
+    public static function deleteUserProfile($user)
+    {
+        //Delete File in folder
+        if (isset($user->profile)) {
+            $master_path = 'images/User/Profile/' . $user->profile;
+            if (Storage::disk('public')->exists($master_path)) {
+                Storage::disk('public')->delete($master_path);
+            }
+        }
+    }
+
 }

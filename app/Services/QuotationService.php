@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Helpers\myHelper;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
+use Illuminate\Support\Carbon;
 use App\Helpers\generateHelper;
 use App\Models\QuotationDetail;
 use App\Services\CalculateService;
@@ -73,19 +75,22 @@ class QuotationService
     }
 
     /** list quotation */
-    public function listQuotations()
+    public function listQuotations($request)
     {
-        $listQuotations = DB::table('quotations')
-        ->select('quotations.*',
-        DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details')
-        )
-        ->leftJoin('customers', 'quotations.customer_id', '=', 'customers.id')
-        ->leftJoin('currencies', 'quotations.currency_id', '=', 'currencies.id')
-        ->leftJoin('users', 'quotations.created_by', '=', 'users.id')
-        ->orderBy('quotations.id', 'desc')->get();
+        $perPage = $request->per_page;
 
-        $listQuotations->map(function ($item) {
-            /** loop data */
+
+        $query = Quotation::select(
+            'quotations.*',
+            DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details')
+        );
+
+        /** query: status, start_date and end_date */
+        $query = myHelper::quotationFilter($query, $request);
+
+        $listQuotations = (clone $query)->orderBy('id', 'asc')->paginate($perPage);
+
+        $listQuotations->each(function ($item) {
             TableHelper::loopDataInQuotation($item);
         });
 

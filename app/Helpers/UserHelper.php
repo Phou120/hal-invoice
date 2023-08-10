@@ -4,7 +4,6 @@ namespace App\Helpers;
 
 use Illuminate\Support\Facades\DB;
 
-
 class UserHelper
 {
     public static function AuthUser()

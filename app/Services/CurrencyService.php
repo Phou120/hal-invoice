@@ -26,12 +26,11 @@ class CurrencyService
     }
 
     /** list currency */
-    public function listCurrency()
+    public function listCurrency($request)
     {
-        $listCurrency = Currency::select(
-            'currencies.*'
-        )
-        ->orderBy('currencies.id', 'desc')->get();
+        $perPage = $request->per_page;
+
+        $listCurrency = Currency::orderBy('id', 'asc')->paginate($perPage);
 
         return response()->json([
             'listCurrency' => $listCurrency

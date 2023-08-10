@@ -22,9 +22,9 @@ class CurrencyController extends Controller
         return $this->currencyService->addCurrency($request);
     }
 
-    public function listCurrency()
+    public function listCurrency(Request $request)
     {
-        return $this->currencyService->listCurrency();
+        return $this->currencyService->listCurrency($request);
     }
 
     public function editCurrency(CurrencyRequest $request)

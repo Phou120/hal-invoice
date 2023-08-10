@@ -20,7 +20,7 @@ class UserRequest extends FormRequest
 
     public function prepareForValidation()
     {
-        if($this->isMethod('put') && $this->routeIs('edit.user')
+        if($this->isMethod('post') && $this->routeIs('edit.user')
              ||$this->isMethod('delete') && $this->routeIs('delete.user')
              ||$this->isMethod('put') && $this->routeIs('change.password')
 
@@ -68,7 +68,7 @@ class UserRequest extends FormRequest
             ];
         }
 
-        if($this->isMethod('put') && $this->routeIs('edit.user'))
+        if($this->isMethod('post') && $this->routeIs('edit.user'))
         {
             return [
                 'id' =>[
