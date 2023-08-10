@@ -42,6 +42,6 @@ class UserProfileService
                 'roleUser' => $roleUser,
                 'permissionRole' => $permissionRole,
             ]
-        ]);
+        ], 200);
     }
 }

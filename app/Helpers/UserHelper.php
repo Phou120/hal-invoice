@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class UserHelper
@@ -10,10 +11,17 @@ class UserHelper
     {
         $user = auth()->user();
 
+        $listUser = User::select(
+            'users.*',
+            DB::raw("CONCAT('" . config('services.master_path.user_profile') . "', users.profile) AS profile_url")
+        )->where('users.id', $user->id)
+        ->first();
+
         $checkRoleUsers = DB::table('role_user')
-        ->select('role.id as roleId', 'role.name as roleName')
+        ->select('role.id as roleId', 'role.name as roleName',)
         ->leftJoin('roles as role', 'role.id', '=', 'role_user.role_id')
         ->where('user_id', $user->id)->get();
+
         $roleUsers = $checkRoleUsers->pluck('roleName');
 
         $permissionRoles = DB::table('permission_role')
@@ -24,9 +32,16 @@ class UserHelper
         ->pluck('permissionName');
 
         return [
-            'user' => $user,
-            'roleUser' => $roleUsers,
-            'permissionRole' => $permissionRoles
+            'user' => [
+                'name' => $listUser->name,
+                'email' => $listUser->email,
+                'profile_url' => $listUser->profile_url,
+                'tel' => $listUser->tel,
+                'created_at' => $listUser->created_at,
+                'updated_at' => $listUser->updated_at,
+                'roleUser' => $roleUsers,
+                'permissionRole' => $permissionRoles,
+            ]
         ];
     }
 }
