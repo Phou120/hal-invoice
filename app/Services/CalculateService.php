@@ -22,19 +22,19 @@ class CalculateService
       /** Sum Total Quotation */
     public function sumTotalQuotation($data)
       {
-        $total = collect($data['invoice_details'])->sum(function ($detail) {
-            return $detail['amount'] * $detail['price'];
-        });
+        $total = collect($data['invoice_details'])->sum(fn($detail) => $detail['amount'] * $detail['price']);
 
-        $totalQuotation = Quotation::where('id', $data['quotation_id'])->sum('total');
-        $invoice = Invoice::where('quotation_id', $data['quotation_id'])->get();
-        $totalInvoice = InvoiceDetail::whereIn('invoice_id', $invoice->pluck('id'))->sum('total');
+        $quotation = Quotation::findOrFail($data['quotation_id']);
+        $totalQuotation = $quotation->total;
+
+        $invoiceIds = $quotation->invoices()->pluck('id');
+        $totalInvoice = InvoiceDetail::whereIn('invoice_id', $invoiceIds)->sum('total');
+
         $discountInvoice = $totalInvoice * $data['discount'] / 100;
-        $sumTotal = ($totalQuotation) - ($totalInvoice - $discountInvoice);
-        if($sumTotal >= $total) {
-            return null;
-        }
-        return $sumTotal;
+
+        $sumTotal = $totalQuotation - ($totalInvoice - $discountInvoice);
+
+        return ($sumTotal >= $total) ? null : $sumTotal;
     }
 
     /** Check Balance Invoice */

@@ -11,4 +11,10 @@ class Quotation extends Model
     use HasFactory;
     use SoftDeletes;
 
+
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
 }
