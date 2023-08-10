@@ -16,7 +16,7 @@ class UserProfileService
         $user = Auth::user('api');
 
         $listUser = User::select(
-            'users.*',
+            'users.name', 'users.email', 'users.password', 'users.created_at', 'users.updated_at',
             DB::raw("CONCAT('" . config('services.master_path.user_profile') . "', users.profile) AS profile_url")
         )
         ->where('id', $user->id)
