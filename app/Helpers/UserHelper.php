@@ -33,6 +33,7 @@ class UserHelper
 
         return [
             'user' => [
+                'id' => $user->id, // Add user ID here
                 'name' => $listUser->name,
                 'email' => $listUser->email,
                 'profile_url' => $listUser->profile_url,
