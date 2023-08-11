@@ -33,6 +33,7 @@ class UserProfileService
 
         return response()->json([
             'user' => [
+                'id' => $listUser->id,
                 'name' => $listUser->name,
                 'email' => $listUser->email,
                 'profile_url' => $listUser->profile_url,
