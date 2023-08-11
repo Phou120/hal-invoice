@@ -55,7 +55,7 @@ Route::group([
     /** CRUD Customers */
     Route::post('add-customer', [CustomerController::class, 'addCustomer'])->name('add.customer');
     Route::get('list-customers', [CustomerController::class, 'listCustomers']);
-    Route::post('edit-customer/{id}', [CustomerController::class, 'editCustomer'])->name('edit.customer');
+    Route::put('edit-customer/{id}', [CustomerController::class, 'editCustomer'])->name('edit.customer');
     Route::delete('delete-customer/{id}', [CustomerController::class, 'deleteCustomer'])->name('delete.customer');
 
 
@@ -69,7 +69,7 @@ Route::group([
     /** CRUD Company */
     Route::post('add-company', [CompanyController::class, 'addCompany'])->name('add.company');
     Route::get('list-companies', [CompanyController::class, 'listCompanies']);
-    Route::post('edit-company/{id}', [CompanyController::class, 'editCompany'])->name('edit.company');
+    Route::put('edit-company/{id}', [CompanyController::class, 'editCompany'])->name('edit.company');
     Route::delete('delete-company/{id}', [CompanyController::class, 'deleteCompany'])->name('delete.company');
 
 
