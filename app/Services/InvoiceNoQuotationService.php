@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\Invoice;
-use App\Helpers\myHelper;
+use App\Helpers\filterHelper;
 use App\Traits\ResponseAPI;
 use App\Models\InvoiceDetail;
 use App\Helpers\generateHelper;
@@ -38,7 +38,7 @@ class InvoiceNoQuotationService
             $addInvoice->end_date = $request['end_date'];
             $addInvoice->note = $request['note'];
             $addInvoice->created_by = Auth::user('api')->id;
-            $addInvoice->tax = myHelper::TAX;
+            $addInvoice->tax = filterHelper::TAX;
             $addInvoice->save();
 
             if(!empty($request['invoice_details'])){
@@ -93,7 +93,7 @@ class InvoiceNoQuotationService
         $editInvoice->end_date = $request['end_date'];
         $editInvoice->note = $request['note'];
         $editInvoice->discount = $request['discount'];
-        $editInvoice->tax = myHelper::TAX;
+        $editInvoice->tax = filterHelper::TAX;
         $editInvoice->customer_id = $request['customer_id'];
         $editInvoice->currency_id = $request['currency_id'];
         $editInvoice->updated_by = Auth::user('api')->id;

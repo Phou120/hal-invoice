@@ -80,22 +80,83 @@ class QuotationService
     {
         $perPage = $request->per_page;
 
-
         $query = Quotation::select(
             'quotations.*',
             DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details')
         );
 
-        /** query: status, start_date and end_date */
+        /** filter: start_date and end_date */
         $query = filterHelper::quotationFilter($query, $request);
+
+        $totalQuotation = (clone $query)->count(); // count all Quotations
+
+        $quotation = (clone $query)->orderBy('quotations.id', 'asc')->get();
+
+        $totalPrice = $quotation->sum('total'); // sum all Quotations
+
+
+        $quotationStatusCreated = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CREATED'])->orderBy('quotations.id', 'asc')->get();
+
+        $created = (clone $quotationStatusCreated)->count(); // count status
+        $createdTotal = (clone $quotationStatusCreated)->sum('total'); // sum total of quotation all
+
+
+        $quotationStatusApproved = (clone $query)->where('status', filterHelper::INVOICE_STATUS['APPROVED'])->orderBy('quotations.id', 'asc')->get();
+
+        $approved = (clone $quotationStatusApproved)->count(); // count status
+        $approvedTotal = (clone $quotationStatusApproved)->sum('total'); // sum total of quotation all
+
+
+        $quotationStatusInprogress = (clone $query)->where('status', filterHelper::INVOICE_STATUS['INPROGRESS'])->orderBy('quotations.id', 'asc')->get();
+
+        $inprogress = (clone $quotationStatusInprogress)->count(); // count status
+        $inprogressTotal = (clone $quotationStatusInprogress)->sum('total'); // sum total of quotation all
+
+
+        $quotationStatusCompleted = (clone $query)->where('status', filterHelper::INVOICE_STATUS['COMPLETED'])->orderBy('quotations.id', 'asc')->get();
+
+        $completed = (clone $quotationStatusCompleted)->count(); // count status
+        $completedTotal = (clone $quotationStatusCompleted)->sum('total'); // sum total of quotation all
+
+
+        $quotationStatusCancelled = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CANCELLED'])->orderBy('quotations.id', 'asc')->get();
+
+        $cancelled = (clone $quotationStatusCancelled)->count(); // count status
+        $cancelledTotal = (clone $quotationStatusCancelled)->sum('total'); // sum total of quotation all
+
+
+        /** query: status */
+        $query = filterHelper::quotationFilterStatus($query, $request);
 
         $listQuotations = (clone $query)->orderBy('id', 'asc')->paginate($perPage);
 
-        $listQuotations->each(function ($item) {
+        $listQuotations->map(function ($item) {
             TableHelper::loopDataInQuotation($item);
         });
 
         return response()->json([
+            'totalQuotation' => $totalQuotation,
+            'totalPrice' => $totalPrice,
+            'created' =>[
+                'amount' => $created,
+                'total' => $createdTotal
+            ],
+            'approved' =>[
+                'amount' => $approved,
+                'total' => $approvedTotal
+            ],
+            'inprogress' =>[
+                'amount' => $inprogress,
+                'total' => $inprogressTotal
+            ],
+            'completed' =>[
+                'amount' => $completed,
+                'total' => $completedTotal
+            ],
+            'cancelled' =>[
+                'amount' => $cancelled,
+                'total' => $cancelledTotal
+            ],
             'listQuotations' => $listQuotations,
         ], 200);
     }

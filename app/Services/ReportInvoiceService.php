@@ -2,9 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Invoice;
-use App\Helpers\myHelper;
 use App\Traits\ResponseAPI;
+use App\Helpers\filterHelper;
 use Illuminate\Support\Facades\DB;
 
 class ReportInvoiceService
@@ -16,7 +15,7 @@ class ReportInvoiceService
         $invoiceQuery = DB::table('invoices');
         // $invoiceQuery = Invoice::select('invoices.*');
 
-        $invoiceQuery = myHelper::reportInvoice($invoiceQuery, $request);
+        $invoiceQuery = filterHelper::reportInvoice($invoiceQuery, $request);
 
         $invoices = (clone $invoiceQuery)->where('status', $request->status)->first();
 

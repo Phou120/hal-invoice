@@ -99,7 +99,7 @@ class InvoiceService
 
         $invoice = (clone $query)->orderBy('invoices.id', 'asc')->get();
 
-        $invoice = filterHelper::getInvoicesStatus($invoice); // Apply transformation
+        $invoice = filterHelper::getInvoicesStatus($invoice);
 
         $totalPrice = $invoice->sum('total'); // sum total of invoices all
 

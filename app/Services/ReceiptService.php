@@ -100,16 +100,23 @@ class ReceiptService
             DB::raw('(SELECT COUNT(*) FROM receipt_details WHERE receipt_details.receipt_id = Receipts.id) as count_details')
         );
          /** query: status, start_date and end_date */
-         $query = filterHelper::receiptFilter($query, $request);
+        $query = filterHelper::receiptFilter($query, $request);
 
-         $listReceipt = (clone $query)->orderBy('receipts.id', 'asc')->paginate($perPage);
+        $totalBill = (clone $query)->count(); // count all invoices
 
-        /** loop data */
-        foreach ($listReceipt as $item) {
-            TableHelper::loopDataOfReceipt($item);
-        }
+        $receipt = (clone $query)->orderBy('receipts.id', 'asc')->get();
+
+        $receipt = filterHelper::getReceipt($receipt); // Apply transformation
+
+        $totalPrice = $receipt->sum('total'); // sum total of invoices all
+
+        $listReceipt = (clone $query)->orderBy('receipts.id', 'asc')->paginate($perPage);
+
+        $listReceipt = filterHelper::mapDataReceipt($listReceipt);
 
         return response()->json([
+            'totalBill' => $totalBill,
+            'totalPrice' => $totalPrice,
             'listReceipt' => $listReceipt
         ], 200);
     }

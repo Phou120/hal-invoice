@@ -7,6 +7,7 @@ use App\Models\Receipt;
 use App\Helpers\myHelper;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
+use App\Helpers\filterHelper;
 use App\Models\InvoiceDetail;
 use App\Models\PurchaseOrder;
 use App\Models\ReceiptDetail;
@@ -98,13 +99,13 @@ class CalculateService
     public function calculateTotal($request, $sumSubTotal, $id)
     {
         /** Calculate **/
-        $sumTotalTax = $sumSubTotal * myHelper::TAX / 100;
+        $sumTotalTax = $sumSubTotal * filterHelper::TAX / 100;
         $sumTotalDiscount = $sumSubTotal * $request['discount'] / 100;
         $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
 
         /** Update Total Quotation */
         $addQuotation = Quotation::find($id);
-        $addQuotation->tax = myHelper::TAX;
+        $addQuotation->tax = filterHelper::TAX;
         $addQuotation->sub_total = $sumSubTotal;
         $addQuotation->total = $sumTotal;
         $addQuotation->save();
@@ -115,13 +116,13 @@ class CalculateService
     {
         /** Calculate */
         $sumSubTotalPrice = QuotationDetail::where('quotation_id', $quotation['id'])->get()->sum('total');
-        $sumTotalTax = $sumSubTotalPrice * myHelper::TAX / 100;
+        $sumTotalTax = $sumSubTotalPrice * filterHelper::TAX / 100;
         $sumTotalDiscount = $sumSubTotalPrice * $quotation['discount'] / 100;
         $sumTotal = ($sumSubTotalPrice - $sumTotalDiscount) + $sumTotalTax;
 
         /** Update Total Quotation */
         $editQuotation = Quotation::find($quotation['id']);
-        $editQuotation->tax = myHelper::TAX;
+        $editQuotation->tax = filterHelper::TAX;
         $editQuotation->sub_total = $sumSubTotalPrice;
         $editQuotation->total = $sumTotal;
         $editQuotation->save();
@@ -131,7 +132,7 @@ class CalculateService
      public function calculateTotalOrder($request, $sumSubTotal, $id)
      {
          /** Calculate */
-         $sumTotalTax = $sumSubTotal * myHelper::TAX / 100;
+         $sumTotalTax = $sumSubTotal * filterHelper::TAX / 100;
          $sumTotalDiscount = $sumSubTotal * $request['discount'] / 100;
          $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
 
@@ -147,7 +148,7 @@ class CalculateService
      {
          /** Calculate */
          $sumSubTotalPrice = PurchaseDetail::where('purchase_id', $request['id'])->get()->sum('total');
-         $sumTotalTax = $sumSubTotalPrice * myHelper::TAX / 100;
+         $sumTotalTax = $sumSubTotalPrice * filterHelper::TAX / 100;
          $sumTotalDiscount = $sumSubTotalPrice * $request['discount'] / 100;
          $sumTotal = ($sumSubTotalPrice - $sumTotalDiscount) + $sumTotalTax;
 
