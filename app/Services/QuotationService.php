@@ -6,6 +6,7 @@ use App\Helpers\myHelper;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
+use App\Helpers\filterHelper;
 use Illuminate\Support\Carbon;
 use App\Helpers\generateHelper;
 use App\Models\QuotationDetail;
@@ -86,7 +87,7 @@ class QuotationService
         );
 
         /** query: status, start_date and end_date */
-        $query = myHelper::quotationFilter($query, $request);
+        $query = filterHelper::quotationFilter($query, $request);
 
         $listQuotations = (clone $query)->orderBy('id', 'asc')->paginate($perPage);
 

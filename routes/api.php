@@ -12,6 +12,7 @@ use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Currency\CurrencyController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Quotation\QuotationController;
+use App\Http\Controllers\Invoice\ReportInvoiceController;
 use App\Http\Controllers\CompanyUser\CompanyUserController;
 use App\Http\Controllers\PurchaseOrder\PurchaseOrderController;
 
@@ -154,6 +155,9 @@ Route::group([
     Route::put('update-company-user/{id}', [CompanyUserController::class, 'updateCompanyUser'])->name('update.company.user');
     Route::delete('delete-company-user/{id}', [CompanyUserController::class, 'deleteCompanyUser'])->name('delete.company.user');
     Route::get('list-company-users', [CompanyUserController::class, 'listCompanyUser']);
+
+
+    Route::get('report-invoice', [ReportInvoiceController::class, 'reportInvoice']);
 
     Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
 });
