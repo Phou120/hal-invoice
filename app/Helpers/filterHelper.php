@@ -43,16 +43,17 @@ class filterHelper
     public static function getInvoicesStatus($invoiceStatus)
     {
         $invoiceStatus->transform(function($item) {
-            $invoiceDetail = InvoiceDetail::where('invoice_id', $item['id'])
-            ->select(DB::raw("IFNULL(sum(total), 0) as total"))->first()->total;
+            $invoiceDetail = InvoiceDetail::where('invoice_id', $item->id)
+                ->select(DB::raw("IFNULL(sum(total), 0) as total"))
+                ->first()->total;
 
-            $tax = $item['tax'];
-            $discount = $item['discount'];
+            $tax = $item->tax;
+            $discount = $item->discount;
 
             $sumTotal = (new CalculateService())->calculateTotalInvoice($invoiceDetail, $tax, $discount);
 
             // Update the item with the calculated total
-            $item['total'] = $sumTotal;
+            $item->total = $sumTotal;
 
             return $item;
         });

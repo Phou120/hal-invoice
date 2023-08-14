@@ -15,12 +15,20 @@ class ReportInvoiceService
         $invoiceQuery = DB::table('invoices');
         // $invoiceQuery = Invoice::select('invoices.*');
 
-        $invoiceQuery = filterHelper::reportInvoice($invoiceQuery, $request);
+        //$invoiceQuery = filterHelper::reportInvoice($invoiceQuery, $request);
 
-        $invoices = (clone $invoiceQuery)->where('status', $request->status)->first();
+        $totalBill = (clone $invoiceQuery)->count(); // count all invoices
+        //$invoices = (clone $invoiceQuery)->where('status', $request->status)->first();
 
-        return response()->json([
-        'listInvoices' => $invoices
-        ], 200);
+        // return response()->json([
+        // 'listInvoices' => $totalBill
+        // ], 200);
+        $invoice = (clone $invoiceQuery)->orderBy('invoices.id', 'asc')->get();
+
+        $invoice = filterHelper::getInvoicesStatus($invoice);
+
+        $totalPrice = $invoice->sum('total'); // sum total of invoices all
+
+        return [$totalBill, $totalPrice];
     }
 }

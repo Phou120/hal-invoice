@@ -157,6 +157,7 @@ Route::group([
     Route::get('list-company-users', [CompanyUserController::class, 'listCompanyUser']);
 
 
+    /** report invoices */
     Route::get('report-invoice', [ReportInvoiceController::class, 'reportInvoice']);
 
     Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
