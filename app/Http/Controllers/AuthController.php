@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Helpers\UserHelper;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class AuthController extends Controller
 {
@@ -29,6 +31,8 @@ class AuthController extends Controller
         if (!$token = auth('api')->attempt($credentials)) {
             return response()->json(['error' => 'ລະຫັດຜ່ານ ຫຼື ອີເມວບໍ່ຖືກຕ້ອງ...'], 401);
         }
+
+        // $refreshToken = JWTAuth::claims(['typ' => 'refresh'])->fromUser(auth()->user());
 
         return $this->respondWithToken($token);
     }
@@ -75,11 +79,9 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token)
     {
-        $expiresIn = auth()->factory()->getTTL() * 99 * 199 * 299; // Convert minutes to seconds
-
         return response()->json([
             'token_type' => 'bearer',
-            'expires_in' => $expiresIn,
+            'expires_in' => auth()->factory()->getTTL() * 1999 * 2999,
             'access_token' => $token,
             'auth' => UserHelper::AuthUser()
         ],200);

@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('company_name');
             $table->string('email')->nullable();
-            $table->string('phone');
-            $table->string('logo');
+            $table->string('phone')->nullable();
+            $table->string('logo')->nullable();
             $table->string('address')->nullable();
             $table->timestamps();
             $table->softDeletes();
