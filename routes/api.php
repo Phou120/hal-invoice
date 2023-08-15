@@ -64,7 +64,7 @@ Route::group([
     Route::get('list-currencies', [CurrencyController::class, 'listCurrency']);
     Route::put('edit-currency/{id}', [CurrencyController::class, 'editCurrency'])->name('edit.currency');
     Route::delete('delete-currency/{id}', [CurrencyController::class, 'deleteCurrency'])->name('delete.currency');
-
+    
 
     /** CRUD Company */
     Route::post('add-company', [CompanyController::class, 'addCompany'])->name('add.company');

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Helpers\UserHelper;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class AuthController extends Controller
 {
@@ -30,7 +32,9 @@ class AuthController extends Controller
             return response()->json(['error' => 'ລະຫັດຜ່ານ ຫຼື ອີເມວບໍ່ຖືກຕ້ອງ...'], 401);
         }
 
-        return $this->respondWithToken($token);
+        $refreshToken = JWTAuth::claims(['typ' => 'refresh'])->fromUser(auth()->user());
+
+        return $this->respondWithToken($token, $refreshToken);
     }
 
     /**
@@ -72,12 +76,13 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function respondWithToken($token)
+    protected function respondWithToken($token, $refreshToken)
     {
         return response()->json([
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 1999 * 2999,
             'access_token' => $token,
+            'refresh_token' => $refreshToken,
             'auth' => UserHelper::AuthUser()
         ]);
     }
