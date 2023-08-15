@@ -52,7 +52,7 @@ class AuthController extends Controller
     {
         auth()->logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json(['message' => 'Successfully logged out'],200);
     }
 
     /**
@@ -62,7 +62,8 @@ class AuthController extends Controller
      */
     public function refresh()
     {
-        return $this->respondWithToken(auth()->refresh());
+        $newToken = auth()->refresh();
+        return $this->respondWithToken($newToken);
     }
 
     /**
@@ -74,11 +75,13 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token)
     {
+        $expiresIn = auth()->factory()->getTTL() * 99 * 199 * 299; // Convert minutes to seconds
+
         return response()->json([
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 1999 * 2999,
+            'expires_in' => $expiresIn,
             'access_token' => $token,
             'auth' => UserHelper::AuthUser()
-        ]);
+        ],200);
     }
 }

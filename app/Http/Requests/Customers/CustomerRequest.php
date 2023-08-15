@@ -81,7 +81,7 @@ class CustomerRequest extends FormRequest
                     ->whereNull('deleted_at')
                 ],
                 'logo' =>[
-                    'required',
+                    'nullable',
                     'mimes:jpg,png,jpeg,gif',
                     'max:2048',
                 ]
@@ -112,7 +112,8 @@ class CustomerRequest extends FormRequest
                     ->whereNull('deleted_at')
                 ],
                 'logo' =>[
-                    'required',
+                    // 'nullable',
+                    'sometimes',
                     'mimes:jpg,png,jpeg,gif',
                     'max:2048',
                 ]

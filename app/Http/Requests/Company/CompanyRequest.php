@@ -86,11 +86,11 @@ class CompanyRequest extends FormRequest
                     ->ignore($this->id)
                     ->whereNull('deleted_at')
                 ],
-                'logo' =>[
-                    'required',
-                    'mimes:jpg,png,jpeg,gif',
-                    'max:2048',
-                ]
+                // 'logo' =>[
+                //     'nullable',
+                //     'mimes:jpg,png,jpeg,gif',
+                //     'max:2048',
+                // ]
             ];
         }
 
@@ -116,11 +116,11 @@ class CompanyRequest extends FormRequest
                     Rule::unique('companies', 'email')
                     ->whereNull('deleted_at')
                 ],
-                'logo' =>[
-                    'required',
-                    'mimes:jpg,png,jpeg,gif',
-                    'max:2048',
-                ]
+                // 'logo' =>[
+                //     'nullable',
+                //     'mimes:jpg,png,jpeg,gif',
+                //     'max:2048',
+                // ]
             ];
         }
 
@@ -142,7 +142,6 @@ class CompanyRequest extends FormRequest
             'email.min' => 'ອີເມວບໍ່ຄວນສັ້ນກວ່າ 5 ໂຕອັກສອນ...',
             'email.unique' => 'ອີເມວນີ້ມີໃນລະບົບເເລ້ວ',
 
-            'logo.required' => 'ກະລຸນາປ້ອນ logo ກ່ອນ....',
             'logo.mimes' => 'ຄວນເປັນນາມສະກຸນໄຟລ jpeg,jpg,png,gif',
             'logo.max' => 'ຂະໜາດບໍ່ຄວນເກີນ 2048',
 
