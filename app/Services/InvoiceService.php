@@ -19,6 +19,7 @@ use App\Helpers\generateHelper;
 use App\Models\QuotationDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Services\filter\filterService;
 use Illuminate\Validation\Rules\Exists;
 
 class InvoiceService
@@ -93,20 +94,20 @@ class InvoiceService
         );
 
         /** filter start_date and end_date */
-        $query = filterHelper::invoiceFilter($query, $request);
+        $query = filterHelper::filterDate($query, $request);
 
         $totalBill = (clone $query)->count(); // count all invoices
 
         $invoice = (clone $query)->orderBy('invoices.id', 'asc')->get();
 
-        $invoice = filterHelper::getInvoicesStatus($invoice);
+        $invoice = filterHelper::getTotal($invoice);
 
         $totalPrice = $invoice->sum('total'); // sum total of invoices all
 
         /** where status = created */
         $invoiceStatus = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CREATED'])->orderBy('invoices.id', 'asc')->get();
 
-        $invoiceStatus = filterHelper::getInvoicesStatus($invoiceStatus); // Apply transformation
+        $invoiceStatus = filterHelper::getTotal($invoiceStatus); // Apply transformation
 
         $created = (clone $invoiceStatus)->count(); // count status
         $createdTotal = (clone $invoiceStatus)->sum('total'); // sum total of invoices all
@@ -114,7 +115,7 @@ class InvoiceService
         /** where status = approved */
         $invoiceStatusApproved = (clone $query)->where('status', filterHelper::INVOICE_STATUS['APPROVED'])->orderBy('invoices.id', 'asc')->get();
 
-        $invoiceStatusApproved = filterHelper::getInvoicesStatus($invoiceStatusApproved); // Apply transformation
+        $invoiceStatusApproved = filterHelper::getTotal($invoiceStatusApproved); // Apply transformation
 
         $approved = (clone $invoiceStatusApproved)->count(); // count status
         $approvedTotal = (clone $invoiceStatusApproved)->sum('total'); // sum total of invoices all
@@ -122,7 +123,7 @@ class InvoiceService
         /** where status = inprogress */
         $invoiceStatusInprogress = (clone $query)->where('status', filterHelper::INVOICE_STATUS['INPROGRESS'])->orderBy('invoices.id', 'asc')->get();
 
-        $invoiceStatusInprogress = filterHelper::getInvoicesStatus($invoiceStatusInprogress); // Apply transformation
+        $invoiceStatusInprogress = filterHelper::getTotal($invoiceStatusInprogress); // Apply transformation
 
         $inprogress = (clone $invoiceStatusInprogress)->count(); // count status
         $inprogressTotal = (clone $invoiceStatusInprogress)->sum('total'); // sum total of invoices all
@@ -130,7 +131,7 @@ class InvoiceService
         /** where status = completed */
         $invoiceStatusCompleted = (clone $query)->where('status', filterHelper::INVOICE_STATUS['COMPLETED'])->orderBy('invoices.id', 'asc')->get();
 
-        $invoiceStatusCompleted = filterHelper::getInvoicesStatus($invoiceStatusCompleted); // Apply transformation
+        $invoiceStatusCompleted = filterHelper::getTotal($invoiceStatusCompleted); // Apply transformation
 
         $completed = (clone $invoiceStatusCompleted)->count(); // count status
         $completedTotal = (clone $invoiceStatusCompleted)->sum('total'); // sum total of invoices all
@@ -138,44 +139,25 @@ class InvoiceService
         /** where status = canceled */
         $invoiceStatusCanceled = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CANCELLED'])->orderBy('invoices.id', 'asc')->get();
 
-        $invoiceStatusCanceled = filterHelper::getInvoicesStatus($invoiceStatusCanceled); // Apply transformation
+        $invoiceStatusCanceled = filterHelper::getTotal($invoiceStatusCanceled); // Apply transformation
 
         $canceled = (clone $invoiceStatusCanceled)->count(); // count status
         $canceledTotal = (clone $invoiceStatusCanceled)->sum('total'); // sum total of invoices all
 
         /** filter status */
-        $query = filterHelper::invoiceFilterStatus($query, $request);
+        $query = filterHelper::filterStatus($query, $request);
 
 
         $listInvoice = (clone $query)->orderBy('invoices.id', 'asc')->paginate($perPage);
 
         $listInvoice = filterHelper::mapDataInvoice($listInvoice); // Apply transformation
 
-        return response()->json([
-            'totalBill' => $totalBill,
-            'totalPrice' => $totalPrice,
-            'created' => [
-                'amount' => $created,
-                'total' => $createdTotal,
-             ],
-             'approved' => [
-                'amount' => $approved,
-                'total' => $approvedTotal,
-             ],
-            'inprogress' => [
-               'amount' => $inprogress,
-               'total' => $inprogressTotal,
-            ],
-            'completed' => [
-                'amount' => $completed,
-                'total' => $completedTotal,
-             ],
-             'canceled' => [
-                'amount' => $canceled,
-                'total' => $canceledTotal,
-             ],
-            'listInvoice' => $listInvoice
-        ], 200);
+        $responseData = (new filterService())->responseInvoiceData(
+            $totalBill, $totalPrice, $created, $createdTotal, $approved, $approvedTotal,
+            $inprogress, $inprogressTotal, $completed, $completedTotal, $canceled, $canceledTotal, $listInvoice
+        );
+
+        return response()->json($responseData, 200);
     }
 
     /** ບັນທຶກລາຍລະອຽດໃບບິນ */

@@ -21,7 +21,7 @@ class filterHelper
 
 
     /** filter of quotation */
-    public static function quotationFilterStatus($query, $request)
+    public static function filterStatus($query, $request)
     {
         if ($request->status !== null) {
             $query->where('status', $request->status);
@@ -40,7 +40,7 @@ class filterHelper
     }
 
     /** get data of invoiceDetail */
-    public static function getInvoicesStatus($invoiceStatus)
+    public static function getTotal($invoiceStatus)
     {
         $invoiceStatus->transform(function($item) {
             $invoiceDetail = InvoiceDetail::where('invoice_id', $item->id)
@@ -82,25 +82,25 @@ class filterHelper
         return $listReceipt;
     }
 
-    public static function getQuotationStatus($invoiceStatus)
-    {
-        $invoiceStatus->transform(function($item) {
-            $invoiceDetail = InvoiceDetail::where('invoice_id', $item['id'])
-                ->select(DB::raw("IFNULL(sum(total), 0) as total"))->first()->total;
+    // public static function getQuotationStatus($invoiceStatus)
+    // {
+    //     $invoiceStatus->transform(function($item) {
+    //         $invoiceDetail = InvoiceDetail::where('invoice_id', $item['id'])
+    //             ->select(DB::raw("IFNULL(sum(total), 0) as total"))->first()->total;
 
-            $tax = $item['tax'];
-            $discount = $item['discount'];
+    //         $tax = $item['tax'];
+    //         $discount = $item['discount'];
 
-            $sumTotal = (new CalculateService())->calculateTotalInvoice($invoiceDetail, $tax, $discount);
+    //         $sumTotal = (new CalculateService())->calculateTotalInvoice($invoiceDetail, $tax, $discount);
 
-            // Update the item with the calculated total
-            $item['total'] = $sumTotal;
+    //         // Update the item with the calculated total
+    //         $item['total'] = $sumTotal;
 
-            return $item;
-        });
+    //         return $item;
+    //     });
 
-        return $invoiceStatus;
-    }
+    //     return $invoiceStatus;
+    // }
 
     /** map data in invoice */
     public static function mapDataInvoice($listInvoice)
@@ -151,7 +151,7 @@ class filterHelper
     }
 
 
-    public static function invoiceFilter($query, $request)
+    public static function filterDate($query, $request)
     {
         if ($request->start_date && $request->end_date) {
             $query->whereRaw("DATE(invoices.start_date) BETWEEN ? AND ?", [$request->start_date, $request->end_date]);
@@ -160,14 +160,14 @@ class filterHelper
         return $query;
     }
 
-    public static function invoiceFilterStatus($query, $request)
-    {
-        if ($request->status !== null) {
-            $query->where('status', $request->status);
-        }
+    // public static function invoiceFilterStatus($query, $request)
+    // {
+    //     if ($request->status !== null) {
+    //         $query->where('status', $request->status);
+    //     }
 
-        return $query;
-    }
+    //     return $query;
+    // }
 
     public static function receiptFilter($query, $request)
     {

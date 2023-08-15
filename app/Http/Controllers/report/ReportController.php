@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Invoice;
+namespace App\Http\Controllers\report;
 
 use Illuminate\Http\Request;
 use App\Services\ReportService;
 use App\Http\Controllers\Controller;
-use App\Services\ReportInvoiceService;
 
-class ReportInvoiceController extends Controller
+class ReportController extends Controller
 {
     public $reportService;
 
@@ -16,8 +15,10 @@ class ReportInvoiceController extends Controller
         $this->reportService = $reportService;
     }
 
-    public function reportInvoice(Request $request)
+
+    public function reportQuotation(Request $request)
     {
-        return $this->reportService->reportInvoice($request);
+        return $this->reportService->reportQuotation($request);
     }
+
 }

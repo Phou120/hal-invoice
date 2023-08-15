@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ExportPDFController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\report\ReportController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Invoice\InvoiceController;
 use App\Http\Controllers\Receipt\ReceiptController;
@@ -66,7 +67,7 @@ Route::group([
     Route::get('list-currencies', [CurrencyController::class, 'listCurrency']);
     Route::put('edit-currency/{id}', [CurrencyController::class, 'editCurrency'])->name('edit.currency');
     Route::delete('delete-currency/{id}', [CurrencyController::class, 'deleteCurrency'])->name('delete.currency');
-    
+
 
     /** CRUD Company */
     Route::post('add-company', [CompanyController::class, 'addCompany'])->name('add.company');
@@ -160,6 +161,8 @@ Route::group([
 
     /** report invoices */
     Route::get('report-invoice', [ReportInvoiceController::class, 'reportInvoice']);
+
+    Route::get('report-quotation', [ReportController::class, 'reportQuotation']);
 
     Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
 });
