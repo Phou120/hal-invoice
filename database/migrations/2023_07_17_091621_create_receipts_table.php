@@ -23,10 +23,10 @@ return new class extends Migration
             $table->string('receipt_name');
             $table->dateTime('receipt_date');
             $table->text('note')->nullable();
-            $table->double('sub_total')->default(0);
+            //$table->double('sub_total')->default(0);
             $table->double('discount')->default(0);
             $table->double('tax')->default(0);
-            $table->double('total')->default(0);
+            //$table->double('total')->default(0);
             $table->timestamps();
             $table->softDeletes();
 

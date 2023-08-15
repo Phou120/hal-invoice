@@ -178,19 +178,26 @@ class filterHelper
         return $query;
     }
 
-    public static function reportInvoice($invoiceQuery, $request)
+    public static function filterName($query, $request)
     {
-        if ($request->status == 'created') {
-            $invoiceQuery->addSelect(DB::raw('(SELECT COUNT(*) FROM invoices WHERE status = "created") as count_created'));
-
-        } elseif ($request->status == 'approved'){
-            $invoiceQuery->addSelect(DB::raw('(SELECT COUNT(*) FROM invoices WHERE status = "approved") as count_approved'));
-
-        } elseif ($request->status == ''){
-
+        if($request->search){
+            $query->where(function ($item) use ($request) {
+                $item->orWhere('users.name', 'like', '%' . $request->search . '%');
+            });
         }
 
-        return $invoiceQuery;
+        return $query;
+    }
 
+
+    public static function filterCompanyUserName($listCompanyUser, $request)
+    {
+        if($request->search){
+            $listCompanyUser->where(function ($item) use ($request) {
+                $item->orWhere('users.name', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        return $listCompanyUser;
     }
 }

@@ -18,6 +18,7 @@ class ReportInvoiceService
     // ->join('companies', 'company_users.company_id', '=', 'companies.id')
     // ->select('companies.id as company_id', DB::raw('count(*) as invoice_count'))
     // ->groupBy('companies.id')
+    // ->orderBy('invoice_count', 'desc') // Sort by the invoice count in descending order
     // ->get();
 
         /** filter start_date and end_date */
@@ -77,15 +78,19 @@ class ReportInvoiceService
         // ->get();
 
 
-        $invoice->transform(function ($item) {
-            $companyForInvoice = DB::table('company_users')
-            ->where('company_id', $item->id)
-            ->sum('company_id');
-            return $companyForInvoice;
+        $companyForInvoice = $invoice->transform(function ($item) {
+            $item = DB::table('company_users')
+            ->select('companies.*')
+            ->leftJoin('companies', 'company_users.company_id', 'companies.id')
+            ->where('company_id', $item->id)->get();
+
+            return $item;
         });
 
+        //$totalCompany = $companyForInvoice->count();
+
         $responseData = [
-            'count_company' => $invoice,
+            'totalCompany' => $companyForInvoice,
             'totalPrice' => $totalPrice,
             'totalBill' => $totalBill,
             'created' => [

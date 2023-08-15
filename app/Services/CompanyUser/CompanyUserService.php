@@ -8,6 +8,7 @@ use App\Models\CompanyUser;
 use App\Traits\ResponseAPI;
 use Illuminate\Support\Str;
 use App\Helpers\TableHelper;
+use App\Helpers\filterHelper;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -47,7 +48,18 @@ class CompanyUserService
     {
         $perPage = $request->per_page;
 
-        $listCompanyUser = CompanyUser::paginate($perPage);
+        $listCompanyUser = DB::table('company_users')
+            ->select('company_users.*')
+            ->join('users', 'company_users.user_id', '=', 'users.id')
+            ->join('companies', 'company_users.company_id', '=', 'companies.id')
+            ->when($request->search, function ($query) use ($request) {
+                $query->where(function ($subQuery) use ($request) {
+                    $subQuery->where('users.name', 'like', '%' . $request->search . '%')
+                            ->orWhere('companies.company_name', 'like', '%' . $request->search . '%');
+                });
+            })
+            ->orderBy('company_users.id', 'asc') // Specify the table alias for the id column
+            ->paginate($perPage);
 
         $listCompanyUser->map(function ($item){
             /** loop data */

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Helpers\myHelper;
 use App\Traits\ResponseAPI;
 use Illuminate\Support\Str;
+use App\Helpers\filterHelper;
 use PhpParser\Node\Expr\FuncCall;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -39,14 +40,17 @@ class UserService
     {
         $perPage = $request->per_page;
 
-        $listUser = User::select('users.id', 'users.name', 'users.email', 'users.created_at', 'users.profile') // Include the profile column
+        $query = User::select('users.id', 'users.name', 'users.email', 'users.created_at', 'users.profile') // Include the profile column
             ->leftJoin('role_user', 'role_user.user_id', '=', 'users.id')
             ->leftJoin('roles', 'roles.id', '=', 'role_user.role_id')
             ->selectRaw('GROUP_CONCAT(DISTINCT roles.name) as roles')
-            ->groupBy('users.id')
-            ->orderBy('users.id', 'desc')->paginate($perPage);
+            ->groupBy('users.id');
 
-        $userData = $listUser->map(function ($user) {
+        $query = filterHelper::filterName($query, $request);
+
+        $users = (clone $query)->orderBy('users.id', 'desc')->paginate($perPage);
+
+        $userData = $users->map(function ($user) {
         $profileUrl = $user->profile;
 
         $fullProfileUrl = $profileUrl ? config('services.master_path.user_profile') . $profileUrl : null;
