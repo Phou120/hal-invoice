@@ -12,6 +12,7 @@ use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Currency\CurrencyController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Quotation\QuotationController;
+use App\Http\Controllers\Invoice\ReportInvoiceController;
 use App\Http\Controllers\CompanyUser\CompanyUserController;
 use App\Http\Controllers\PurchaseOrder\PurchaseOrderController;
 
@@ -38,6 +39,7 @@ Route::group([
 
     Route::post('login', [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
 
 });
 
@@ -55,7 +57,7 @@ Route::group([
     /** CRUD Customers */
     Route::post('add-customer', [CustomerController::class, 'addCustomer'])->name('add.customer');
     Route::get('list-customers', [CustomerController::class, 'listCustomers']);
-    Route::post('edit-customer/{id}', [CustomerController::class, 'editCustomer'])->name('edit.customer');
+    Route::put('edit-customer/{id}', [CustomerController::class, 'editCustomer'])->name('edit.customer');
     Route::delete('delete-customer/{id}', [CustomerController::class, 'deleteCustomer'])->name('delete.customer');
 
 
@@ -69,7 +71,7 @@ Route::group([
     /** CRUD Company */
     Route::post('add-company', [CompanyController::class, 'addCompany'])->name('add.company');
     Route::get('list-companies', [CompanyController::class, 'listCompanies']);
-    Route::post('edit-company/{id}', [CompanyController::class, 'editCompany'])->name('edit.company');
+    Route::put('edit-company/{id}', [CompanyController::class, 'editCompany'])->name('edit.company');
     Route::delete('delete-company/{id}', [CompanyController::class, 'deleteCompany'])->name('delete.company');
 
 
@@ -154,6 +156,10 @@ Route::group([
     Route::put('update-company-user/{id}', [CompanyUserController::class, 'updateCompanyUser'])->name('update.company.user');
     Route::delete('delete-company-user/{id}', [CompanyUserController::class, 'deleteCompanyUser'])->name('delete.company.user');
     Route::get('list-company-users', [CompanyUserController::class, 'listCompanyUser']);
+
+
+    /** report invoices */
+    Route::get('report-invoice', [ReportInvoiceController::class, 'reportInvoice']);
 
     Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
 });

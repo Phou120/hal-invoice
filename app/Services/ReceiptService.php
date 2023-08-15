@@ -11,6 +11,7 @@ use App\Models\Customer;
 use App\Helpers\myHelper;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
+use App\Helpers\filterHelper;
 use App\Models\InvoiceDetail;
 use App\Models\ReceiptDetail;
 use App\Services\CalculateService;
@@ -38,7 +39,7 @@ class ReceiptService
             )
             ->join('invoices as invoice', 'invoice_details.invoice_id', 'invoice.id')
             ->where('invoice_details.invoice_id', $getInvoice['id'])
-            ->where('status', myHelper::INVOICE_STATUS['APPROVED'])
+            ->where('status', filterHelper::INVOICE_STATUS['APPROVED'])
             ->get();
 
             if(count($getInvoiceDetail) > 0) {
@@ -93,20 +94,29 @@ class ReceiptService
     {
         $perPage = $request->per_page;
 
-        $listReceipt = DB::table('Receipts')
+        $query = DB::table('receipts')
         ->select(
             'receipts.*',
             DB::raw('(SELECT COUNT(*) FROM receipt_details WHERE receipt_details.receipt_id = Receipts.id) as count_details')
-        )
-        ->orderBy('receipts.id', 'asc')->paginate($perPage);
+        );
+         /** query: status, start_date and end_date */
+        $query = filterHelper::receiptFilter($query, $request);
 
-        /** loop data */
-        foreach ($listReceipt as $item) {
-            TableHelper::loopDataOfReceipt($item);
-        }
+        $totalBill = (clone $query)->count(); // count all invoices
 
+        $receipt = (clone $query)->orderBy('receipts.id', 'asc')->get();
+
+        $receipt = filterHelper::getReceipt($receipt); // Apply transformation
+
+        $totalPrice = $receipt->sum('total'); // sum total of invoices all
+
+        $listReceipt = (clone $query)->orderBy('receipts.id', 'asc')->paginate($perPage);
+
+        $listReceipt = filterHelper::mapDataReceipt($listReceipt);
 
         return response()->json([
+            'totalBill' => $totalBill,
+            'totalPrice' => $totalPrice,
             'listReceipt' => $listReceipt
         ], 200);
     }

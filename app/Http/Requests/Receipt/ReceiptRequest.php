@@ -64,50 +64,6 @@ class ReceiptRequest extends FormRequest
             ];
         }
 
-        // if($this->isMethod('delete') && $this->routeIs('delete.receipt.detail'))
-        // {
-        //     return [
-        //         'id' =>[
-        //             'required',
-        //                 'numeric',
-        //                     Rule::exists('receipt_details', 'id')
-        //                         ->whereNull('deleted_at')
-        //         ]
-        //     ];
-        // }
-
-        // if($this->isMethod('put') && $this->routeIs('edit.receipt.detail'))
-        // {
-        //     return [
-        //         'id' =>[
-        //             'required',
-        //                 'numeric',
-        //                     Rule::exists('receipt_details', 'id')
-        //                         ->whereNull('deleted_at')
-        //         ],
-        //         'order' => [
-        //             'required',
-        //                 'numeric'
-        //         ],
-        //         'name' => [
-        //             'required',
-        //                 'max:255'
-        //         ],
-        //         'amount' => [
-        //             'required',
-        //                 'numeric'
-        //         ],
-        //         'price' => [
-        //             'required',
-        //                 'numeric'
-        //         ],
-        //         'description' => [
-        //             'nullable',
-        //                 'max:255'
-        //         ]
-        //     ];
-        // }
-
         if($this->isMethod('put') && $this->routeIs('edit.receipt'))
         {
             return [
@@ -117,84 +73,21 @@ class ReceiptRequest extends FormRequest
                             Rule::exists('receipts', 'id')
                                 ->whereNull('deleted_at')
                 ],
-                'invoice_id' =>[
-                    'required',
-                        'numeric',
-                            Rule::exists('invoices', 'id')
-                                ->whereNull('deleted_at')
-                ],
                 'receipt_name' =>[
                     'required',
                         'max:255'
                 ],
                 'receipt_date' =>[
                     'required',
-                        'date'
+                        'date',
+                            'after_or_equal:today',
                 ],
                 'note' =>[
                     'nullable',
                         'max:255'
-                ],
-                'customer_id' => [
-                    'required',
-                        'numeric',
-                            Rule::exists('customers', 'id')
-                                ->whereNull('deleted_at')
-                ],
-                'company_id' => [
-                    'required',
-                        'numeric',
-                            Rule::exists('companies', 'id')
-                                ->whereNull('deleted_at')
-                ],
-                'currency_id' => [
-                    'required',
-                        'numeric',
-                            Rule::exists('currencies', 'id')
-                                ->whereNull('deleted_at')
-                ],
-                'tax' => [
-                    'required',
-                        'numeric'
-                ],
-                'discount' => [
-                    'required',
-                        'numeric'
                 ]
             ];
         }
-
-        // if($this->isMethod('post') && $this->routeIs('add.receipt.detail'))
-        // {
-        //     return [
-        //         'id' =>[
-        //             'required',
-        //                 'numeric',
-        //                     Rule::exists('receipts', 'id')
-        //                         ->whereNull('deleted_at')
-        //         ],
-        //         'order' => [
-        //             'required',
-        //                 'numeric'
-        //         ],
-        //         'name' => [
-        //             'required',
-        //                 'max:255'
-        //         ],
-        //         'amount' => [
-        //             'required',
-        //                 'numeric'
-        //         ],
-        //         'price' => [
-        //             'required',
-        //                 'numeric'
-        //         ],
-        //         'description' => [
-        //             'nullable',
-        //                 'max:255'
-        //         ]
-        //     ];
-        // }
 
         if($this->isMethod('post') && $this->routeIs('add.receipt'))
         {
@@ -211,7 +104,8 @@ class ReceiptRequest extends FormRequest
                 ],
                 'receipt_date' =>[
                     'required',
-                        'date'
+                        'date',
+                            'after_or_equal:today',
                 ],
                 'note' =>[
                     'nullable',
@@ -233,6 +127,7 @@ class ReceiptRequest extends FormRequest
 
             'receipt_date.required' => 'ກະລຸນາປ້ອນວັນທີກ່ອນ...',
             'receipt_date.date' => 'ຄວນເປັນວັນທີເດືອນປີ...',
+            'receipt_date.after_or_equal' => 'ວັນທີເລີ່ມຄວນເປັນວັນທີປັດຈຸບັນ...',
 
             'note.max' => 'ຄຳອະທິບາຍບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
 

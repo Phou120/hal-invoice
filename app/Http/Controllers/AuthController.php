@@ -32,9 +32,9 @@ class AuthController extends Controller
             return response()->json(['error' => 'ລະຫັດຜ່ານ ຫຼື ອີເມວບໍ່ຖືກຕ້ອງ...'], 401);
         }
 
-        $refreshToken = JWTAuth::claims(['typ' => 'refresh'])->fromUser(auth()->user());
+        // $refreshToken = JWTAuth::claims(['typ' => 'refresh'])->fromUser(auth()->user());
 
-        return $this->respondWithToken($token, $refreshToken);
+        return $this->respondWithToken($token);
     }
 
     /**
@@ -76,13 +76,12 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function respondWithToken($token, $refreshToken)
+    protected function respondWithToken($token)
     {
         return response()->json([
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 1999 * 2999,
+            'expires_in' => auth()->factory()->getTTL() * 60 * 60 * 24 * 7,
             'access_token' => $token,
-            'refresh_token' => $refreshToken,
             'auth' => UserHelper::AuthUser()
         ]);
     }
