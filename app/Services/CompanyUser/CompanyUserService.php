@@ -48,8 +48,7 @@ class CompanyUserService
     {
         $perPage = $request->per_page;
 
-        $listCompanyUser = DB::table('company_users')
-            ->select('company_users.*')
+        $listCompanyUser = CompanyUser::select('company_users.*')
             ->join('users', 'company_users.user_id', '=', 'users.id')
             ->join('companies', 'company_users.company_id', '=', 'companies.id')
             ->when($request->search, function ($query) use ($request) {

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Company;
 use App\Traits\ResponseAPI;
+use App\Helpers\filterHelper;
 use Illuminate\Support\Facades\Storage;
 use App\Helpers\CreateFolderImageHelper;
 
@@ -34,6 +35,8 @@ class CompanyService
         $perPage = $request->per_page;
 
         $query = Company::select('companies.*')->orderBy('companies.id', 'asc');
+
+        $query = filterHelper::filterCompanyName($query, $request);
         $listCompanies = (clone $query)->paginate($perPage);
 
         $listCompanies->transform(function($item){

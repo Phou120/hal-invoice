@@ -190,14 +190,25 @@ class filterHelper
     }
 
 
-    public static function filterCompanyUserName($listCompanyUser, $request)
+    public static function filterCustomerName($query, $request)
     {
         if($request->search){
-            $listCompanyUser->where(function ($item) use ($request) {
-                $item->orWhere('users.name', 'like', '%' . $request->search . '%');
+            $query->where(function ($item) use ($request) {
+                $item->orWhere('customers.company_name', 'like', '%' . $request->search . '%');
             });
         }
 
-        return $listCompanyUser;
+        return $query;
+    }
+
+    public static function filterCompanyName($query, $request)
+    {
+        if($request->search){
+            $query->where(function ($item) use ($request) {
+                $item->orWhere('companies.company_name', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        return $query;
     }
 }
