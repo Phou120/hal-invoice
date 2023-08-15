@@ -82,26 +82,6 @@ class filterHelper
         return $listReceipt;
     }
 
-    // public static function getQuotationStatus($invoiceStatus)
-    // {
-    //     $invoiceStatus->transform(function($item) {
-    //         $invoiceDetail = InvoiceDetail::where('invoice_id', $item['id'])
-    //             ->select(DB::raw("IFNULL(sum(total), 0) as total"))->first()->total;
-
-    //         $tax = $item['tax'];
-    //         $discount = $item['discount'];
-
-    //         $sumTotal = (new CalculateService())->calculateTotalInvoice($invoiceDetail, $tax, $discount);
-
-    //         // Update the item with the calculated total
-    //         $item['total'] = $sumTotal;
-
-    //         return $item;
-    //     });
-
-    //     return $invoiceStatus;
-    // }
-
     /** map data in invoice */
     public static function mapDataInvoice($listInvoice)
     {
@@ -159,15 +139,6 @@ class filterHelper
 
         return $query;
     }
-
-    // public static function invoiceFilterStatus($query, $request)
-    // {
-    //     if ($request->status !== null) {
-    //         $query->where('status', $request->status);
-    //     }
-
-    //     return $query;
-    // }
 
     public static function receiptFilter($query, $request)
     {

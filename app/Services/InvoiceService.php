@@ -1,26 +1,17 @@
 <?php
 
 namespace App\Services;
-
-use App\Models\User;
-use App\Models\Company;
+;
 use App\Models\Invoice;
-use App\Models\Receipt;
-use App\Models\Currency;
-use App\Models\Customer;
-use App\Helpers\myHelper;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
 use App\Helpers\filterHelper;
 use App\Models\InvoiceDetail;
-use App\Models\ReceiptDetail;
 use App\Helpers\generateHelper;
-use App\Models\QuotationDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use App\Services\filter\filterService;
-use Illuminate\Validation\Rules\Exists;
+use App\Services\returnData\ReturnService;
 
 class InvoiceService
 {
@@ -152,7 +143,7 @@ class InvoiceService
 
         $listInvoice = filterHelper::mapDataInvoice($listInvoice); // Apply transformation
 
-        $responseData = (new filterService())->responseInvoiceData(
+        $responseData = (new ReturnService())->responseInvoiceData(
             $totalBill, $totalPrice, $created, $createdTotal, $approved, $approvedTotal,
             $inprogress, $inprogressTotal, $completed, $completedTotal, $canceled, $canceledTotal, $listInvoice
         );

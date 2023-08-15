@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Services\filter;
+namespace App\Services\returnData;
 
 use App\Models\User;
 use App\Models\Company;
 use App\Traits\ResponseAPI;
 use App\Helpers\filterHelper;
 
-class filterService
+class ReturnService
 {
     use ResponseAPI;
 
@@ -60,28 +60,6 @@ class filterService
 
         return $responseData;
     }
-
-    // public function foreach($statuses, $quotationQuery, $responseData)
-    // {
-
-    //     foreach ($statuses as $statusName => $statusValue) {
-    //         $statusQuery = clone $quotationQuery;
-    //         $statusQuery->where('status', $statusValue);
-
-    //         $statusQuotation = $statusQuery->orderBy('id', 'asc')->get();
-    //         // $statusQuotation = FilterHelper::getTotal($statusQuotation);
-
-    //         $responseData[$statusName] = [
-    //             'amount' => $statusQuotation->count(),
-    //             'total' => $statusQuotation->sum('total'),
-    //         ];
-
-    //         $responseData['totalPrice'] += $responseData[$statusName]['total'];
-    //     }
-
-    //     return $responseData;
-    // }
-
 
     public function responseInvoiceData(
         $totalBill, $totalPrice, $created, $createdTotal, $approved, $approvedTotal,
@@ -146,6 +124,39 @@ class filterService
                 'amount' => $cancelled,
                 'total' => $cancelledTotal,
              ],
+        ];
+    }
+
+    public function QuotationData(
+        $totalQuotation, $totalPrice, $created, $createdTotal,
+        $approved, $approvedTotal,$inprogress, $inprogressTotal,
+        $completed, $completedTotal, $cancelled,$cancelledTotal, $listQuotations
+    )
+    {
+        return [
+            'totalQuotation' => $totalQuotation,
+            'totalPrice' => $totalPrice,
+            'created' =>[
+                'amount' => $created,
+                'total' => $createdTotal
+            ],
+            'approved' =>[
+                'amount' => $approved,
+                'total' => $approvedTotal
+            ],
+            'inprogress' =>[
+                'amount' => $inprogress,
+                'total' => $inprogressTotal
+            ],
+            'completed' =>[
+                'amount' => $completed,
+                'total' => $completedTotal
+            ],
+            'cancelled' =>[
+                'amount' => $cancelled,
+                'total' => $cancelledTotal
+            ],
+            'listQuotations' => $listQuotations,
         ];
     }
 }

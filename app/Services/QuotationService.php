@@ -2,17 +2,16 @@
 
 namespace App\Services;
 
-use App\Helpers\myHelper;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
 use App\Helpers\filterHelper;
-use Illuminate\Support\Carbon;
 use App\Helpers\generateHelper;
 use App\Models\QuotationDetail;
 use App\Services\CalculateService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Services\returnData\ReturnService;
 
 class QuotationService
 {
@@ -134,31 +133,13 @@ class QuotationService
             TableHelper::loopDataInQuotation($item);
         });
 
-        return response()->json([
-            'totalQuotation' => $totalQuotation,
-            'totalPrice' => $totalPrice,
-            'created' =>[
-                'amount' => $created,
-                'total' => $createdTotal
-            ],
-            'approved' =>[
-                'amount' => $approved,
-                'total' => $approvedTotal
-            ],
-            'inprogress' =>[
-                'amount' => $inprogress,
-                'total' => $inprogressTotal
-            ],
-            'completed' =>[
-                'amount' => $completed,
-                'total' => $completedTotal
-            ],
-            'cancelled' =>[
-                'amount' => $cancelled,
-                'total' => $cancelledTotal
-            ],
-            'listQuotations' => $listQuotations,
-        ], 200);
+        $responseQuotationData = (new ReturnService())->QuotationData(
+            $totalQuotation, $totalPrice, $created, $createdTotal,
+            $approved, $approvedTotal,$inprogress, $inprogressTotal,
+            $completed, $completedTotal, $cancelled,$cancelledTotal, $listQuotations
+        );
+
+        return response()->json($responseQuotationData, 200);
     }
 
     /** add quotation detail */

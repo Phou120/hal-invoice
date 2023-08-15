@@ -2,15 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
 use App\Helpers\filterHelper;
-use Illuminate\Support\Facades\DB;
-use App\Services\filter\filterService;
+use App\Services\returnData\ReturnService;
 
 class ReportService
 {
@@ -24,13 +21,13 @@ class ReportService
         $invoiceQuery = FilterHelper::filterDate($invoiceQuery, $request);
 
         // Define invoice statuses
-        $statuses = (new filterService())->status($invoiceQuery);
+        $statuses = (new ReturnService())->status($invoiceQuery);
 
         // Initialize data array
-        $responseData = (new filterService())->responseData($invoiceQuery);
+        $responseData = (new ReturnService())->responseData($invoiceQuery);
 
         /** foreach data */
-        $foreach = (new filterService())->foreachData($statuses, $invoiceQuery, $responseData);
+        $foreach = (new ReturnService())->foreachData($statuses, $invoiceQuery, $responseData);
 
         return response()->json($foreach, 200);
     }
@@ -80,7 +77,7 @@ class ReportService
         $countCompany = TableHelper::countCompany($quotationQuery);
         $countUser = TableHelper::countUser($quotationQuery);
 
-        $response = (new filterService())->response(
+        $response = (new ReturnService())->response(
             $countCompany, $countUser, $totalBill, $totalPrice,$created,
             $createdTotal, $approved, $approvedTotal,$inprogress, $inprogressTotal,
             $completed, $completedTotal, $cancelled,$cancelledTotal
