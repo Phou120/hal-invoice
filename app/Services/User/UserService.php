@@ -72,25 +72,34 @@ class UserService
 
     public function editUser($request)
     {
-        $editUser = User::find($request['id']);
-        $editUser->name = $request['name'];
-        $editUser->email = $request['email'];
+        if ($request->hasFile('profile')) {
+            $editUser = User::find($request['id']);
+            $editUser->name = $request['name'];
+            $editUser->email = $request['email'];
 
-            if (isset($request['profile'])) {
-                // Upload File
-                $fileName = CreateFolderImageHelper::saveUserProfile($request);
+                if (isset($request['profile'])) {
+                    // Upload File
+                    $fileName = CreateFolderImageHelper::saveUserProfile($request);
 
-                /** ຍ້າຍໄຟລ໌ເກົ່າອອກຈາກ folder */
-                if (isset($editUser->profile)) {
-                    $master_path = 'images/User/Profile/' . $editUser->profile;
-                    if (Storage::disk('public')->exists($master_path)) {
-                        Storage::disk('public')->delete($master_path);
+                    /** ຍ້າຍໄຟລ໌ເກົ່າອອກຈາກ folder */
+                    if (isset($editUser->profile)) {
+                        $master_path = 'images/User/Profile/' . $editUser->profile;
+                        if (Storage::disk('public')->exists($master_path)) {
+                            Storage::disk('public')->delete($master_path);
+                        }
                     }
+                    $editUser->profile = $fileName;
                 }
-                $editUser->profile = $fileName;
-            }
 
-        $editUser->save();
+            $editUser->save();
+        }
+
+        if (is_string($request->profile)) {
+            $editUser = User::find($request['id']);
+            $editUser->name = $request['name'];
+            $editUser->email = $request['email'];
+            $editUser->save();
+        }
 
         return response()->json([
             'error' => false,
