@@ -35,7 +35,7 @@ class CompanyService
     {
         $perPage = $request->per_page;
 
-        $query = Company::select('companies.*')->orderBy('companies.id', 'asc');
+        $query = Company::select('companies.*')->orderBy('companies.id', 'desc');
 
         $query = filterHelper::filterCompanyName($query, $request);
         $listCompanies = (clone $query)->paginate($perPage);

@@ -168,6 +168,8 @@ Route::group([
     /** report receipt */
     Route::get('report-receipt', [ReportController::class, 'reportReceipt']);
 
+    /** report company */
+    Route::get('report-company-customer', [ReportController::class, 'reportCompanyCustomer']);
 
     Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
 });

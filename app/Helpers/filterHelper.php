@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Models\Company;
+use App\Models\Customer;
 use App\Models\InvoiceDetail;
 use App\Models\ReceiptDetail;
 use App\Models\QuotationDetail;
@@ -182,5 +183,17 @@ class filterHelper
         }
 
         return $query;
+    }
+
+    public static function logo($request)
+    {
+        $editCustomer = Customer::find($request['id']);
+        $editCustomer->company_name = $request['company_name'];
+        $editCustomer->phone = $request['phone'];
+        $editCustomer->email = $request['email'];
+        $editCustomer->address = $request['address'];
+        $editCustomer->save();
+
+        return $editCustomer;
     }
 }

@@ -41,7 +41,7 @@ class CustomerService
          /** search name */
         $query = filterHelper::filterCustomerName($query, $request);
 
-        $listCustomers = (clone $query)->orderBy('id', 'asc')->paginate($perPage);
+        $listCustomers = (clone $query)->orderBy('id', 'desc')->paginate($perPage);
 
         $listCustomers->transform(function ($item){
             return $item->format();
@@ -62,7 +62,8 @@ class CustomerService
             $editCustomer->email = $request['email'];
             $editCustomer->address = $request['address'];
 
-                if (isset($request['logo'])) {
+                if ($request->hasFile('logo')) {
+                    //dd('dasd');
 
                     // Upload File
                     $fileName = CreateFolderImageHelper::saveImage($request);
@@ -81,12 +82,11 @@ class CustomerService
         }
 
         if (is_string($request->logo)) {
-            $editCustomer = Customer::find($request['id']);
-            $editCustomer->company_name = $request['company_name'];
-            $editCustomer->phone = $request['phone'];
-            $editCustomer->email = $request['email'];
-            $editCustomer->address = $request['address'];
-            $editCustomer->save();
+            $editCustomer = filterHelper::logo($request);
+        }
+
+        if ($request->logo == null) {
+            $editCustomer = filterHelper::logo($request);
         }
 
         return response()->json([

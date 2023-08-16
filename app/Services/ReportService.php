@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\Receipt;
+use App\Models\Customer;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
@@ -92,13 +94,29 @@ class ReportService
     {
         $query = Receipt::query();
 
-        $totalReceipt = (clone $query)->count();
+        $totalReceipt = (clone $query)->count(); // count all invoices
 
-        $receipt = (clone $query)->get();
+        $receipt = (clone $query)->orderBy('receipts.id', 'asc')->get();
+
+        $receipt = filterHelper::getReceipt($receipt); // Apply transformation
+
+        $totalPrice = $receipt->sum('total');
 
         return [
             'totalReceipt' => $totalReceipt,
-            'receipt' => $receipt
+            'totalPrice' => $totalPrice,
+            'query' => $receipt
         ];
+    }
+
+    public function reportCompanyCustomer($request)
+    {
+        // $companyCount = DB::table('companies')->count();
+        // $customerCount = DB::table('customers')->count();
+
+        // return [
+        //     'companyCount' => $companyCount,
+        //     'customerCount' => $customerCount,
+        // ];
     }
 }
