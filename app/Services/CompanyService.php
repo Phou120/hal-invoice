@@ -78,11 +78,11 @@ class CompanyService
         }
 
         if (is_string($request->logo)) {
-            $editCompany = Company::find($request['id']);
-            $editCompany->company_name = $request['company_name'];
-            $editCompany->phone = $request['phone'];
-            $editCompany->address = $request['address'];
-            $editCompany->save();
+            $editCompany = filterHelper::companyLogo($request);
+        }
+
+        if ($request->logo == null) {
+            $editCompany = filterHelper::companyLogo($request);
         }
 
         return response()->json([

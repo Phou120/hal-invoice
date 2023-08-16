@@ -62,8 +62,7 @@ class CustomerService
             $editCustomer->email = $request['email'];
             $editCustomer->address = $request['address'];
 
-                if ($request->hasFile('logo')) {
-                    //dd('dasd');
+                    if (isset($request['logo'])) {
 
                     // Upload File
                     $fileName = CreateFolderImageHelper::saveImage($request);
@@ -82,11 +81,11 @@ class CustomerService
         }
 
         if (is_string($request->logo)) {
-            $editCustomer = filterHelper::logo($request);
+            $editCustomer = filterHelper::customerLogo($request);
         }
 
         if ($request->logo == null) {
-            $editCustomer = filterHelper::logo($request);
+            $editCustomer = filterHelper::customerLogo($request);
         }
 
         return response()->json([

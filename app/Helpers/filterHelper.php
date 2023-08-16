@@ -185,7 +185,7 @@ class filterHelper
         return $query;
     }
 
-    public static function logo($request)
+    public static function customerLogo($request)
     {
         $editCustomer = Customer::find($request['id']);
         $editCustomer->company_name = $request['company_name'];
@@ -195,5 +195,17 @@ class filterHelper
         $editCustomer->save();
 
         return $editCustomer;
+    }
+
+    public static function companyLogo($request)
+    {
+        $editCompany = Company::find($request['id']);
+        $editCompany->company_name = $request['company_name'];
+        $editCompany->phone = $request['phone'];
+        $editCompany->email = $request['email'];
+        $editCompany->address = $request['address'];
+        $editCompany->save();
+
+        return $editCompany;
     }
 }
