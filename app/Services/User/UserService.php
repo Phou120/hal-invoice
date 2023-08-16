@@ -95,10 +95,11 @@ class UserService
         }
 
         if (is_string($request->profile)) {
-            $editUser = User::find($request['id']);
-            $editUser->name = $request['name'];
-            $editUser->email = $request['email'];
-            $editUser->save();
+            $editUser = filterHelper::userProfile($request);
+        }
+
+        if ($request->profile == null) {
+            $editUser = filterHelper::userProfile($request);
         }
 
         return response()->json([

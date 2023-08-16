@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\User;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\InvoiceDetail;
@@ -207,5 +208,15 @@ class filterHelper
         $editCompany->save();
 
         return $editCompany;
+    }
+
+    public static function userProfile($request)
+    {
+        $editUser = User::find($request['id']);
+        $editUser->name = $request['name'];
+        $editUser->email = $request['email'];
+        $editUser->save();
+
+        return $editUser;
     }
 }
