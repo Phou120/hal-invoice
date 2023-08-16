@@ -47,15 +47,21 @@ class ReportService
 
         $totalPrice = $quotation->sum('total'); // sum all Quotations
 
-        $statuses = (new ReturnService())->statusQuotation($quotationQuery); // status for Quotations
+        $statuses = [
+            'CREATED' => 'quotationStatusCreated',
+            'APPROVED' => 'quotationStatusApproved',
+            'INPROGRESS' => 'quotationStatusInprogress',
+            'COMPLETED' => 'quotationStatusCompleted',
+            'CANCELLED' => 'quotationStatusCancelled',
+        ];
 
         $responseData = [];
 
-        /** foreach */
+        /** foreach  */
         $foreach = (new ReturnService())->foreach($statuses, $quotationQuery, $responseData);
 
-        $countCompany = TableHelper::countCompany($quotationQuery);
-        $countUser = TableHelper::countUser($quotationQuery);
+        $countCompany = TableHelper::countCompany($quotationQuery); // count company
+        $countUser = TableHelper::countUser($quotationQuery);   // count user
 
         $response = (new ReturnService())->response(
             $countCompany, $countUser, $totalBill, $totalPrice,
@@ -63,12 +69,12 @@ class ReportService
             $foreach['quotationStatusCreated']['total'],
             $foreach['quotationStatusApproved']['count'],
             $foreach['quotationStatusApproved']['total'],
+            $foreach['quotationStatusInprogress']['count'],
+            $foreach['quotationStatusInprogress']['total'],
             $foreach['quotationStatusCompleted']['count'],
             $foreach['quotationStatusCompleted']['total'],
             $foreach['quotationStatusCancelled']['count'],
-            $foreach['quotationStatusCancelled']['total'],
-            $foreach['quotationStatusInprogress']['count'],
-            $foreach['quotationStatusInprogress']['total'],
+            $foreach['quotationStatusCancelled']['total']
         );
 
         return response()->json($response, 200);

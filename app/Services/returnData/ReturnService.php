@@ -24,20 +24,6 @@ class ReturnService
         return $invoiceQuery;
     }
 
-
-    public function statusQuotation($invoiceQuery)
-    {
-        $invoiceQuery = [
-            'CREATED' => 'quotationStatusCreated',
-            'APPROVED' => 'quotationStatusApproved',
-            'INPROGRESS' => 'quotationStatusInprogress',
-            'COMPLETED' => 'quotationStatusCompleted',
-            'CANCELLED' => 'quotationStatusCancelled',
-        ];
-
-        return $invoiceQuery;
-    }
-
     public function responseData($quotationQuery)
     {
         $countUser = User::select('users.id')->count();
