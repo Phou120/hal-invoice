@@ -8,6 +8,7 @@ use App\Helpers\filterHelper;
 use Illuminate\Support\Facades\Storage;
 use App\Helpers\CreateFolderImageHelper;
 
+
 class CustomerService
 {
     use ResponseAPI;
