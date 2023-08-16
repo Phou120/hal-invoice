@@ -10,6 +10,7 @@ use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
 use App\Helpers\filterHelper;
+use Illuminate\Support\Facades\DB;
 use App\Services\returnData\ReturnService;
 
 class ReportService
@@ -42,48 +43,34 @@ class ReportService
         // filters date
         $quotationQuery = FilterHelper::quotationFilter($quotationQuery, $request);
 
-        $totalBill = (clone $quotationQuery)->count(); // count all Quotations
+        $totalBill = $quotationQuery->count(); // count all Quotations
 
-        $quotation = (clone $quotationQuery)->orderBy('quotations.id', 'asc')->get();
+        $quotation = $quotationQuery->orderBy('quotations.id', 'asc')->get();
 
         $totalPrice = $quotation->sum('total'); // sum all Quotations
 
-        $quotationStatusCreated = (clone $quotationQuery)->where('status', filterHelper::INVOICE_STATUS['CREATED'])->orderBy('quotations.id', 'asc')->get();
+        $statuses = (new ReturnService())->statusQuotation($quotationQuery); // status for Quotations
 
-        $created = (clone $quotationStatusCreated)->count(); // count status
-        $createdTotal = (clone $quotationStatusCreated)->sum('total'); // sum total of quotation all
+        $responseData = [];
 
-
-        $quotationStatusApproved = (clone $quotationQuery)->where('status', filterHelper::INVOICE_STATUS['APPROVED'])->orderBy('quotations.id', 'asc')->get();
-
-        $approved = (clone $quotationStatusApproved)->count(); // count status
-        $approvedTotal = (clone $quotationStatusApproved)->sum('total'); // sum total of quotation all
-
-
-        $quotationStatusInprogress = (clone $quotationQuery)->where('status', filterHelper::INVOICE_STATUS['INPROGRESS'])->orderBy('quotations.id', 'asc')->get();
-
-        $inprogress = (clone $quotationStatusInprogress)->count(); // count status
-        $inprogressTotal = (clone $quotationStatusInprogress)->sum('total'); // sum total of quotation all
-
-
-        $quotationStatusCompleted = (clone $quotationQuery)->where('status', filterHelper::INVOICE_STATUS['COMPLETED'])->orderBy('quotations.id', 'asc')->get();
-
-        $completed = (clone $quotationStatusCompleted)->count(); // count status
-        $completedTotal = (clone $quotationStatusCompleted)->sum('total'); // sum total of quotation all
-
-
-        $quotationStatusCancelled = (clone $quotationQuery)->where('status', filterHelper::INVOICE_STATUS['CANCELLED'])->orderBy('quotations.id', 'asc')->get();
-
-        $cancelled = (clone $quotationStatusCancelled)->count(); // count status
-        $cancelledTotal = (clone $quotationStatusCancelled)->sum('total');
+        /** foreach */
+        $foreach = (new ReturnService())->foreach($statuses, $quotationQuery, $responseData);
 
         $countCompany = TableHelper::countCompany($quotationQuery);
         $countUser = TableHelper::countUser($quotationQuery);
 
         $response = (new ReturnService())->response(
-            $countCompany, $countUser, $totalBill, $totalPrice,$created,
-            $createdTotal, $approved, $approvedTotal,$inprogress, $inprogressTotal,
-            $completed, $completedTotal, $cancelled,$cancelledTotal
+            $countCompany, $countUser, $totalBill, $totalPrice,
+            $foreach['quotationStatusCreated']['count'],
+            $foreach['quotationStatusCreated']['total'],
+            $foreach['quotationStatusApproved']['count'],
+            $foreach['quotationStatusApproved']['total'],
+            $foreach['quotationStatusCompleted']['count'],
+            $foreach['quotationStatusCompleted']['total'],
+            $foreach['quotationStatusCancelled']['count'],
+            $foreach['quotationStatusCancelled']['total'],
+            $foreach['quotationStatusInprogress']['count'],
+            $foreach['quotationStatusInprogress']['total'],
         );
 
         return response()->json($response, 200);
@@ -111,12 +98,12 @@ class ReportService
 
     public function reportCompanyCustomer($request)
     {
-        // $companyCount = DB::table('companies')->count();
-        // $customerCount = DB::table('customers')->count();
+        $companyCount = DB::table('companies')->count();
+        $customerCount = DB::table('customers')->count();
 
-        // return [
-        //     'companyCount' => $companyCount,
-        //     'customerCount' => $customerCount,
-        // ];
+        return [
+            'companyCount' => $companyCount,
+            'customerCount' => $customerCount,
+        ];
     }
 }

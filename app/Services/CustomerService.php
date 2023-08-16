@@ -37,6 +37,7 @@ class CustomerService
         $perPage = $request->per_page;
 
         $query = Customer::select('customers.*');
+        dd('query');
 
          /** search name */
         $query = filterHelper::filterCustomerName($query, $request);
