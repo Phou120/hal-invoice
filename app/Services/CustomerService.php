@@ -20,6 +20,10 @@ class CustomerService
         $addCustomer->company_name = $request['company_name'];
         $addCustomer->phone = $request['phone'];
         $addCustomer->email = $request['email'];
+        if (is_string($request->logo)) {
+            // If logo is sent as a string, return null (do nothing).
+            return null;
+        }
         $addCustomer->logo = CreateFolderImageHelper::saveImage($request);
         $addCustomer->address = $request['address'];
         $addCustomer->save();

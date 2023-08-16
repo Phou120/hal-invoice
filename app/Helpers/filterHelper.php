@@ -2,9 +2,10 @@
 
 namespace App\Helpers;
 
+use App\Models\Company;
 use App\Models\InvoiceDetail;
-use App\Models\QuotationDetail;
 use App\Models\ReceiptDetail;
+use App\Models\QuotationDetail;
 use App\Services\CalculateService;
 use Illuminate\Support\Facades\DB;
 
@@ -181,5 +182,20 @@ class filterHelper
         }
 
         return $query;
+    }
+
+    public static function is_string($request)
+    {
+        if (is_string($request->logo)) {
+            $addCompany = new Company();
+            $addCompany->company_name = $request['company_name'];
+            $addCompany->phone = $request['phone'];
+            $addCompany->email = $request['email'];
+            $addCompany->address = $request['address'];
+            $addCompany->logo = null;
+    
+            return $addCompany;
+        }
+
     }
 }

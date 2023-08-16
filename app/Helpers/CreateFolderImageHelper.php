@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\Company;
 use Illuminate\Support\Facades\Storage;
 
 

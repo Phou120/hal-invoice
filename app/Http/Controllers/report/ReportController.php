@@ -21,4 +21,10 @@ class ReportController extends Controller
         return $this->reportService->reportQuotation($request);
     }
 
+
+    public function reportReceipt(Request $request)
+    {
+        return $this->reportService->reportReceipt($request);
+    }
+
 }

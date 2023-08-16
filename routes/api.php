@@ -72,7 +72,7 @@ Route::group([
     /** CRUD Company */
     Route::post('add-company', [CompanyController::class, 'addCompany'])->name('add.company');
     Route::get('list-companies', [CompanyController::class, 'listCompanies']);
-    Route::put('edit-company/{id}', [CompanyController::class, 'editCompany'])->name('edit.company');
+    Route::post('edit-company/{id}', [CompanyController::class, 'editCompany'])->name('edit.company');
     Route::delete('delete-company/{id}', [CompanyController::class, 'deleteCompany'])->name('delete.company');
 
 
@@ -162,7 +162,12 @@ Route::group([
     /** report invoices */
     Route::get('report-invoice', [ReportInvoiceController::class, 'reportInvoice']);
 
+    /** report quotation */
     Route::get('report-quotation', [ReportController::class, 'reportQuotation']);
+
+    /** report receipt */
+    Route::get('report-receipt', [ReportController::class, 'reportReceipt']);
+
 
     Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
 });

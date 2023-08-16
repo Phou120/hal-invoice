@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Invoice;
+use App\Models\Receipt;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
@@ -84,5 +85,20 @@ class ReportService
         );
 
         return response()->json($response, 200);
+    }
+
+
+    public function reportReceipt($request)
+    {
+        $query = Receipt::query();
+
+        $totalReceipt = (clone $query)->count();
+
+        $receipt = (clone $query)->get();
+
+        return [
+            'totalReceipt' => $totalReceipt,
+            'receipt' => $receipt
+        ];
     }
 }
