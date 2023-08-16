@@ -4,9 +4,9 @@ namespace App\Services;
 
 use App\Models\Customer;
 use App\Traits\ResponseAPI;
-use App\Helpers\filterHelper;
 use Illuminate\Support\Facades\Storage;
 use App\Helpers\CreateFolderImageHelper;
+
 
 class CustomerService
 {
@@ -36,6 +36,7 @@ class CustomerService
     {
         $perPage = $request->per_page;
 
+<<<<<<< HEAD
         $query = Customer::select('customers.*');
         dd('query');
 
@@ -43,6 +44,9 @@ class CustomerService
         $query = filterHelper::filterCustomerName($query, $request);
 
         $listCustomers = (clone $query)->orderBy('id', 'desc')->paginate($perPage);
+=======
+        $listCustomers = Customer::orderBy('id', 'asc')->paginate($perPage);
+>>>>>>> 9416bcc9adaffdddcb88da3b9df9b24765586c18
 
         $listCustomers->transform(function ($item){
             return $item->format();
@@ -56,38 +60,28 @@ class CustomerService
     /** ແກ້ໄຂຂໍ້ມູນລູກຄ້າ */
     public function editCustomer($request)
     {
-        if ($request->hasFile('logo')) {
-            $editCustomer = Customer::find($request['id']);
-            $editCustomer->company_name = $request['company_name'];
-            $editCustomer->phone = $request['phone'];
-            $editCustomer->email = $request['email'];
-            $editCustomer->address = $request['address'];
+        $editCustomer = Customer::find($request['id']);
+        $editCustomer->company_name = $request['company_name'];
+        $editCustomer->phone = $request['phone'];
+        $editCustomer->email = $request['email'];
+        $editCustomer->address = $request['address'];
 
-                    if (isset($request['logo'])) {
+            if (isset($request['logo'])) {
 
-                    // Upload File
-                    $fileName = CreateFolderImageHelper::saveImage($request);
+                // Upload File
+                $fileName = CreateFolderImageHelper::saveImage($request);
 
-                    /** ຍ້າຍໄຟລ໌ເກົ່າອອກຈາກ folder */
-                    if (isset($editCustomer->logo)) {
-                        $destination_path = 'images/Customer/Logo/' . $editCustomer->logo;
-                        if (Storage::disk('public')->exists($destination_path)) {
-                            Storage::disk('public')->delete($destination_path);
-                        }
+                /** ຍ້າຍໄຟລ໌ເກົ່າອອກຈາກ folder */
+                if (isset($editCustomer->logo)) {
+                    $destination_path = 'images/Customer/Logo/' . $editCustomer->logo;
+                    if (Storage::disk('public')->exists($destination_path)) {
+                        Storage::disk('public')->delete($destination_path);
                     }
-                    $editCustomer->logo = $fileName;
                 }
+                $editCustomer->logo = $fileName;
+            }
 
-            $editCustomer->save();
-        }
-
-        if (is_string($request->logo)) {
-            $editCustomer = filterHelper::customerLogo($request);
-        }
-
-        if ($request->logo == null) {
-            $editCustomer = filterHelper::customerLogo($request);
-        }
+        $editCustomer->save();
 
         return response()->json([
             'error' => false,
