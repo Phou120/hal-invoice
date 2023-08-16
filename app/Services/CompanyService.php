@@ -20,7 +20,6 @@ class CompanyService
         $addCompany->phone = $request['phone'];
         $addCompany->email = $request['email'];
         $addCompany->address = $request['address'];
-        $addCompany->logo = filterHelper::is_string($addCompany, $request);
         $addCompany->logo = CreateFolderImageHelper::saveLogoCompany($request);
 
         $addCompany->save();

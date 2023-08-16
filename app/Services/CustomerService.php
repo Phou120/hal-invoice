@@ -20,10 +20,6 @@ class CustomerService
         $addCustomer->company_name = $request['company_name'];
         $addCustomer->phone = $request['phone'];
         $addCustomer->email = $request['email'];
-        if (is_string($request->logo)) {
-            // If logo is sent as a string, return null (do nothing).
-            return null;
-        }
         $addCustomer->logo = CreateFolderImageHelper::saveImage($request);
         $addCustomer->address = $request['address'];
         $addCustomer->save();
@@ -59,28 +55,39 @@ class CustomerService
     /** ແກ້ໄຂຂໍ້ມູນລູກຄ້າ */
     public function editCustomer($request)
     {
-        $editCustomer = Customer::find($request['id']);
-        $editCustomer->company_name = $request['company_name'];
-        $editCustomer->phone = $request['phone'];
-        $editCustomer->email = $request['email'];
-        $editCustomer->address = $request['address'];
+        if ($request->hasFile('logo')) {
+            $editCustomer = Customer::find($request['id']);
+            $editCustomer->company_name = $request['company_name'];
+            $editCustomer->phone = $request['phone'];
+            $editCustomer->email = $request['email'];
+            $editCustomer->address = $request['address'];
 
-            if (isset($request['logo'])) {
+                if (isset($request['logo'])) {
 
-                // Upload File
-                $fileName = CreateFolderImageHelper::saveImage($request);
+                    // Upload File
+                    $fileName = CreateFolderImageHelper::saveImage($request);
 
-                /** ຍ້າຍໄຟລ໌ເກົ່າອອກຈາກ folder */
-                if (isset($editCustomer->logo)) {
-                    $destination_path = 'images/Customer/Logo/' . $editCustomer->logo;
-                    if (Storage::disk('public')->exists($destination_path)) {
-                        Storage::disk('public')->delete($destination_path);
+                    /** ຍ້າຍໄຟລ໌ເກົ່າອອກຈາກ folder */
+                    if (isset($editCustomer->logo)) {
+                        $destination_path = 'images/Customer/Logo/' . $editCustomer->logo;
+                        if (Storage::disk('public')->exists($destination_path)) {
+                            Storage::disk('public')->delete($destination_path);
+                        }
                     }
+                    $editCustomer->logo = $fileName;
                 }
-                $editCustomer->logo = $fileName;
-            }
 
-        $editCustomer->save();
+            $editCustomer->save();
+        }
+
+        if (is_string($request->logo)) {
+            $editCustomer = Customer::find($request['id']);
+            $editCustomer->company_name = $request['company_name'];
+            $editCustomer->phone = $request['phone'];
+            $editCustomer->email = $request['email'];
+            $editCustomer->address = $request['address'];
+            $editCustomer->save();
+        }
 
         return response()->json([
             'error' => false,

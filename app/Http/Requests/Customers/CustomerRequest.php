@@ -20,7 +20,7 @@ class CustomerRequest extends FormRequest
 
     public function prepareForValidation()
     {
-        if($this->isMethod('put') && $this->routeIs('edit.customer')
+        if($this->isMethod('post') && $this->routeIs('edit.customer')
              ||$this->isMethod('delete') && $this->routeIs('delete.customer')
 
         ){
@@ -51,7 +51,7 @@ class CustomerRequest extends FormRequest
         }
 
         /** ແກ້ໄຂຂໍ້ມູນລູກຄ້າ */
-        if($this->isMethod('put') && $this->routeIs('edit.customer'))
+        if($this->isMethod('post') && $this->routeIs('edit.customer'))
         {
             return [
                 'id' =>[
@@ -80,11 +80,11 @@ class CustomerRequest extends FormRequest
                     ->ignore($this->id)
                     ->whereNull('deleted_at')
                 ],
-                'logo' =>[
-                    'nullable',
-                    'mimes:jpg,png,jpeg,gif',
-                    'max:2048',
-                ]
+                // 'logo' =>[
+                //     'nullable',
+                //     'mimes:jpg,png,jpeg,gif',
+                //     'max:2048',
+                // ]
             ];
         }
 
@@ -111,12 +111,12 @@ class CustomerRequest extends FormRequest
                     Rule::unique('customers', 'email')
                     ->whereNull('deleted_at')
                 ],
-                'logo' =>[
-                    // 'nullable',
-                    'sometimes',
-                    'mimes:jpg,png,jpeg,gif',
-                    'max:2048',
-                ]
+                // 'logo' =>[
+                //     // 'nullable',
+                //     'sometimes',
+                //     'mimes:jpg,png,jpeg,gif',
+                //     'max:2048',
+                // ]
             ];
         }
 
