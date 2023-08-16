@@ -2,19 +2,14 @@
 
 namespace App\Services;
 
-use App\Models\Invoice;
-use App\Models\Receipt;
-use App\Helpers\myHelper;
+use App\Models\Invoice;;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\filterHelper;
 use App\Models\InvoiceDetail;
-use App\Models\PurchaseOrder;
-use App\Models\ReceiptDetail;
+use App\Models\PurchaseOrder;;
 use App\Models\PurchaseDetail;
 use App\Models\QuotationDetail;
-use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 class CalculateService
 {
