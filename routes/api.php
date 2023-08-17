@@ -58,7 +58,7 @@ Route::group([
     /** CRUD Customers */
     Route::post('add-customer', [CustomerController::class, 'addCustomer'])->name('add.customer');
     Route::get('list-customers', [CustomerController::class, 'listCustomers']);
-    Route::put('edit-customer/{id}', [CustomerController::class, 'editCustomer'])->name('edit.customer');
+    Route::post('edit-customer/{id}', [CustomerController::class, 'editCustomer'])->name('edit.customer');
     Route::delete('delete-customer/{id}', [CustomerController::class, 'deleteCustomer'])->name('delete.customer');
 
 
