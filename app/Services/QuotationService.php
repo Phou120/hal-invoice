@@ -132,6 +132,8 @@ class QuotationService
 
         /** filter Name */
         $query = filterHelper::filterQuotationName($query, $request);
+        /** filter total */
+        $query = filterHelper::filterTotal($query, $request);
 
         $listQuotations = (clone $query)->orderBy('id', 'asc')->paginate($perPage);
 

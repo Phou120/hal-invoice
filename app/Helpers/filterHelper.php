@@ -53,12 +53,29 @@ class filterHelper
         return $query;
     }
 
+    public static function filterTotal($query, $request)
+    {
+        if($request->total !== null)
+        {
+            $query->where('quotations.total', $request->total);
+        }
+
+        return $query;
+    }
+
     /** filter start_date and end_date */
     public static function quotationFilter($query, $request)
     {
         if ($request->start_date && $request->end_date) {
             $query->whereRaw("DATE(quotations.start_date) BETWEEN ? AND ?", [$request->start_date, $request->end_date]);
         }
+
+        // if ($request->start_date && $request->end_date && $request->id !== null && $request->name !== null && $request->total !== null) {
+        //     $query->whereRaw("DATE(quotations.start_date) BETWEEN ? AND ?", [$request->start_date, $request->end_date])
+        //           ->where('quotations.id', $request->id)
+        //           ->where('quotations.quotation_name', 'LIKE', '%' . $request->name . '%')
+        //           ->where('quotations.total', $request->total);
+        // }
 
         return $query;
     }
