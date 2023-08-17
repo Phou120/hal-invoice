@@ -20,13 +20,12 @@ class CustomerRequest extends FormRequest
 
     public function prepareForValidation()
     {
-        if($this->isMethod('post') && $this->routeIs('edit.customer')
+        if($this->isMethod('put') && $this->routeIs('edit.customer')
              ||$this->isMethod('delete') && $this->routeIs('delete.customer')
 
         ){
             $this->merge([
                 'id' => $this->route()->parameters['id'],
-
             ]);
         }
     }
@@ -51,7 +50,7 @@ class CustomerRequest extends FormRequest
         }
 
         /** ແກ້ໄຂຂໍ້ມູນລູກຄ້າ */
-        if($this->isMethod('post') && $this->routeIs('edit.customer'))
+        if($this->isMethod('put') && $this->routeIs('edit.customer'))
         {
             return [
                 'id' =>[
