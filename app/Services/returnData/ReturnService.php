@@ -24,7 +24,6 @@ class ReturnService
         return $invoiceQuery;
     }
 
-
     public function responseData($quotationQuery)
     {
         $countUser = User::select('users.id')->count();
@@ -36,6 +35,23 @@ class ReturnService
             'totalBill' => $quotationQuery->count(),
             'totalPrice' => 0,
         ];
+
+        return $responseData;
+    }
+
+    public function foreach($statuses, $quotationQuery, $responseData)
+    {
+        foreach ($statuses as $status => $statusVariable) {
+            $statusQuery = (clone $quotationQuery)->where('status', filterHelper::INVOICE_STATUS[$status])->orderBy('quotations.id', 'asc')->get();
+
+            $statusCount = $statusQuery->count(); // count status
+            $statusTotal = $statusQuery->sum('total'); // sum total of quotation all
+
+            $responseData[$statusVariable] = [
+                'count' => $statusCount,
+                'total' => $statusTotal,
+            ];
+        }
 
         return $responseData;
     }
