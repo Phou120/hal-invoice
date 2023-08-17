@@ -74,6 +74,7 @@ class CompanyUserService
     {
         $update = CompanyUser::find($request['id']);
         $update->company_id = $request['company_id'];
+        $update->save();
 
         /** update User */
         $getUser = User::find($update['user_id']);
