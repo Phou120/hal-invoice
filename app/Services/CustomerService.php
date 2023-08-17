@@ -37,6 +37,7 @@ class CustomerService
     {
         $perPage = $request->per_page;
 
+<<<<<<< HEAD
         $query = Customer::select('customers.*');
 
          /** search name */
@@ -44,6 +45,8 @@ class CustomerService
 
         $listCustomers = (clone $query)->orderBy('id', 'desc')->paginate($perPage);
 
+=======
+>>>>>>> 269150dc9ef4fdd077bf81533c9bef5fafebf6d8
         $listCustomers = Customer::orderBy('id', 'asc')->paginate($perPage);
 
         $listCustomers->transform(function ($item){

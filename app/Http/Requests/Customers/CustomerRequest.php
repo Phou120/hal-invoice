@@ -26,7 +26,6 @@ class CustomerRequest extends FormRequest
         ){
             $this->merge([
                 'id' => $this->route()->parameters['id'],
-
             ]);
         }
     }
