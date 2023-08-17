@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Customer;
 use App\Traits\ResponseAPI;
+use App\Helpers\filterHelper;
 use Illuminate\Support\Facades\Storage;
 use App\Helpers\CreateFolderImageHelper;
 
@@ -36,17 +37,14 @@ class CustomerService
     {
         $perPage = $request->per_page;
 
-<<<<<<< HEAD
         $query = Customer::select('customers.*');
-        dd('query');
 
          /** search name */
         $query = filterHelper::filterCustomerName($query, $request);
 
         $listCustomers = (clone $query)->orderBy('id', 'desc')->paginate($perPage);
-=======
+
         $listCustomers = Customer::orderBy('id', 'asc')->paginate($perPage);
->>>>>>> 9416bcc9adaffdddcb88da3b9df9b24765586c18
 
         $listCustomers->transform(function ($item){
             return $item->format();
