@@ -41,13 +41,13 @@ class UserService
             ->leftJoin('role_user', 'role_user.user_id', '=', 'users.id')
             ->leftJoin('roles', 'roles.id', '=', 'role_user.role_id')
             ->selectRaw('GROUP_CONCAT(DISTINCT roles.name) as roles')
-            ->groupBy('users.id');
+            ->groupBy('users.id')
+            ->orderBy('users.id', 'desc')->paginate($perPage);
 
         $query = filterHelper::filterName($query, $request);
 
-        $users = (clone $query)->orderBy('users.id', 'desc')->paginate($perPage);
 
-        $userData = $users->map(function ($user) {
+        $userData = $query->map(function ($user) {
         $profileUrl = $user->profile;
 
         $fullProfileUrl = $profileUrl ? config('services.master_path.user_profile') . $profileUrl : null;
@@ -65,6 +65,7 @@ class UserService
         return response()->json([
             'listUser' => $userData
         ], 200);
+
     }
 
     public function editUser($request)
