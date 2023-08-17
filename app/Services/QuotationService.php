@@ -127,6 +127,12 @@ class QuotationService
         /** query: status */
         $query = filterHelper::filterStatus($query, $request);
 
+        /** filter DI */
+        $query = filterHelper::filterID($query, $request);
+
+        /** filter Name */
+        $query = filterHelper::filterQuotationName($query, $request);
+
         $listQuotations = (clone $query)->orderBy('id', 'asc')->paginate($perPage);
 
         $listQuotations->map(function ($item) {

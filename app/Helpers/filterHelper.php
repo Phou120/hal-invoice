@@ -33,6 +33,27 @@ class filterHelper
         return $query;
     }
 
+    /** filter id */
+    public static function filterID($query, $request)
+    {
+        if ($request->id !== null) {
+            $query->where('quotations.id', $request->id);
+        }
+
+        return $query;
+    }
+
+    /** filter name */
+    public static function filterQuotationName($query, $request)
+    {
+        if ($request->quotation_name !== null) {
+            $query->where('quotations.quotation_name', 'LIKE', '%' . $request->quotation_name . '%');
+        }
+
+        return $query;
+    }
+
+    /** filter start_date and end_date */
     public static function quotationFilter($query, $request)
     {
         if ($request->start_date && $request->end_date) {
