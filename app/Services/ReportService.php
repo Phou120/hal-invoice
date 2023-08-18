@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Invoice;
 use App\Models\Receipt;
+use App\Models\Customer;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
@@ -102,12 +103,19 @@ class ReportService
 
     public function reportCompanyCustomer($request)
     {
-        $companyCount = DB::table('companies')->count();
-        $customerCount = DB::table('customers')->count();
-
-        return [
-            'companyCount' => $companyCount,
-            'customerCount' => $customerCount,
+        $query = Customer::select('customers.*', DB::raw('(SELECT COUNT(*) FROM customers c WHERE c.id = customers.id) as customer_count'))
+        ->get();
+        $customer = $query->count('customer_count');
+        return[
+            'customer' => $customer
         ];
+
+        // $companyCount = DB::table('companies')->count();
+        // $customerCount = DB::table('customers')->count();
+
+    //     return [
+    //         'companyCount' => $companyCount,
+    //         'customerCount' => $customerCount,
+    //     ];
     }
 }

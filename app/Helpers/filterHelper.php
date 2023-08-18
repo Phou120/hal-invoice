@@ -205,9 +205,7 @@ class filterHelper
     public static function filterCustomerName($query, $request)
     {
         if($request->search){
-            $query->where(function ($item) use ($request) {
-                $item->orWhere('customers.company_name', 'like', '%' . $request->search . '%');
-            });
+            $query->Where('customers.company_name', 'like', '%' . $request->search . '%');
         }
 
         return $query;
