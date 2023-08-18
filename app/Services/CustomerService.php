@@ -36,16 +36,14 @@ class CustomerService
     public function listCustomers($request)
     {
         $perPage = $request->per_page;
+        $searchTerm = $request->search;
 
         $query = Customer::select('customers.*');
 
          /** search name */
-        $query = filterHelper::filterCustomerName($query, $request);
+        $query = filterHelper::filterCustomerName($query, $searchTerm);
 
         $listCustomers = (clone $query)->orderBy('id', 'desc')->paginate($perPage);
-
-
-        $listCustomers = Customer::orderBy('id', 'asc')->paginate($perPage);
 
         $listCustomers->transform(function ($item){
             return $item->format();

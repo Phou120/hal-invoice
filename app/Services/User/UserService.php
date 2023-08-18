@@ -36,18 +36,20 @@ class UserService
     public function listUsers($request)
     {
         $perPage = $request->per_page;
+        $searchTerm = $request->search;
 
         $query = User::select('users.id', 'users.name', 'users.email', 'users.created_at', 'users.profile') // Include the profile column
             ->leftJoin('role_user', 'role_user.user_id', '=', 'users.id')
             ->leftJoin('roles', 'roles.id', '=', 'role_user.role_id')
             ->selectRaw('GROUP_CONCAT(DISTINCT roles.name) as roles')
-            ->groupBy('users.id')
-            ->orderBy('users.id', 'desc')->paginate($perPage);
+            ->groupBy('users.id');
 
-        $query = filterHelper::filterName($query, $request);
+        $query = filterHelper::filterName($query, $searchTerm);
+
+        $queryUser = $query->orderBy('users.id', 'desc')->paginate($perPage);
 
 
-        $userData = $query->map(function ($user) {
+        $userData = $queryUser->map(function ($user) {
         $profileUrl = $user->profile;
 
         $fullProfileUrl = $profileUrl ? config('services.master_path.user_profile') . $profileUrl : null;

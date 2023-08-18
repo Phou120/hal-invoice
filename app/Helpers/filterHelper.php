@@ -190,22 +190,20 @@ class filterHelper
         return $query;
     }
 
-    public static function filterName($query, $request)
+    public static function filterName($query, $searchTerm)
     {
-        if($request->search){
-            $query->where(function ($item) use ($request) {
-                $item->orWhere('users.name', 'like', '%' . $request->search . '%');
-            });
+        if($searchTerm){
+            $query->Where('users.name', 'like', '%' . $searchTerm . '%');
         }
 
         return $query;
     }
 
 
-    public static function filterCustomerName($query, $request)
+    public static function filterCustomerName($query, $searchTerm)
     {
-        if($request->search){
-            $query->Where('customers.company_name', 'like', '%' . $request->search . '%');
+        if ($searchTerm) {
+            $query->where('customers.company_name', 'like', '%' . $searchTerm . '%');
         }
 
         return $query;
