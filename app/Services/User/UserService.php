@@ -44,7 +44,10 @@ class UserService
             ->selectRaw('GROUP_CONCAT(DISTINCT roles.name) as roles')
             ->groupBy('users.id');
 
+        $countUser = $query->get()->count();
+
         $query = filterHelper::filterName($query, $searchTerm);
+
 
         $queryUser = $query->orderBy('users.id', 'desc')->paginate($perPage);
 
@@ -65,7 +68,8 @@ class UserService
         })->values();
 
         return response()->json([
-            'listUser' => $userData
+            'total' => $countUser,
+            'listUser' => $userData,
         ], 200);
 
     }
