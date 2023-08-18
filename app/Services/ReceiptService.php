@@ -91,10 +91,10 @@ class ReceiptService
         $perPage = $request->per_page;
 
         $query = DB::table('receipts')
-        ->select(
-            'receipts.*',
-            DB::raw('(SELECT COUNT(*) FROM receipt_details WHERE receipt_details.receipt_id = Receipts.id) as count_details')
+        ->select('receipts.*',
+        DB::raw('(SELECT COUNT(*) FROM receipt_details WHERE receipt_details.receipt_id = receipts.id) as count_details')
         );
+
          /** query: status, start_date and end_date */
         $query = filterHelper::receiptFilter($query, $request);
 
