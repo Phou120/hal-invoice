@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\Receipt;
 use App\Models\Customer;
@@ -94,28 +95,23 @@ class ReportService
 
         $totalPrice = $receipt->sum('total');
 
-        return [
-            'totalReceipt' => $totalReceipt,
-            'totalPrice' => $totalPrice,
-            'query' => $receipt
-        ];
+        /** return data */
+        $response = (new ReturnService())->returnReceipt($totalReceipt, $totalPrice, $receipt);
+
+        return response()->json($response, 200);
     }
 
     public function reportCompanyCustomer($request)
     {
-        $query = Customer::select('customers.*', DB::raw('(SELECT COUNT(*) FROM customers c WHERE c.id = customers.id) as customer_count'))
-        ->get();
-        $customer = $query->count('customer_count');
-        return[
-            'customer' => $customer
-        ];
+        $queryCustomer = Customer::select('customers.*', DB::raw('(SELECT COUNT(*) FROM customers c WHERE c.id = customers.id) as customer_count'))->get();
+        $queryCompany = Company::select('companies.*', DB::raw('(SELECT COUNT(*) FROM companies c WHERE c.id = companies.id) as company_count'))->get();
 
-        // $companyCount = DB::table('companies')->count();
-        // $customerCount = DB::table('customers')->count();
+        $customer = $queryCustomer->count('customer_count');
+        $company = $queryCompany->count('company_count');
 
-    //     return [
-    //         'companyCount' => $companyCount,
-    //         'customerCount' => $customerCount,
-    //     ];
+        /** return data */
+        $response = (new ReturnService())->returnData($customer, $company);
+
+        return response()->json($response, 200);
     }
 }

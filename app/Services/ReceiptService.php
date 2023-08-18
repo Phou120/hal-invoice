@@ -12,6 +12,7 @@ use App\Models\ReceiptDetail;
 use App\Services\CalculateService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Services\returnData\ReturnService;
 
 class ReceiptService
 {
@@ -109,11 +110,10 @@ class ReceiptService
 
         $listReceipt = filterHelper::mapDataReceipt($listReceipt);
 
-        return response()->json([
-            'totalBill' => $totalBill,
-            'totalPrice' => $totalPrice,
-            'listReceipt' => $listReceipt
-        ], 200);
+        /** return data */
+        $response = (new ReturnService())->returnDataReceipt($totalBill, $totalPrice, $listReceipt);
+
+        return response()->json($response, 200);
     }
 
     /** ດຶງຂໍມູນລາຍລະອຽດໃບຮັບເງິນ */

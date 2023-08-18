@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Traits\ResponseAPI;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Services\returnData\ReturnService;
 
 class UserProfileService
 {
@@ -31,18 +32,9 @@ class UserProfileService
             return $role->permissions->pluck('name');
         });
 
-        return response()->json([
-            'user' => [
-                'id' => $listUser->id,
-                'name' => $listUser->name,
-                'email' => $listUser->email,
-                'profile_url' => $listUser->profile_url,
-                'tel' => $listUser->tel,
-                'created_at' => $listUser->created_at,
-                'updated_at' => $listUser->updated_at,
-                'roleUser' => $roleUser,
-                'permissionRole' => $permissionRole,
-            ]
-        ], 200);
+        /** return data */
+        $response = (new ReturnService())->returnUserData($listUser, $roleUser, $permissionRole);
+
+        return response()->json($response, 200);
     }
 }

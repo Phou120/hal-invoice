@@ -77,6 +77,49 @@ class ReturnService
         return $responseData;
     }
 
+    public function returnUserData($listUser, $roleUser, $permissionRole)
+    {
+        return [
+            'user' => [
+                'id' => $listUser->id,
+                'name' => $listUser->name,
+                'email' => $listUser->email,
+                'profile_url' => $listUser->profile_url,
+                'tel' => $listUser->tel,
+                'created_at' => $listUser->created_at,
+                'updated_at' => $listUser->updated_at,
+                'roleUser' => $roleUser,
+                'permissionRole' => $permissionRole,
+            ]
+        ];
+    }
+
+    public function returnDataReceipt($totalBill, $totalPrice, $listReceipt)
+    {
+        return [
+            'totalBill' => $totalBill,
+            'totalPrice' => $totalPrice,
+            'listReceipt' => $listReceipt
+        ];
+    }
+
+    public function returnReceipt($totalReceipt, $totalPrice, $receipt)
+    {
+        return [
+            'totalReceipt' => $totalReceipt,
+            'totalPrice' => $totalPrice,
+            'query' => $receipt
+        ];
+    }
+
+    public function returnData($company, $customer)
+    {
+        return[
+            'customer' => $customer,
+            'company' => $company
+        ];
+    }
+
     public function responseInvoiceData(
         $totalBill, $totalPrice, $created, $createdTotal, $approved, $approvedTotal,
         $inprogress, $inprogressTotal, $completed, $completedTotal, $canceled, $canceledTotal, $listInvoice

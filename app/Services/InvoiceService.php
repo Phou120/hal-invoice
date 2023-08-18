@@ -143,6 +143,7 @@ class InvoiceService
 
         $listInvoice = filterHelper::mapDataInvoice($listInvoice); // Apply transformation
 
+        /** return data */
         $responseData = (new ReturnService())->responseInvoiceData(
             $totalBill, $totalPrice, $created, $createdTotal, $approved, $approvedTotal,
             $inprogress, $inprogressTotal, $completed, $completedTotal, $canceled, $canceledTotal, $listInvoice
