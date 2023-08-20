@@ -4,12 +4,13 @@ namespace App\Helpers;
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class UserHelper
 {
     public static function AuthUser()
     {
-        $user = auth()->user();
+        $user = Auth::user('api');
 
         $listUser = User::select(
             'users.*',
