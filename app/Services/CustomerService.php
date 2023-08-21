@@ -7,7 +7,7 @@ use App\Traits\ResponseAPI;
 use App\Helpers\filterHelper;
 use Illuminate\Support\Facades\Storage;
 use App\Helpers\CreateFolderImageHelper;
-
+use Illuminate\Support\Facades\Auth;
 
 class CustomerService
 {
@@ -34,7 +34,7 @@ class CustomerService
 
     /** ດຶງ ຂໍ້ມູນລູກຄ້າ */
     public function listCustomers($request)
-    {
+    {   
         $perPage = $request->per_page;
         $searchTerm = $request->search;
 
