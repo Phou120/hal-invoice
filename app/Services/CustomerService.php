@@ -35,6 +35,9 @@ class CustomerService
     /** ດຶງ ຂໍ້ມູນລູກຄ້າ */
     public function listCustomers($request)
     {   
+        // $data = Customer::orderBy('id', 'desc')->forPage($request['page'], $request['per_page'])->get();
+        // return $data->skip($request['skip'])->take($request['per_page'])->values();
+        
         $perPage = $request->per_page;
         $searchTerm = $request->search;
 
