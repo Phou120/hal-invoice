@@ -38,7 +38,7 @@ class AuthController extends Controller
         if (!auth('api')->attempt($credentials)) {
             return response()->json(['error' => 'ລະຫັດຜ່ານ ຫຼື ອີເມວບໍ່ຖືກຕ້ອງ...'], 401);
         }
-        
+
         $customClaims = [
             'type' => 'access_token',
             'refres_token_id' => null
@@ -47,7 +47,7 @@ class AuthController extends Controller
         $payload = JWTAuth::setToken($customToken)->getPayload();
 
         OauthAccessToken::setOauthAccessToken($payload['jti']);
-        
+
         return $this->respondWithToken($customToken, $payload);
     }
 
@@ -81,37 +81,37 @@ class AuthController extends Controller
     public function refresh()
     {
         // $date = Carbon::now()->timestamp;
-        try {
-            $data = auth()->payload()->toArray();
-            if (array_key_exists('type', $data) && $data['type'] === 'access_token') {
-                return response()->json(['message' => 'token ນີ້ບໍ່ສາມາດໃຊ້ refresh.'], 401);
-            }
-            
-            DB::beginTransaction();
-                /** Revoked Token */
-                OauthAccessToken::revokedAccessToken();
+        // try {
+        //     $data = auth()->payload()->toArray();
+        //     if (array_key_exists('type', $data) && $data['type'] === 'access_token') {
+        //         return response()->json(['message' => 'token ນີ້ບໍ່ສາມາດໃຊ້ refresh.'], 401);
+        //     }
 
-                $currentToken = JWTAuth::getToken();
-                JWTAuth::refresh($currentToken);
+        //     DB::beginTransaction();
+        //         /** Revoked Token */
+        //         OauthAccessToken::revokedAccessToken();
 
-                $customClaims = [
-                    'type' => 'access_token',
-                    'refres_token_id' => null
-                ];
-                $customToken = JWTAuth::claims($customClaims)->fromUser(JWTAuth::user());
+        //         $currentToken = JWTAuth::getToken();
+        //         JWTAuth::refresh($currentToken);
 
-                $payload = JWTAuth::setToken($customToken)->getPayload();
+        //         $customClaims = [
+        //             'type' => 'access_token',
+        //             'refres_token_id' => null
+        //         ];
+        //         $customToken = JWTAuth::claims($customClaims)->fromUser(JWTAuth::user());
 
-                /** Set Token To Database */
-                OauthAccessToken::setOauthAccessToken($payload['jti']);
-            DB::commit();
-            
-            return $this->respondWithToken($customToken, $payload);
-        } catch (TokenExpiredException $e) {
-            return response()->json(['message' => 'refresh token has expired.'], 401);
-        } catch (JWTException $e) {
-            return response()->json(['message' => $e->getMessage()], 401);
-        }
+        //         $payload = JWTAuth::setToken($customToken)->getPayload();
+
+        //         /** Set Token To Database */
+        //         OauthAccessToken::setOauthAccessToken($payload['jti']);
+        //     DB::commit();
+
+        //     return $this->respondWithToken($customToken, $payload);
+        // } catch (TokenExpiredException $e) {
+        //     return response()->json(['message' => 'refresh token has expired.'], 401);
+        // } catch (JWTException $e) {
+        //     return response()->json(['message' => $e->getMessage()], 401);
+        // }
     }
 
     /**
@@ -123,19 +123,19 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token, $payload)
     {
-        $customClaims = [
-            'type' => 'refresh',
-            'refres_token_id' => $payload['jti'],
-            'exp' => now()->addDays(14)->timestamp,
-        ];
-        $refreshToken = JWTAuth::customClaims($customClaims)->fromUser(JWTAuth::user());
+        // $customClaims = [
+        //     'type' => 'refresh',
+        //     'refres_token_id' => $payload['jti'],
+        //     'exp' => now()->addDays(14)->timestamp,
+        // ];
+        // $refreshToken = JWTAuth::customClaims($customClaims)->fromUser(JWTAuth::user());
 
 
         /** Response Json */
         return response()->json([
             'token_type' => 'bearer',
             'access_token' => $token,
-            'refresh_token' => $refreshToken,
+            // 'refresh_token' => $refreshToken,
             'expires_in' => JWTAuth::factory()->getTTL(),
             'auth' => UserHelper::AuthUser()
         ], 200);
