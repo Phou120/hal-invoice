@@ -118,29 +118,11 @@ class ReportService
     {
         $quotation = DB::table('quotations')
         ->select(
-            DB::raw('(SELECT COUNT(id) FROM customers WHERE customers.id) as customers_count'),
-            DB::raw('(SELECT COUNT(id) FROM users WHERE users.id) as user_count')
+            DB::raw('(SELECT COUNT(id) FROM companies) as company_count'),
+            DB::raw('(SELECT COUNT(id) FROM customers) as customer_count')
         )
         ->first();
 
-        // $customer = $quotation->count('customers_count');
-        // $user = $quotation->count('user_count');
-
-        // return [
-        //      $quotation
-        //     //'user' => $user
-        // ];
-
-
-        // $queryCustomer = Customer::select('customers.*')->get();
-        // $queryCompany = Company::select('companies.*')->get();
-
-        // $customer = $queryCustomer->count();
-        // $company = $queryCompany->count();
-
-        // /** return data */
-        // $response = (new ReturnService())->returnData($customer, $company);
-
-         return response()->json($quotation, 200);
+        return response()->json($quotation, 200);
     }
 }

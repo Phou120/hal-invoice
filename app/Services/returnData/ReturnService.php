@@ -29,16 +29,16 @@ class ReturnService
     {
         return $invoiceQuery->select
             (
-                DB::raw('(SELECT COUNT(id) FROM users) as user_count'),
-                DB::raw('(SELECT COUNT(id) FROM companies) as company_count')
+                DB::raw('(SELECT COUNT(id) FROM companies) as company_count'),
+                DB::raw('(SELECT COUNT(id) FROM customers) as customer_count')
             )->first();
     }
 
     public function outputData($foreach, $countUserCompany)
     {
         $output = [
-            "user_count" => $countUserCompany->user_count,
             "company_count" => $countUserCompany->company_count,
+            "customer_count" => $countUserCompany->customer_count,
         ] + $foreach;
 
         return $output;
