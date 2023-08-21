@@ -30,10 +30,18 @@ class ReportService
         // Initialize data array
         $responseData = (new ReturnService())->responseData($invoiceQuery);
 
+        //$countUser = $invoiceQuery->select(DB::raw('(SELECT COUNT(id) FROM users WHERE users.id) as user_count'))->first();
+
         /** foreach data */
         $foreach = (new ReturnService())->foreachData($statuses, $invoiceQuery, $responseData);
 
-        return response()->json($foreach, 200);
+        /** count user and company */
+        $countUserCompany = (new ReturnService())->countUserCompany($invoiceQuery);
+
+        /** output data  */
+        $outputData = (new ReturnService())->outputData($foreach, $countUserCompany);
+
+        return response()->json($outputData, 200);
     }
 
     public function reportQuotation($request)
@@ -45,9 +53,9 @@ class ReportService
 
         $totalBill = $quotationQuery->count(); // count all Quotations
 
-        $quotation = $quotationQuery->orderBy('quotations.id', 'asc')->get();
+        //$quotation = $quotationQuery->orderBy('quotations.id', 'asc')->get();
 
-        $totalPrice = $quotation->sum('total'); // sum all Quotations
+        $totalPrice = $quotationQuery->sum('total'); // sum all Quotations
 
         $statuses = [
             'CREATED' => 'quotationStatusCreated',
@@ -62,11 +70,11 @@ class ReportService
         /** foreach  */
         $foreach = (new ReturnService())->foreach($statuses, $quotationQuery, $responseData);
 
-        $countCompany = TableHelper::countCompany($quotationQuery); // count company
-        $countUser = TableHelper::countUser($quotationQuery);   // count user
+        /** count user and company */
+        $countUserCompany = (new ReturnService())->countUserCompany($quotationQuery);
 
         $response = (new ReturnService())->response(
-            $countCompany, $countUser, $totalBill, $totalPrice,
+            $totalBill, $totalPrice,
             $foreach['quotationStatusCreated']['count'],
             $foreach['quotationStatusCreated']['total'],
             $foreach['quotationStatusApproved']['count'],
@@ -79,17 +87,22 @@ class ReportService
             $foreach['quotationStatusCancelled']['total']
         );
 
-        return response()->json($response, 200);
+        /** output data */
+        $outputData = (new ReturnService())->outputData($response, $countUserCompany);
+
+        return response()->json($outputData, 200);
     }
 
 
     public function reportReceipt($request)
     {
+        $perPage = $request->per_page;
+
         $query = Receipt::query();
 
         $totalReceipt = (clone $query)->count(); // count all invoices
 
-        $receipt = (clone $query)->orderBy('receipts.id', 'asc')->get();
+        $receipt = (clone $query)->orderBy('receipts.id', 'asc')->paginate($perPage);
 
         $receipt = filterHelper::getReceipt($receipt); // Apply transformation
 
@@ -103,15 +116,31 @@ class ReportService
 
     public function reportCompanyCustomer($request)
     {
-        $queryCustomer = Customer::select('customers.*', DB::raw('(SELECT COUNT(*) FROM customers c WHERE c.id = customers.id) as customer_count'))->get();
-        $queryCompany = Company::select('companies.*', DB::raw('(SELECT COUNT(*) FROM companies c WHERE c.id = companies.id) as company_count'))->get();
+        $quotation = DB::table('quotations')
+        ->select(
+            DB::raw('(SELECT COUNT(id) FROM customers WHERE customers.id) as customers_count'),
+            DB::raw('(SELECT COUNT(id) FROM users WHERE users.id) as user_count')
+        )
+        ->first();
 
-        $customer = $queryCustomer->count('customer_count');
-        $company = $queryCompany->count('company_count');
+        // $customer = $quotation->count('customers_count');
+        // $user = $quotation->count('user_count');
 
-        /** return data */
-        $response = (new ReturnService())->returnData($customer, $company);
+        // return [
+        //      $quotation
+        //     //'user' => $user
+        // ];
 
-        return response()->json($response, 200);
+
+        // $queryCustomer = Customer::select('customers.*')->get();
+        // $queryCompany = Company::select('companies.*')->get();
+
+        // $customer = $queryCustomer->count();
+        // $company = $queryCompany->count();
+
+        // /** return data */
+        // $response = (new ReturnService())->returnData($customer, $company);
+
+         return response()->json($quotation, 200);
     }
 }

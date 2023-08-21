@@ -95,7 +95,7 @@ class ReceiptService
         DB::raw('(SELECT COUNT(*) FROM receipt_details WHERE receipt_details.receipt_id = receipts.id) as count_details')
         );
 
-         /** query: status, start_date and end_date */
+        /** query: status, start_date and end_date */
         $query = filterHelper::receiptFilter($query, $request);
 
         $totalBill = (clone $query)->count(); // count all invoices

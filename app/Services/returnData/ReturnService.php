@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Company;
 use App\Traits\ResponseAPI;
 use App\Helpers\filterHelper;
+use Illuminate\Support\Facades\DB;
 
 class ReturnService
 {
@@ -24,14 +25,28 @@ class ReturnService
         return $invoiceQuery;
     }
 
+    public function countUserCompany($invoiceQuery)
+    {
+        return $invoiceQuery->select
+            (
+                DB::raw('(SELECT COUNT(id) FROM users) as user_count'),
+                DB::raw('(SELECT COUNT(id) FROM companies) as company_count')
+            )->first();
+    }
+
+    public function outputData($foreach, $countUserCompany)
+    {
+        $output = [
+            "user_count" => $countUserCompany->user_count,
+            "company_count" => $countUserCompany->company_count,
+        ] + $foreach;
+
+        return $output;
+    }
+
     public function responseData($quotationQuery)
     {
-        $countUser = User::select('users.id')->count();
-        $countCompany = Company::select('companies.id')->count();
-
         $responseData = [
-            'totalUser' => $countUser,
-            'totalCompany' => $countCompany,
             'totalBill' => $quotationQuery->count(),
             'totalPrice' => 0,
         ];
@@ -58,7 +73,6 @@ class ReturnService
 
     public function foreachData($statuses, $quotationQuery, $responseData)
     {
-
         foreach ($statuses as $statusName => $statusValue) {
             $statusQuery = clone $quotationQuery;
             $statusQuery->where('status', $statusValue);
@@ -153,14 +167,14 @@ class ReturnService
     }
 
     public function response(
-        $countCompany, $countUser, $totalBill, $totalPrice,$created,
+        $totalBill, $totalPrice,$created,
         $createdTotal, $approved, $approvedTotal,$inprogress, $inprogressTotal,
         $completed, $completedTotal, $cancelled,$cancelledTotal
     )
     {
         return [
-            'count_company' => $countCompany,
-            'count_user' => $countUser,
+            // 'count_company' => $countCompany,
+            // 'count_user' => $countUser,
             'totalBill' => $totalBill,
             'totalPrice' => $totalPrice,
             'created' => [

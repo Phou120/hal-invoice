@@ -25,7 +25,7 @@ class UserSeeder extends Seeder
     // role
     public function createRoles(){
         $roleSuperAdmin = Role::create([
-            'name' => 'superAdmin', 'display_name' => 'Super Admin'
+            'name' => 'superadmin', 'display_name' => 'Super Admin'
         ]);
 
         $roleAdmin  = Role::create([

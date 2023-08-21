@@ -34,11 +34,14 @@ class CompanyService
     public function listCompanies($request)
     {
         $perPage = $request->per_page;
+        $skip = 5;
 
-        $query = Company::select('companies.*')->orderBy('companies.id', 'desc');
+        $query = Company::select('companies.*');
+
+        return $query->skip($skip)->take($perPage)->get();
 
         $query = filterHelper::filterCompanyName($query, $request);
-        $listCompanies = (clone $query)->paginate($perPage);
+        $listCompanies = (clone $query)->skip($skip)->take($perPage);
 
         $listCompanies->transform(function($item){
             return $item->format();

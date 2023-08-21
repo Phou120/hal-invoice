@@ -50,7 +50,7 @@ Route::group([
     'middleware' => [
         'auth.jwt',
     ],
-    'role:superAdmin|admin',
+    'role:superadmin|admin',
     'prefix' => 'admin',
 
 ], function() {
@@ -171,6 +171,6 @@ Route::group([
     /** report company */
     Route::get('report-company-customer', [ReportController::class, 'reportCompanyCustomer']);
 
-    Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
+    //Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
 });
 

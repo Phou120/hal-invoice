@@ -49,7 +49,7 @@ class UserService
         $query = filterHelper::filterName($query, $searchTerm);
 
 
-        $queryUser = $query->orderBy('users.id', 'desc')->paginate($perPage);
+        $queryUser = $query->orderBy('users.id', 'asc')->paginate($perPage);
 
 
         $userData = $queryUser->map(function ($user) {
@@ -71,7 +71,6 @@ class UserService
             'total' => $countUser,
             'listUser' => $userData,
         ], 200);
-
     }
 
     public function editUser($request)

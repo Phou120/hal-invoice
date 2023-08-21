@@ -37,18 +37,4 @@ class TableHelper
         $item->company = DB::table('companies')->where('id', $item->company_id)->first();
         $item->user = DB::table('users')->where('id', $item->user_id)->first();
     }
-
-    public static function countCompany($quotationQuery)
-    {
-        $quotationQuery = Company::select('companies.id')->count();
-
-        return $quotationQuery;
-    }
-
-    public static function countUser($quotationQuery)
-    {
-        $quotationQuery = User::select('users.id')->count();
-
-        return $quotationQuery;
-    }
 }

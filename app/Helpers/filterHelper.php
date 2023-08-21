@@ -70,13 +70,6 @@ class filterHelper
             $query->whereRaw("DATE(quotations.start_date) BETWEEN ? AND ?", [$request->start_date, $request->end_date]);
         }
 
-        // if ($request->start_date && $request->end_date && $request->id !== null && $request->name !== null && $request->total !== null) {
-        //     $query->whereRaw("DATE(quotations.start_date) BETWEEN ? AND ?", [$request->start_date, $request->end_date])
-        //           ->where('quotations.id', $request->id)
-        //           ->where('quotations.quotation_name', 'LIKE', '%' . $request->name . '%')
-        //           ->where('quotations.total', $request->total);
-        // }
-
         return $query;
     }
 
