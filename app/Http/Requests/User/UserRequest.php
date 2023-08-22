@@ -49,7 +49,7 @@ class UserRequest extends FormRequest
                             ->whereNull('deleted_at')
                 ],
                 'password' =>[
-                    'required',
+                    // 'required',
                         'min:6',
                             'max:15'
                 ]

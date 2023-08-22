@@ -20,6 +20,7 @@ class UserService
         $addUser = new User();
         $addUser->name = $request['name'];
         $addUser->email = $request['email'];
+        $addUser->tel = $request['tel'];
         $addUser->profile = CreateFolderImageHelper::saveUserProfile($request);
         $addUser->password = Hash::make($request['password']);
         $addUser->save();
@@ -38,7 +39,7 @@ class UserService
         $perPage = $request->per_page;
         $searchTerm = $request->search;
 
-        $query = User::select('users.id', 'users.name', 'users.email', 'users.created_at', 'users.profile') // Include the profile column
+        $query = User::select('users.id', 'users.name', 'users.email', 'users.tel', 'users.created_at', 'users.profile') // Include the profile column
             ->leftJoin('role_user', 'role_user.user_id', '=', 'users.id')
             ->leftJoin('roles', 'roles.id', '=', 'role_user.role_id')
             ->selectRaw('GROUP_CONCAT(DISTINCT roles.name) as roles')
@@ -61,6 +62,7 @@ class UserService
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'tel' => $user->tel,
                 'profile.url' => $fullProfileUrl,
                 'created_at' => $user->created_at,
                 'roles' => explode(',', $user->roles)
@@ -79,6 +81,7 @@ class UserService
             $editUser = User::find($request['id']);
             $editUser->name = $request['name'];
             $editUser->email = $request['email'];
+            $editUser->tel = $request['tel'];
 
                 if (isset($request['profile'])) {
                     // Upload File
@@ -130,6 +133,7 @@ class UserService
     public function changePassword($request)
     {
         $user = User::find($request->id);
+        //$getUser = (clone $user)->where('password', $user->id);
 
         if (!$user) {
             return response()->json([
@@ -137,12 +141,33 @@ class UserService
                 'msg' => 'ບໍ່ພົບ user...',
             ], 422);
         }
-        $user->password = Hash::make($request->password);
-        $user->save();
 
-        return response()->json([
-            'error' => false,
-            'msg' => 'ສຳເລັດແລ້ວ'
-        ], 200);
+        // if (Hash::check($request->oldPassword, $user->password)) {
+        //     dd('dd');
+        //     $user->password = Hash::make($request->password);
+        //     $user->save();
+        //     // dd($request->password);
+
+        //     return response()->json([
+        //         'error' => false,
+        //         'msg' => 'ສຳເລັດແລ້ວ'
+        //     ], 200);
+
+        // } else {
+        //     return response()->json([
+        //         'error' => true,
+        //         'msg' => 'ລະຫັດຜ່ານເກົ່າບໍ່ຖືກຕ້ອງ',
+        //     ], 422);
+        // }
+
+        // Get the user's stored hashed password from the database (typically based on their username or email)
+        $storedPasswordHash = 'hashed_password_from_database';
+
+        // Check if the entered password matches the stored hash
+        if (Hash::check('user_entered_password', $storedPasswordHash)) {
+            // Password is correct, allow the user to log in
+        } else {
+            // Password is incorrect, deny access
+        }
     }
 }

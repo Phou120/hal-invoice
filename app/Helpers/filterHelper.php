@@ -242,6 +242,7 @@ class filterHelper
         $editUser = User::find($request['id']);
         $editUser->name = $request['name'];
         $editUser->email = $request['email'];
+        $editUser->tel = $request['tel'];
         $editUser->save();
 
         return $editUser;

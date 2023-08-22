@@ -39,6 +39,7 @@ class UserController extends Controller
 
     public function changePassword(UserRequest $request)
     {
+        // return $request->all();
         return $this->userService->changePassword($request);
     }
 }
