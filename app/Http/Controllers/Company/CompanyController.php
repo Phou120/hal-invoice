@@ -36,4 +36,9 @@ class CompanyController extends Controller
     {
         return $this->companyService->deleteCompany($request);
     }
+
+    public function listCompanyToUseSkip(Request $request)
+    {
+        return $this->companyService->listCompanyToUseSkip($request);
+    }
 }

@@ -36,4 +36,9 @@ class CustomerController extends Controller
     {
         return $this->customerService->deleteCustomer($request);
     }
+
+    public function listCustomersSkip(Request $request)
+    {
+        return $this->customerService->listCustomersSkip($request);
+    }
 }

@@ -32,9 +32,9 @@ class CustomerService
 
     }
 
-    /** ດຶງ ຂໍ້ມູນລູກຄ້າ */
+    /** ດຶງ ຂໍ້ມູນລູກຄ້າ ໂດຍໃຊ້ paginate */
     public function listCustomers($request)
-    {   
+    {
         $perPage = $request->per_page;
         $searchTerm = $request->search;
 
@@ -51,6 +51,25 @@ class CustomerService
 
         return response()->json([
             'listCustomers' => $listCustomers
+        ], 200);
+    }
+
+    /** list customer to use skip */
+    public function listCustomersSkip($request)
+    {
+        $data = Customer::orderBy('id', 'asc')->forPage($request['page'], $request['per_page'])->get();
+        $myData = $data->skip($request['skip'])->take($request['per_page'])->values();
+        // $searchTerm = $request->search;
+
+        //  /** search name */
+        //$data = filterHelper::filterCustomerName($data, $searchTerm);
+
+        $myData->transform(function ($item){
+            return $item->format();
+        });
+
+        return response()->json([
+            'listCustomers' => $myData
         ], 200);
     }
 

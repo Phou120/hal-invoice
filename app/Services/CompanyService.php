@@ -37,8 +37,9 @@ class CompanyService
 
         $query = Company::select('companies.*');
 
+        /** filter nama */
         $query = filterHelper::filterCompanyName($query, $request);
-        
+
         $listCompanies = (clone $query)->orderBy('id', 'asc')->paginate($perPage);
 
         $listCompanies->transform(function($item){
@@ -47,6 +48,23 @@ class CompanyService
 
         return response()->json([
             'listCompanies' => $listCompanies
+        ], 200);
+    }
+
+    public function listCompanyToUseSkip($request)
+    {
+        $data = Company::orderBy('id', 'asc')->forPage($request['page'], $request['per_page'])->get();
+        $myData = $data->skip($request['skip'])->take($request['per_page'])->values();
+
+        /** filter nama */
+        //$query = filterHelper::filterCompanyName($data, $request);
+
+        $myData->transform(function($item){
+            return $item->format();
+        });
+
+        return response()->json([
+            'listCompanies' => $myData
         ], 200);
     }
 
@@ -72,9 +90,7 @@ class CompanyService
                         }
                     }
                     $editCompany->logo = $fileName;
-
                 }
-
             $editCompany->save();
         }
 

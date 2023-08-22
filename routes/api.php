@@ -61,6 +61,9 @@ Route::group([
     Route::put('edit-customer/{id}', [CustomerController::class, 'editCustomer'])->name('edit.customer');
     Route::delete('delete-customer/{id}', [CustomerController::class, 'deleteCustomer'])->name('delete.customer');
 
+    /** list customer to use skip */
+    Route::get('list-customer-skips', [CustomerController::class, 'listCustomersSkip']);
+
 
     /** CRUD Currency */
     Route::post('add-currency', [CurrencyController::class, 'addCurrency'])->name('add.currency');
@@ -74,6 +77,9 @@ Route::group([
     Route::get('list-companies', [CompanyController::class, 'listCompanies']);
     Route::put('edit-company/{id}', [CompanyController::class, 'editCompany'])->name('edit.company');
     Route::delete('delete-company/{id}', [CompanyController::class, 'deleteCompany'])->name('delete.company');
+
+    /** list companies to use skip */
+    Route::get('list-companies-skip', [CompanyController::class, 'listCompanyToUseSkip']);
 
 
     /** CRUD Quotation and CRUD Quotation Detail */
