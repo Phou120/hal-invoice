@@ -49,7 +49,7 @@ class UserRequest extends FormRequest
                             ->whereNull('deleted_at')
                 ],
                 'password' =>[
-                    // 'required',
+                    'required',
                         'min:6',
                             'max:15'
                 ]
@@ -90,6 +90,14 @@ class UserRequest extends FormRequest
                                         ->ignore($this->id)
                                         ->whereNull('deleted_at')
 
+                ],
+                'tel' =>[
+                    'required',
+                        'numeric',
+                            'digits_between:6,15',
+                                Rule::unique('users', 'tel')
+                                ->ignore($this->id)
+                                ->whereNull('deleted_at')
                 ]
             ];
         }
@@ -114,6 +122,13 @@ class UserRequest extends FormRequest
                     'required',
                         'min:6',
                             'max:15'
+                ],
+                'tel' =>[
+                    'required',
+                        'numeric',
+                            'digits_between:6,15',
+                                Rule::unique('users', 'tel')
+                                ->whereNull('deleted_at')
                 ]
             ];
         }
@@ -137,7 +152,12 @@ class UserRequest extends FormRequest
 
             'id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
             'id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
-            'id.exists' => 'id ບໍ່ມີໃນລະບົບ...'
+            'id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
+
+            'tel.required' => 'ກະລຸນາປ້ອນເບີໂທລະສັບກ່ອນ...',
+            'tel.numeric' => 'ເບີໂທລະສັບຄວນເປັນໂຕເລກ...',
+            'tel.digits_between' => 'ບໍ່ຄວນສັ້ນກວ່າ 6 ເເລະ ເກີນ 15 ໂຕເລກ...',
+            'tel.unique' => 'ເບີໂທລະສັບນີ້ມີໃນລະບົບເເລ້ວ...',
         ];
     }
 }

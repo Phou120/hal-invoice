@@ -29,7 +29,6 @@ class CustomerService
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'
         ], 200);
-
     }
 
     /** ດຶງ ຂໍ້ມູນລູກຄ້າ ໂດຍໃຊ້ paginate */

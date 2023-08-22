@@ -118,6 +118,7 @@ class UserService
     {
         $user = User::find($request['id']);
         $user->email = $user->email . '_deleted_' . Str::random(6);
+        $user->tel = $user->tel . '_deleted_' . Str::random(6);
         $user->save();
         $user->delete();
 
@@ -133,7 +134,6 @@ class UserService
     public function changePassword($request)
     {
         $user = User::find($request->id);
-        //$getUser = (clone $user)->where('password', $user->id);
 
         if (!$user) {
             return response()->json([
@@ -142,32 +142,28 @@ class UserService
             ], 422);
         }
 
-        // if (Hash::check($request->oldPassword, $user->password)) {
-        //     dd('dd');
-        //     $user->password = Hash::make($request->password);
-        //     $user->save();
-        //     // dd($request->password);
-
-        //     return response()->json([
-        //         'error' => false,
-        //         'msg' => 'ສຳເລັດແລ້ວ'
-        //     ], 200);
-
-        // } else {
-        //     return response()->json([
-        //         'error' => true,
-        //         'msg' => 'ລະຫັດຜ່ານເກົ່າບໍ່ຖືກຕ້ອງ',
-        //     ], 422);
-        // }
-
         // Get the user's stored hashed password from the database (typically based on their username or email)
-        $storedPasswordHash = 'hashed_password_from_database';
+        $storedPasswordHash = $user['password'];
+        $oldPassword = $request['oldPassword'];
+        // dd($oldPassword);
 
         // Check if the entered password matches the stored hash
-        if (Hash::check('user_entered_password', $storedPasswordHash)) {
+        if (Hash::check($oldPassword, $storedPasswordHash)){
             // Password is correct, allow the user to log in
+            $user->password = Hash::make($request->password);
+            $user->save();
+
+            return response()->json([
+                'error' => false,
+                'msg' => 'ສຳເລັດແລ້ວ'
+            ], 200);
+
         } else {
             // Password is incorrect, deny access
+            return response()->json([
+                'error' => true,
+                'msg' => 'ລະຫັດຜ່ານເກົ່າບໍ່ຖືກຕ້ອງ',
+            ], 422);
         }
     }
 }
