@@ -15,7 +15,11 @@ use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Quotation\QuotationController;
 use App\Http\Controllers\Invoice\ReportInvoiceController;
 use App\Http\Controllers\CompanyUser\CompanyUserController;
+use App\Http\Controllers\Quotation\QuotationTypeController;
+use App\Http\Controllers\Company\CompanyBankAccountController;
+use App\Http\Controllers\moduleCategory\ModuleTitleController;
 use App\Http\Controllers\PurchaseOrder\PurchaseOrderController;
+use App\Http\Controllers\moduleCategory\ModuleCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -159,10 +163,10 @@ Route::group([
     Route::get('user-profile', [UserProfileController::class, 'ListUserProfile'])->middleware('auth');
 
     /** CRUD CompanyUser */
+    Route::get('list-company-users', [CompanyUserController::class, 'listCompanyUser']);
     Route::post('create-company-user', [CompanyUserController::class, 'createCompanyUser'])->name('create.company.user');
     Route::put('update-company-user/{id}', [CompanyUserController::class, 'updateCompanyUser'])->name('update.company.user');
     Route::delete('delete-company-user/{id}', [CompanyUserController::class, 'deleteCompanyUser'])->name('delete.company.user');
-    Route::get('list-company-users', [CompanyUserController::class, 'listCompanyUser']);
 
 
     /** report invoices */
@@ -178,5 +182,39 @@ Route::group([
     Route::get('report-company-customer', [ReportController::class, 'reportCompanyCustomer']);
 
     //Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
+
+
+    /** CRUD company_bank_account */
+    Route::get('list-company-bank-accounts', [CompanyBankAccountController::class, 'listCompanyBankAccount']);
+    Route::post('create-company-bank-account', [CompanyBankAccountController::class, 'createCompanyBankAccount'])->name('create.bank.account');
+    Route::put('update-company-bank-account/{id}', [CompanyBankAccountController::class, 'updateCompanyBankAccount'])->name('update.bank.account');
+    Route::delete('delete-company-bank-account/{id}', [CompanyBankAccountController::class, 'deleteCompanyBankAccount'])->name('delete.bank.account');
+
+    /** update status */
+    Route::put('update-status/{id}', [CompanyBankAccountController::class, 'updateStatus'])->name('update.status');
+
+
+    /** CRUD module categories */
+    Route::get('list-module-categories', [ModuleCategoryController::class, 'listModuleCategory']);
+    Route::post('create-module-category', [ModuleCategoryController::class, 'createModuleCategory'])->name('create.module.category');
+    Route::put('update-module-category/{id}', [ModuleCategoryController::class, 'updateModuleCategory'])->name('update.module.category');
+    Route::delete('delete-module-category/{id}', [ModuleCategoryController::class, 'deleteModuleCategory'])->name('delete.module.category');
+
+
+    /** CRUD module title */
+    Route::get('list-module-titles', [ModuleTitleController::class, 'listModuleTitle']);
+    Route::post('create-module-title', [ModuleTitleController::class, 'createModuleTitle'])->name('create.module.title');
+    Route::put('update-module-title/{id}', [ModuleTitleController::class, 'updateModuleTitle'])->name('update.module.title');
+    Route::delete('delete-module-title/{id}', [ModuleTitleController::class, 'deleteModuleTitle'])->name('delete.module.title');
+
+
+    /** CRUD quotation type */
+    Route::get('list-quotation-types', [QuotationTypeController::class, 'listQuotationTypes']);
+    Route::post('create-quotation-type', [QuotationTypeController::class, 'createQuotationType'])->name('create.quotation.type');
+    Route::put('update-quotation-type/{id}', [QuotationTypeController::class, 'updateQuotationType'])->name('update.quotation.type');
+    Route::delete('delete-quotation-type/{id}', [QuotationTypeController::class, 'deleteQuotationType'])->name('delete.quotation.type');
+
+
 });
+
 

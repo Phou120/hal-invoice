@@ -7,7 +7,6 @@ use App\Traits\ResponseAPI;
 
 class CurrencyService
 {
-
     use ResponseAPI;
 
     /** add currency */
