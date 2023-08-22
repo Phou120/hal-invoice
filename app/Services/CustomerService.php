@@ -57,19 +57,22 @@ class CustomerService
     /** list customer to use skip */
     public function listCustomersSkip($request)
     {
-        $data = Customer::orderBy('id', 'asc')->forPage($request['page'], $request['per_page'])->get();
-        $myData = $data->skip($request['skip'])->take($request['per_page'])->values();
-        // $searchTerm = $request->search;
+        $query = Customer::orderBy('id', 'asc');
 
-        //  /** search name */
-        //$data = filterHelper::filterCustomerName($data, $searchTerm);
+        /** count customer */
+        $totalCustomers = $query->count();
+
+        $data = (clone $query)->forPage($request['page'], $request['per_page'])->get();
+
+        $myData = $data->skip($request['skip'])->take($request['per_page'])->values();
 
         $myData->transform(function ($item){
             return $item->format();
         });
 
         return response()->json([
-            'listCustomers' => $myData
+            'totalCustomers' => $totalCustomers,
+            'data' => $myData
         ], 200);
     }
 

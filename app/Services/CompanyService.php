@@ -53,18 +53,22 @@ class CompanyService
 
     public function listCompanyToUseSkip($request)
     {
-        $data = Company::orderBy('id', 'asc')->forPage($request['page'], $request['per_page'])->get();
-        $myData = $data->skip($request['skip'])->take($request['per_page'])->values();
+        $query = Company::orderBy('id', 'asc');
 
-        /** filter nama */
-        //$query = filterHelper::filterCompanyName($data, $request);
+        /** count Company */
+        $totalCompany = $query->count();
+
+        $data = (clone $query)->forPage($request['page'], $request['per_page'])->get();
+
+        $myData = $data->skip($request['skip'])->take($request['per_page'])->values();
 
         $myData->transform(function($item){
             return $item->format();
         });
 
         return response()->json([
-            'listCompanies' => $myData
+            'totalCompany' => $totalCompany,
+            'data' => $myData
         ], 200);
     }
 
