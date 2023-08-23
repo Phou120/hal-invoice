@@ -39,8 +39,8 @@ class QuotationService
         $addQuotation->note = $request['note'];
         $addQuotation->customer_id = $request['customer_id'];
         $addQuotation->currency_id = $request['currency_id'];
-        $addQuotation->discount = $request['discount'];
         $addQuotation->created_by = Auth::user('api')->id;
+        $addQuotation->discount = $request['discount'];
         $addQuotation->save();
 
 
