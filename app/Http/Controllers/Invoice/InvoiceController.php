@@ -27,11 +27,7 @@ class InvoiceController extends Controller
 
     public function addInvoice(InvoiceRequest $request)
     {
-        if($request['quotation_id']){
-            return $this->invoiceService->addInvoice($request);
-        } else {
-            return $this->invoiceNoQuotationService->addInvoice($request);
-        }
+        return $this->invoiceService->addInvoice($request);
     }
 
     public function listInvoices(Request $request)
@@ -46,63 +42,31 @@ class InvoiceController extends Controller
 
     public function addInvoiceDetail(InvoiceRequest $request)
     {
-        $invoice = Invoice::where('id', $request['id'])->first();
-        if($invoice->quotation_id){
-            return $this->invoiceService->addInvoiceDetail($request);
-        } else {
-            return $this->invoiceNoQuotationService->addInvoiceDetail($request);
-        }
+        return $this->invoiceService->addInvoiceDetail($request);
     }
 
     public function editInvoice(InvoiceRequest $request)
     {
-        $invoice = Invoice::where('id', $request['id'])->first();
-        if($invoice['quotation_id']){
-            return $this->invoiceService->editInvoice($request);
-        } else {
-            return $this->invoiceNoQuotationService->editInvoice($request);
-        }
+        return $this->invoiceService->editInvoice($request);
     }
 
-    public function editInvoiceDetail(InvoiceRequest $request)
-    {
-        $detail = InvoiceDetail::where('id', $request['id'])->first();
-        $invoice = Invoice::where('id', $detail['invoice_id'])->first();
-        if($invoice['quotation_id']){
-            return $this->invoiceService->editInvoiceDetail($request);
-        } else {
-            return $this->invoiceNoQuotationService->editInvoiceDetailNoQuotationID($request);
-        }
-    }
+    // public function editInvoiceDetail(InvoiceRequest $request)
+    // {
+    //     return $this->invoiceService->editInvoiceDetail($request);
+    // }
 
     public function deleteInvoiceDetail(InvoiceRequest $request)
     {
-        $detail = InvoiceDetail::where('id', $request['id'])->first();
-        $invoice = Invoice::where('id', $detail['invoice_id'])->first();
-        if($invoice['quotation_id']){
-            return $this->invoiceService->deleteInvoiceDetail($request);
-        } else {
-            return $this->invoiceNoQuotationService->deleteInvoiceDetailNoQuotationID($request);
-        }
+        return $this->invoiceService->deleteInvoiceDetail($request);
     }
 
     public function deleteInvoice(InvoiceRequest $request)
     {
-        $invoice = Invoice::where('id', $request['id'])->first();
-        if($invoice['quotation_id']){
-            return $this->invoiceService->deleteInvoice($request);
-        } else {
-            return $this->invoiceNoQuotationService->deleteInvoice($request);
-        }
+        return $this->invoiceService->deleteInvoice($request);
     }
 
     public function updateInvoiceStatus(InvoiceRequest $request)
     {
-        $invoice = Invoice::where('id', $request['id'])->first();
-        if($invoice['quotation_id']){
-            return $this->invoiceService->updateInvoiceStatus($request);
-        } else {
-            return $this->invoiceNoQuotationService->updateInvoiceStatus($request);
-        }
+        return $this->invoiceService->updateInvoiceStatus($request);
     }
 }

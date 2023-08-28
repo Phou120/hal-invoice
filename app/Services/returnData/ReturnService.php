@@ -54,6 +54,35 @@ class ReturnService
         return $responseData;
     }
 
+    public function selectQuotation($quotationDetailId)
+    {
+        $quotation = DB::table('quotations')
+        ->select('quotation_detail.*')
+        ->join('quotation_details as quotation_detail', 'quotation_detail.quotation_id', '=', 'quotations.id')
+        ->where('quotation_detail.id', $quotationDetailId)
+        ->first();
+
+        return $quotation;
+    }
+
+    public function invoiceDetail($quotation, $invoiceId)
+    {
+        $invoiceDetails = [
+            'description' => $quotation->description,
+            'invoice_id' => $invoiceId,
+            'amount' => $quotation->amount,
+            'price' => $quotation->price,
+            'order' => $quotation->order,
+            'name' => $quotation->name,
+            'total' => $quotation->amount * $quotation->price,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        return $invoiceDetails;
+    }
+
+    /** loop report quotations.status */
     public function foreach($statuses, $quotationQuery, $responseData)
     {
         foreach ($statuses as $status => $statusVariable) {
@@ -71,6 +100,7 @@ class ReturnService
         return $responseData;
     }
 
+    /** loop quotation data */
     public function foreachData($statuses, $quotationQuery, $responseData)
     {
         foreach ($statuses as $statusName => $statusValue) {
@@ -91,6 +121,67 @@ class ReturnService
         return $responseData;
     }
 
+    /** join data */
+    public function joinData($request)
+    {
+        $editDetail = DB::table('quotation_details')
+        ->select('quotation_details.*', 'quotation_types.rate', 'quotations.quotation_type_id')
+        ->join('quotations', 'quotation_details.quotation_id', '=', 'quotations.id')
+        ->join('quotation_types', 'quotations.quotation_type_id', '=', 'quotation_types.id')
+        ->where('quotation_details.id', $request['id'])
+        ->first();
+
+        return $editDetail;
+    }
+
+    /** update data in quotation_detail */
+    public function updateData($editDetail, $request)
+    {
+         // Update the fields
+         $updateData = [
+            'order' => $request['order'],
+            'name' => $request['name'],
+            'amount' => $request['amount'],
+            'description' => $request['description'],
+            'price' => $editDetail->rate,
+            'total' => $request['amount'] * $editDetail->rate
+        ];
+
+        return $updateData;
+    }
+
+    /** add quotation_details */
+    public function detailData($request)
+    {
+        $data = [
+            'order' => $request['order'],
+            'quotation_id' => $request['id'],
+            'name' => $request['name'],
+            'amount' => $request['amount'],
+            'description' => $request['description'],
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        return $data;
+    }
+
+    /** join data in quotation_type to get quotation_types.rate */
+    public function getQuotationType($request)
+    {
+        $getQuotationType = DB::table('quotation_types')
+            ->select('quotation_types.rate')
+            ->join('quotations as quotation', 'quotation.quotation_type_id', '=', 'quotation_types.id')
+            ->join('quotation_details as quotationDetail', 'quotationDetail.quotation_id', '=', 'quotation.id')
+            ->where('quotationDetail.quotation_id', '=', $request['id'])
+            ->whereNotNull('quotation.quotation_type_id')
+            ->whereNotNull('quotation_types.rate')
+            ->first();
+
+        return $getQuotationType;
+    }
+
+    /** return user data */
     public function returnUserData($listUser, $roleUser, $permissionRole)
     {
         return [
@@ -108,6 +199,7 @@ class ReturnService
         ];
     }
 
+    /** return receipt data */
     public function returnDataReceipt($totalBill, $totalPrice, $listReceipt)
     {
         return [
@@ -117,6 +209,7 @@ class ReturnService
         ];
     }
 
+    /** return receipt */
     public function returnReceipt($totalReceipt, $totalPrice, $receipt)
     {
         return [
@@ -126,6 +219,7 @@ class ReturnService
         ];
     }
 
+    /** return data in company and customer */
     public function returnData($company, $customer)
     {
         return[
@@ -134,6 +228,7 @@ class ReturnService
         ];
     }
 
+    /** response invoice data */
     public function responseInvoiceData(
         $totalBill, $totalPrice, $created, $createdTotal, $approved, $approvedTotal,
         $inprogress, $inprogressTotal, $completed, $completedTotal, $canceled, $canceledTotal, $listInvoice
@@ -166,6 +261,7 @@ class ReturnService
         ];
     }
 
+    /** response report quotation data */
     public function response(
         $totalBill, $totalPrice,$created,
         $createdTotal, $approved, $approvedTotal,$inprogress, $inprogressTotal,
@@ -173,8 +269,6 @@ class ReturnService
     )
     {
         return [
-            // 'count_company' => $countCompany,
-            // 'count_user' => $countUser,
             'totalBill' => $totalBill,
             'totalPrice' => $totalPrice,
             'created' => [
@@ -200,6 +294,7 @@ class ReturnService
         ];
     }
 
+    /** return quotation data */
     public function QuotationData(
         $totalQuotation, $totalPrice, $created, $createdTotal,
         $approved, $approvedTotal,$inprogress, $inprogressTotal,

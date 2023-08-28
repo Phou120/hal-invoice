@@ -9,9 +9,11 @@ use App\Helpers\TableHelper;
 use App\Helpers\filterHelper;
 use App\Models\InvoiceDetail;
 use App\Helpers\generateHelper;
+use App\Models\QuotationDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Services\returnData\ReturnService;
+use PHPUnit\Framework\MockObject\Stub\ReturnSelf;
 
 class InvoiceService
 {
@@ -28,37 +30,55 @@ class InvoiceService
     /** ບັນທຶກໃບບິນເກັບເງິນ */
     public function addInvoice($request)
     {
-        DB::beginTransaction();
+        $quotationDetailId = $request['quotation_detail_id'];
+        $quotationDetail = QuotationDetail::find($quotationDetailId);
 
-            $getTotalQuotation = $this->calculateService->sumTotalQuotation($request);
-            if(!$getTotalQuotation){
-                $addInvoice = new Invoice();
-                $addInvoice->invoice_number = generateHelper::generateInvoiceNumber('IV- ', 8);
-                $addInvoice->invoice_name = $request['invoice_name'];
-                $addInvoice->currency_id = $request['currency_id'];
-                $addInvoice->quotation_id = $request['quotation_id'];
-                $addInvoice->customer_id = $request['customer_id'];
-                $addInvoice->start_date = $request['start_date'];
-                $addInvoice->discount = $request['discount'];
-                $addInvoice->end_date = $request['end_date'];
-                $addInvoice->note = $request['note'];
-                $addInvoice->created_by = Auth::user('api')->id;
-                $addInvoice->tax = filterHelper::TAX;
-                $addInvoice->save();
+        if(isset($quotationDetail)) {
+            $getQuotation = DB::table('quotations')
+                ->select('quotations.*')
+                ->join('quotation_details as quotation_detail', 'quotation_detail.quotation_id', '=', 'quotations.id')
+                ->where('quotation_detail.id', $quotationDetailId)
+                ->first(); // Use first() instead of get()
 
-                if(!empty($request['invoice_details'])){
-                    foreach($request['invoice_details'] as $item){
-                        $addDetail = new InvoiceDetail();
-                        $addDetail->order = $item['order'];
-                        $addDetail->invoice_id = $addInvoice['id'];
-                        $addDetail->name = $item['name'];
-                        $addDetail->amount = $item['amount'];
-                        $addDetail->price = $item['price'];
-                        $addDetail->description = $item['description'];
-                        $addDetail->total = $item['amount'] * $item['price'];
-                        $addDetail->save();
-                    }
-                }
+                // dd($getQuotation);
+            if (count($quotationDetail) > 0) {
+                // try {
+                DB::beginTransaction();
+
+                    $addInvoice = new Invoice();
+                    $addInvoice->invoice_number = generateHelper::generateInvoiceNumber('IV-', 8);
+                    $addInvoice->invoice_name = $request['invoice_name'];
+                    $addInvoice->currency_id = $getQuotation->currency_id; // Use object syntax
+                    $addInvoice->quotation_id = $getQuotation->id; // Use object syntax
+                    $addInvoice->customer_id = $getQuotation->customer_id; // Use object syntax
+                    $addInvoice->start_date = $request['start_date'];
+                    $addInvoice->discount = $getQuotation->discount; // Use object syntax
+                    $addInvoice->end_date = $request['end_date'];
+                    $addInvoice->note = $request['note'];
+                    $addInvoice->created_by = Auth::user('api')->id;
+                    $addInvoice->tax = filterHelper::TAX;
+                    $addInvoice->save();
+
+                    $taxRate = filterHelper::TAX;
+                    $discountRate = $getQuotation->discount;
+                    $sumSubTotal = 0;
+                    foreach ($quotationDetail as $item) {
+                            $total = $item['amount'] * $item['price'];
+
+                            $addDetail = new InvoiceDetail();
+                            $addDetail->order = $item['order'];
+                            $addDetail->invoice_id = $addInvoice->id; // Use object syntax
+                            $addDetail->name = $item['name'];
+                            $addDetail->amount = $item['amount'];
+                            $addDetail->price = $item['price'];
+                            $addDetail->description = $item['description'];
+                            $addDetail->total = $total;
+                            $addDetail->save();
+
+                            $sumSubTotal += $total;
+                        }
+                        /**Calculate */
+                        $this->calculateService->sumTotalInvoice($taxRate, $discountRate, $sumSubTotal);
 
                 DB::commit();
 
@@ -66,12 +86,59 @@ class InvoiceService
                     'error' => false,
                     'msg' => 'ສຳເລັດແລ້ວ'
                 ], 200);
-            }else{
-                return response()->json([
-                    'error' => true,
-                    'msg' => 'ທ່ານບໍ່ສາມາດສ້າງໃບເກັບເງິນເກີນນີ້ໄດ້: ' . $getTotalQuotation
-                ], 422);
             }
+        } else {
+            return response()->json([
+                'error' => true,
+                'msg' => 'Quotation detail not found.'
+            ], 404);
+
+
+
+            // $getTotalQuotation = $this->calculateService->sumTotalQuotation($request);
+            // if(!$getTotalQuotation){
+            //     $addInvoice = new Invoice();
+            //     $addInvoice->invoice_number = generateHelper::generateInvoiceNumber('IV- ', 8);
+            //     $addInvoice->invoice_name = $request['invoice_name'];
+            //     $addInvoice->currency_id = $request['currency_id'];
+            //     $addInvoice->quotation_id = $request['quotation_id'];
+            //     $addInvoice->customer_id = $request['customer_id'];
+            //     $addInvoice->start_date = $request['start_date'];
+            //     $addInvoice->discount = $request['discount'];
+            //     $addInvoice->end_date = $request['end_date'];
+            //     $addInvoice->note = $request['note'];
+            //     $addInvoice->created_by = Auth::user('api')->id;
+            //     $addInvoice->tax = filterHelper::TAX;
+            //     $addInvoice->save();
+
+            //     if(!empty($request['invoice_details'])){
+            //         foreach($request['invoice_details'] as $item){
+            //             $addDetail = new InvoiceDetail();
+            //             $addDetail->order = $item['order'];
+            //             $addDetail->invoice_id = $addInvoice['id'];
+            //             $addDetail->name = $item['name'];
+            //             $addDetail->amount = $item['amount'];
+            //             $addDetail->price = $item['price'];
+            //             $addDetail->description = $item['description'];
+            //             $addDetail->total = $item['amount'] * $item['price'];
+            //             $addDetail->save();
+            //         }
+            //     }
+
+                // DB::commit();
+
+            //     return response()->json([
+            //         'error' => false,
+            //         'msg' => 'ສຳເລັດແລ້ວ'
+            //     ], 200);
+            // }else{
+            //     return response()->json([
+            //         'error' => true,
+            //         'msg' => 'ທ່ານບໍ່ສາມາດສ້າງໃບເກັບເງິນເກີນນີ້ໄດ້: ' . $getTotalQuotation
+            //     ], 422);
+            // }
+
+        }
     }
 
     /** ດຶງໃບບິນເກັບເງິນ */
@@ -155,28 +222,57 @@ class InvoiceService
     /** ບັນທຶກລາຍລະອຽດໃບບິນ */
     public function addInvoiceDetail($request)
     {
-        $checkBalance = $this->calculateService->checkBalanceInvoice($request);
-        if(!$checkBalance){
-            $addDetail = new InvoiceDetail();
-            $addDetail->description = $request['description'];
-            $addDetail->invoice_id = $request['id'];
-            $addDetail->amount = $request['amount'];
-            $addDetail->price = $request['price'];
-            $addDetail->order = $request['order'];
-            $addDetail->name = $request['name'];
-            $addDetail->total = $request['amount'] * $request['price'];
-            $addDetail->save();
+        $quotationDetailId = $request->input('quotation_detail_id');
+        $quotationDetail = QuotationDetail::find($quotationDetailId);
 
+        if (!$quotationDetail) {
             return response()->json([
-                'error' => false,
-                'msg' => 'ສຳເລັດແລ້ວ'
-            ], 200);
-        }else{
-            return response()->json([
-                'error' => false,
-                'msg' => 'ທ່ານບໍ່ສາມາດສ້າງໃບເກັບເງິນເກີນນີ້ໄດ້: ' . $checkBalance
-            ], 422);
+                'error' => true,
+                'msg' => 'Quotation detail not found'
+            ], 404);
         }
+
+        /** select quotation_details */
+        $quotation = (new ReturnService())->selectQuotation($quotationDetailId);
+
+        if ($quotation) {
+            $invoiceId = $request->input('id');
+
+            /** data in invoice_details */
+            $invoiceDetails = (new ReturnService())->invoiceDetail($quotation, $invoiceId);
+
+            /** insert invoice_details */
+            InvoiceDetail::insert([$invoiceDetails]);
+        }
+
+        return response()->json([
+            'error' => false,
+            'msg' => 'ສຳເລັດແລ້ວ'
+        ], 200);
+
+
+        // $checkBalance = $this->calculateService->checkBalanceInvoice($request);
+        // if(!$checkBalance){
+        //     $addDetail = new InvoiceDetail();
+        //     $addDetail->description = $request['description'];
+        //     $addDetail->invoice_id = $request['id'];
+        //     $addDetail->amount = $request['amount'];
+        //     $addDetail->price = $request['price'];
+        //     $addDetail->order = $request['order'];
+        //     $addDetail->name = $request['name'];
+        //     $addDetail->total = $request['amount'] * $request['price'];
+        //     $addDetail->save();
+
+        //     return response()->json([
+        //         'error' => false,
+        //         'msg' => 'ສຳເລັດແລ້ວ'
+        //     ], 200);
+        // }else{
+        //     return response()->json([
+        //         'error' => false,
+        //         'msg' => 'ທ່ານບໍ່ສາມາດສ້າງໃບເກັບເງິນເກີນນີ້ໄດ້: ' . $checkBalance
+        //     ], 422);
+        // }
     }
 
     /** ດຶງລາຍລະອຽດໃບບິນ */
@@ -241,30 +337,30 @@ class InvoiceService
     }
 
     /** ແກ້ໄຂລາຍລະອຽດໃບບິນ */
-    public function editInvoiceDetail($request)
-    {
-        $checkBalance = $this->calculateService->checkBalanceInvoiceByEdit($request);
-        if(!$checkBalance){
-            $editDetail = InvoiceDetail::find($request['id']);
-            $editDetail->order = $request['order'];
-            $editDetail->name = $request['name'];
-            $editDetail->amount = $request['amount'];
-            $editDetail->price = $request['price'];
-            $editDetail->description = $request['description'];
-            $editDetail->total = $request['amount'] * $request['price'];
-            $editDetail->save();
+    // public function editInvoiceDetail($request)
+    // {
+    //     $checkBalance = $this->calculateService->checkBalanceInvoiceByEdit($request);
+    //     if(!$checkBalance){
+    //         $editDetail = InvoiceDetail::find($request['id']);
+    //         $editDetail->order = $request['order'];
+    //         $editDetail->name = $request['name'];
+    //         $editDetail->amount = $request['amount'];
+    //         $editDetail->price = $request['price'];
+    //         $editDetail->description = $request['description'];
+    //         $editDetail->total = $request['amount'] * $request['price'];
+    //         $editDetail->save();
 
-            return response()->json([
-                'error' => false,
-                'msg' => 'ສຳເລັດແລ້ວ'
-            ], 200);
-        }else{
-            return response()->json([
-                'error' => false,
-                'msg' => 'ທ່ານບໍ່ສາມາດສ້າງໃບເກັບເງິນເກີນນີ້ໄດ້: ' . $checkBalance
-            ], 422);
-        }
-    }
+    //         return response()->json([
+    //             'error' => false,
+    //             'msg' => 'ສຳເລັດແລ້ວ'
+    //         ], 200);
+    //     }else{
+    //         return response()->json([
+    //             'error' => false,
+    //             'msg' => 'ທ່ານບໍ່ສາມາດສ້າງໃບເກັບເງິນເກີນນີ້ໄດ້: ' . $checkBalance
+    //         ], 422);
+    //     }
+    // }
 
     /** ລຶບລາຍລະອຽດໃບບິນ */
     public function deleteInvoiceDetail($request)
@@ -285,16 +381,8 @@ class InvoiceService
 
             DB::beginTransaction();
 
-                // Find the Invoice model
-                $invoice = Invoice::findOrFail($request['id']);
+            $invoice = Invoice::findOrFail($request['id']);
                 $invoice->updated_by = Auth::user('api')->id;
-                if($invoice['quotation_id']){
-                    $getQuotation = Quotation::find($invoice['quotation_id']);
-                    if($getQuotation){
-                        $getQuotation->total += $invoice['total'];
-                        $getQuotation->save();
-                    }
-                }
                 $invoice->save();
 
                  // Delete the InvoiceDetails and the Invoice model
@@ -302,6 +390,21 @@ class InvoiceService
                 InvoiceDetail::where('invoice_id', $request['id'])->delete();
 
 
+                // Find the Invoice model
+                // $invoice = Invoice::findOrFail($request['id']);
+                // $invoice->updated_by = Auth::user('api')->id;
+                // if($invoice['quotation_id']){
+                //     $getQuotation = Quotation::find($invoice['quotation_id']);
+                //     if($getQuotation){
+                //         $getQuotation->total += $invoice['total'];
+                //         $getQuotation->save();
+                //     }
+                // }
+                // $invoice->save();
+
+                //  // Delete the InvoiceDetails and the Invoice model
+                // $invoice->delete();
+                // InvoiceDetail::where('invoice_id', $request['id'])->delete();
 
             DB::commit();
 

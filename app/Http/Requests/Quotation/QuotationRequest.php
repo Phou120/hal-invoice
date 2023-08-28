@@ -114,10 +114,10 @@ class QuotationRequest extends FormRequest
                     'required',
                         'numeric'
                 ],
-                'price' => [
-                    'required',
-                        'numeric'
-                ],
+                // 'price' => [
+                //     'required',
+                //         'numeric'
+                // ],
                 'description' => [
                     'nullable',
                         'max:255'
@@ -151,6 +151,11 @@ class QuotationRequest extends FormRequest
                     'required',
                         'date',
                             'after_or_equal:start_date'
+                ],
+                'quotation_type_id' =>[
+                    'required',
+                        'numeric',
+                            Rule::exists('quotation_types', 'id')
                 ],
                 'customer_id' => [
                     'required',
@@ -192,10 +197,10 @@ class QuotationRequest extends FormRequest
                     'required',
                         'numeric'
                 ],
-                'price' => [
-                    'required',
-                        'numeric'
-                ],
+                // 'price' => [
+                //     'required',
+                //         'numeric'
+                // ],
                 'description' => [
                     'nullable',
                         'max:255'
@@ -222,6 +227,11 @@ class QuotationRequest extends FormRequest
                 ],
                 'note' => [
                     'nullable',
+                ],
+                'quotation_type_id' =>[
+                    'required',
+                        'numeric',
+                            Rule::exists('quotation_types', 'id')
                 ],
                 'customer_id' => [
                     'required',
@@ -255,10 +265,10 @@ class QuotationRequest extends FormRequest
                     'required',
                         'numeric'
                 ],
-                'quotation_details.*.price' => [
-                    'required',
-                        'numeric'
-                ],
+                // 'quotation_details.*.price' => [
+                //     'nullable',
+                //         'numeric'
+                // ],
                 'quotation_details.*.description' => [
                     'nullable'
                 ]
@@ -281,6 +291,10 @@ class QuotationRequest extends FormRequest
             'end_date.after_or_equal' => 'ວັນທີສິ້ນສຸດຄວນໃຫ່ຍກວ່າວັນທີເລີ່ມ...',
 
             'note.max' => 'ຄຳອະທິບາຍບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
+
+            'quotation_type_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
+            'quotation_type_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
+            'quotation_type_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
 
             'customer_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
             'customer_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',

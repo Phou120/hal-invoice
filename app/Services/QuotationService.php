@@ -8,6 +8,7 @@ use App\Helpers\TableHelper;
 use App\Helpers\filterHelper;
 use App\Helpers\generateHelper;
 use App\Models\QuotationDetail;
+use App\Models\QuotationType;
 use App\Services\CalculateService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -28,6 +29,11 @@ class QuotationService
     /** add quotation */
     public function addQuotation($request)
     {
+        $getQuotationType = QuotationType::find($request['quotation_type_id']);
+        if(isset($getQuotationType)){
+            $getQuotationType->select('quotation_types.*')
+            ->where('quotation_types', 'rate');
+        }
 
         DB::beginTransaction();
         /** add quotation */
@@ -38,6 +44,7 @@ class QuotationService
         $addQuotation->end_date = $request['end_date'];
         $addQuotation->note = $request['note'];
         $addQuotation->customer_id = $request['customer_id'];
+        $addQuotation->quotation_type_id = $getQuotationType['id'];
         $addQuotation->currency_id = $request['currency_id'];
         $addQuotation->created_by = Auth::user('api')->id;
         $addQuotation->discount = $request['discount'];
@@ -48,19 +55,20 @@ class QuotationService
             $sumSubTotal = 0;
             if(!empty($request['quotation_details'])){
                 foreach($request['quotation_details'] as $item){
-                    $total = $item['amount'] * $item['price'];
+                    $total = $item['amount'] * $getQuotationType['rate'];
 
                     $addDetail = new QuotationDetail();
                     $addDetail->order = $item['order'];
                     $addDetail->quotation_id = $addQuotation['id'];
                     $addDetail->name = $item['name'];
                     $addDetail->amount = $item['amount'];
-                    $addDetail->price = $item['price'];
+                    $addDetail->price = $getQuotationType['rate'];
                     $addDetail->description = $item['description'];
                     $addDetail->total = $total;
                     $addDetail->save();
 
                     $sumSubTotal += $total;
+                    // dd($sumSubTotal);
                 }
             }
             /**Calculate */
@@ -154,15 +162,17 @@ class QuotationService
     /** add quotation detail */
     public function addQuotationDetail($request)
     {
-        $addDetail = new QuotationDetail();
-        $addDetail->order = $request['order'];
-        $addDetail->quotation_id = $request['id'];
-        $addDetail->name = $request['name'];
-        $addDetail->amount = $request['amount'];
-        $addDetail->price = $request['price'];
-        $addDetail->description = $request['description'];
-        $addDetail->total = $request['amount'] * $request['price'];
-        $addDetail->save();
+        $detailData = (new ReturnService())->detailData($request);
+
+        $queryQuotationType = (new ReturnService())->getQuotationType($request);
+
+        if ($queryQuotationType) {
+            $rate = $queryQuotationType->rate;
+            $detailData['price'] = $rate;
+            $detailData['total'] = $request['amount'] * $rate;
+
+            DB::table('quotation_details')->insert($detailData);
+        }
 
         /** Update Quotation */
         $quotation = Quotation::find($request['id']);
@@ -209,6 +219,7 @@ class QuotationService
         $editQuotation->start_date = $request['start_date'];
         $editQuotation->end_date = $request['end_date'];
         $editQuotation->note = $request['note'];
+        $editQuotation->quotation_type_id = $request['quotation_type_id'];
         $editQuotation->customer_id = $request['customer_id'];
         $editQuotation->currency_id = $request['currency_id'];
         $editQuotation->discount = $request['discount'];
@@ -228,19 +239,19 @@ class QuotationService
     /** edit detail */
     public function editQuotationDetail($request)
     {
-        $editDetail = QuotationDetail::find($request['id']);
-        $editDetail->order = $request['order'];
-        $editDetail->name = $request['name'];
-        $editDetail->amount = $request['amount'];
-        $editDetail->price = $request['price'];
-        $editDetail->description = $request['description'];
-        $editDetail->total = $request['amount'] * $request['price'];
-        $editDetail->save();
+        /** join data */
+        $editDetail = (new ReturnService())->joinData($request);
 
-        /**Update Quotation */
-        $editQuotation = Quotation::find($editDetail['quotation_id']);
+        /** update data in quotation_details */
+        $updateData = (new ReturnService())->updateData($editDetail, $request);
 
-        /**Update Calculate quotation */
+        // Update the record
+        DB::table('quotation_details')->where('id', $editDetail->id)->update($updateData);
+
+        // Fetch the Quotation using the quotation_id from the joined data
+        $editQuotation = Quotation::find($editDetail->quotation_id);
+
+        // Update Calculate quotation
         $this->calculateService->calculateTotal_ByEdit($editQuotation);
 
         return response()->json([

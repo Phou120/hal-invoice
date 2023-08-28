@@ -15,23 +15,33 @@ class CalculateService
 {
     use ResponseAPI;
 
-      /** Sum Total Quotation */
-    public function sumTotalQuotation($data)
-      {
-        $total = collect($data['invoice_details'])->sum(fn($detail) => $detail['amount'] * $detail['price']);
+    /** Sum Total invoice */
+    public function sumTotalInvoice($taxRate, $discountRate, $sumSubTotal)
+    {
+        /** Calculate */
+        $sumTotalTax = $sumSubTotal * $taxRate / 100;
+        $sumTotalDiscount = $sumSubTotal * $discountRate / 100;
+        $sumTotal = $sumSubTotal - $sumTotalDiscount + $sumTotalTax;
 
-        $quotation = Quotation::findOrFail($data['quotation_id']);
-        $totalQuotation = $quotation->total;
-
-        $invoiceIds = $quotation->invoices()->pluck('id');
-        $totalInvoice = InvoiceDetail::whereIn('invoice_id', $invoiceIds)->sum('total');
-
-        $discountInvoice = $totalInvoice * $data['discount'] / 100;
-
-        $sumTotal = $totalQuotation - ($totalInvoice - $discountInvoice);
-
-        return ($sumTotal >= $total) ? null : $sumTotal;
+        return $sumTotal;
     }
+
+    // public function sumTotalQuotation($data)
+    // {
+        // $total = collect($data['invoice_details'])->sum(fn($detail) => $detail['amount'] * $detail['price']);
+
+        // $quotation = Quotation::findOrFail($data['quotation_id']);
+        // $totalQuotation = $quotation->total;
+
+        // $invoiceIds = $quotation->invoices()->pluck('id');
+        // $totalInvoice = InvoiceDetail::whereIn('invoice_id', $invoiceIds)->sum('total');
+
+        // $discountInvoice = $totalInvoice * $data['discount'] / 100;
+
+        // $sumTotal = $totalQuotation - ($totalInvoice - $discountInvoice);
+
+        // return ($sumTotal >= $total) ? null : $sumTotal;
+    //}
 
     /** Check Balance Invoice */
     public function checkBalanceInvoice($data)
@@ -81,7 +91,7 @@ class CalculateService
         return $sumTotal;
     }
 
-    /**  */
+    /** get total in invoice */
     public function calculateTotalInvoice($invoiceDetail, $tax, $discount) {
         $calculateTax = $invoiceDetail * $tax / 100;
         $calculateDiscount = $invoiceDetail * $discount / 100;
@@ -89,6 +99,16 @@ class CalculateService
 
         return $sumTotal;
     }
+
+    /** Calculate invoice noQuotation */
+    public function calculateInvoiceNoQuotation($request, $sumSubTotal) {
+        /** Calculate **/
+        $sumTotalTax = $sumSubTotal * filterHelper::TAX / 100;
+        $sumTotalDiscount = $sumSubTotal * $request['discount'] / 100;
+        $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
+
+        return $sumTotal;
+     }
 
     /** calculate quotation */
     public function calculateTotal($request, $sumSubTotal, $id)
@@ -114,6 +134,7 @@ class CalculateService
         $sumTotalTax = $sumSubTotalPrice * filterHelper::TAX / 100;
         $sumTotalDiscount = $sumSubTotalPrice * $quotation['discount'] / 100;
         $sumTotal = ($sumSubTotalPrice - $sumTotalDiscount) + $sumTotalTax;
+        // dd($sumSubTotalPrice);
 
         /** Update Total Quotation */
         $editQuotation = Quotation::find($quotation['id']);

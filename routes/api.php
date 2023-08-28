@@ -19,6 +19,7 @@ use App\Http\Controllers\Quotation\QuotationTypeController;
 use App\Http\Controllers\Company\CompanyBankAccountController;
 use App\Http\Controllers\moduleCategory\ModuleTitleController;
 use App\Http\Controllers\PurchaseOrder\PurchaseOrderController;
+use App\Http\Controllers\Invoice\InvoiceNoQuotationIDController;
 use App\Http\Controllers\moduleCategory\ModuleCategoryController;
 
 /*
@@ -104,7 +105,7 @@ Route::group([
     Route::put('update-quotation-status/{id}', [QuotationController::class, 'updateQuotationStatus'])->name('update.quotation.status');
 
 
-    /** CRUD Invoice and CRUD InvoiceDetail */
+    /** CRUD Invoice */
     Route::post('add-invoice', [InvoiceController::class, 'addInvoice'])->name('add.invoice');
     // ->middleware('role:superAdmin');
     Route::get('list-invoices', [InvoiceController::class, 'listInvoices']);
@@ -116,11 +117,19 @@ Route::group([
     Route::get('list-invoice-detail/{id}', [InvoiceController::class, 'listInvoiceDetail'])->name('list.invoice.detail');
 
     /** edit-invoice-detail/{id} = {id} = ແມ່ນແກ້ໄຂ id detail  *** And ***  delete-invoice-detail/{id} = {id} = ແມ່ນລຶບ id detail */
-    Route::put('edit-invoice-detail/{id}', [InvoiceController::class, 'editInvoiceDetail'])->name('edit.invoice.detail');
+    //Route::put('edit-invoice-detail/{id}', [InvoiceController::class, 'editInvoiceDetail'])->name('edit.invoice.detail');
     Route::delete('delete-invoice-detail/{id}', [InvoiceController::class, 'deleteInvoiceDetail'])->name('delete.invoice.detail');
 
     /** update status in table Invoice */
     Route::put('update-invoice-status/{id}', [InvoiceController::class, 'updateInvoiceStatus'])->name('update.invoice.status');
+    Route::get('list-invoices', [InvoiceController::class, 'listInvoices']);
+
+
+    /** CURD invoice no quotation id */
+    Route::post('add-invoice-noQuotationID', [InvoiceNoQuotationIDController::class, 'addInvoiceNoQuotationID'])->name('add.invoice.noQuotation');
+    Route::put('edit-invoice-noQuotationID/{id}', [InvoiceNoQuotationIDController::class, 'editInvoiceNoQuotationID'])->name('edit.invoice.noQuotation');
+    Route::post('add-invoice-detail-noQuotationID/{id}', [InvoiceNoQuotationIDController::class, 'addInvoiceDetailNoQuotationID'])->name('add.invoice.detail.noQuotation');
+    Route::put('edit-invoice-detail-noQuotationID/{id}', [InvoiceNoQuotationIDController::class, 'editInvoiceDetailNoQuotationID'])->name('edit.invoice.detail.noQuotation');
 
 
     /** CRUD Receipt */

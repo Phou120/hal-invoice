@@ -179,18 +179,18 @@ class InvoiceRequest extends FormRequest
                         'date',
                             'after_or_equal:start_date'
                 ],
-                'customer_id' => [
-                    'required',
-                        'numeric',
-                            Rule::exists('customers', 'id')
-                                ->whereNull('deleted_at')
-                ],
-                'currency_id' => [
-                    'required',
-                        'numeric',
-                            Rule::exists('currencies', 'id')
-                                ->whereNull('deleted_at')
-                ]
+                // 'customer_id' => [
+                //     'required',
+                //         'numeric',
+                //             Rule::exists('customers', 'id')
+                //                 ->whereNull('deleted_at')
+                // ],
+                // 'currency_id' => [
+                //     'required',
+                //         'numeric',
+                //             Rule::exists('currencies', 'id')
+                //                 ->whereNull('deleted_at')
+                // ]
             ];
         }
 
@@ -203,22 +203,27 @@ class InvoiceRequest extends FormRequest
                             Rule::exists('invoices', 'id')
                                 ->whereNull('deleted_at')
                 ],
-                'order' => [
+                'quotation_detail_id' =>[
                     'required',
-                        'numeric'
+                        'array',
+                            Rule::exists('quotation_details', 'id')->whereNull('deleted_at')
                 ],
-                'name' => [
-                    'required',
-                        'max:255'
-                ],
-                'amount' => [
-                    'required',
-                        'numeric'
-                ],
-                'price' => [
-                    'required',
-                        'numeric'
-                ]
+                // 'order' => [
+                //     'required',
+                //         'numeric'
+                // ],
+                // 'name' => [
+                //     'required',
+                //         'max:255'
+                // ],
+                // 'amount' => [
+                //     'required',
+                //         'numeric'
+                // ],
+                // 'price' => [
+                //     'required',
+                //         'numeric'
+                // ]
             ];
         }
 
@@ -239,48 +244,53 @@ class InvoiceRequest extends FormRequest
                         'date',
                             'after_or_equal:start_date'
                 ],
-                'customer_id' => [
+                'quotation_detail_id' =>[
                     'required',
-                        'numeric',
-                            Rule::exists('customers', 'id')
-                                ->whereNull('deleted_at')
+                        'array',
+                            Rule::exists('quotation_details', 'id')->whereNull('deleted_at')
                 ],
-                'quotation_id' => [
-                    'nullable',
-                        'numeric',
-                            Rule::exists('quotations', 'id')
-                                ->whereNull('deleted_at')
-                ],
-                'currency_id' => [
-                    'required',
-                        'numeric',
-                            Rule::exists('currencies', 'id')
-                                ->whereNull('deleted_at')
-                ],
-                'discount' => [
-                    'required',
-                        'numeric'
-                ],
-                'invoice_details' => [
-                    'required',
-                        'array'
-                ],
-                'invoice_details.*.order' => [
-                    'required',
-                        'numeric'
-                ],
-                'invoice_details.*.name' => [
-                    'required',
-                        'max:255'
-                ],
-                'invoice_details.*.amount' => [
-                    'required',
-                        'numeric'
-                ],
-                'invoice_details.*.price' => [
-                    'required',
-                        'numeric'
-                ]
+                // 'customer_id' => [
+                //     'required',
+                //         'numeric',
+                //             Rule::exists('customers', 'id')
+                //                 ->whereNull('deleted_at')
+                // ],
+                // 'quotation_id' => [
+                //     'nullable',
+                //         'numeric',
+                //             Rule::exists('quotations', 'id')
+                //                 ->whereNull('deleted_at')
+                // ],
+                // 'currency_id' => [
+                //     'nullable',
+                //         // 'numeric',
+                //         //     Rule::exists('currencies', 'id')
+                //         //         ->whereNull('deleted_at')
+                // ],
+                // 'discount' => [
+                //     'required',
+                //         'numeric'
+                // ],
+                // 'invoice_details' => [
+                //     'required',
+                //         'array'
+                // ],
+                // 'invoice_details.*.order' => [
+                //     'required',
+                //         'numeric'
+                // ],
+                // 'invoice_details.*.name' => [
+                //     'required',
+                //         'max:255'
+                // ],
+                // 'invoice_details.*.amount' => [
+                //     'required',
+                //         'numeric'
+                // ],
+                // 'invoice_details.*.price' => [
+                //     'required',
+                //         'numeric'
+                // ]
             ];
         }
 
@@ -299,34 +309,35 @@ class InvoiceRequest extends FormRequest
             'end_date.date' => 'ຄວນເປັນວັນທີ...',
             'end_date.after_or_equal' => 'ວັນທີສິ້ນສຸດຄວນໃຫ່ຍກວ່າວັນທີເລີ່ມ...',
 
-            'customer_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
-            'customer_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
-            'customer_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
+            // 'customer_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
+            // 'customer_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
+            // 'customer_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
 
-            'quotation_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
-            'quotation_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
+            // 'quotation_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
+            // 'quotation_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
 
-            'currency_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
-            'currency_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
-            'currency_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
+            // 'currency_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
+            // 'currency_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
+            // 'currency_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
 
             'discount.required' => 'ກະລຸນາປ້ອນກ່ອນ...',
             'discount.numeric' => 'ຄວນເປັນໂຕເລກ...',
 
-            'invoice_details.required' => 'ກະລຸນາປ້ອນກ່ອນ...',
-            'invoice_details.array' => 'invoice_details ຄວນເປັນ array...',
+            'quotation_detail_id.required' => 'ກະລຸນາປ້ອນກ່ອນ...',
+            'quotation_detail_id.array' => 'quotation_detail_id ຄວນເປັນ array...',
+            'quotation_detail_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
 
-            'invoice_details.*.order.required' => 'ກະລຸນາປ້ອນ order ກ່ອນ...',
-            'invoice_details.*.order.numeric' => 'order ຄວນເປັນໂຕເລກ...',
+            // 'invoice_details.*.order.required' => 'ກະລຸນາປ້ອນ order ກ່ອນ...',
+            // 'invoice_details.*.order.numeric' => 'order ຄວນເປັນໂຕເລກ...',
 
-            'invoice_details.*.name.required' => 'ກະລຸນາປ້ອນຊື່ກ່ອນ...',
-            'invoice_details.*.name.max' => 'ຊື່ບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
+            // 'invoice_details.*.name.required' => 'ກະລຸນາປ້ອນຊື່ກ່ອນ...',
+            // 'invoice_details.*.name.max' => 'ຊື່ບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
 
-            'invoice_details.*.amount.required' => 'ກະລຸນາປ້ອນຈຳນວນກ່ອນ...',
-            'invoice_details.*.amount.numeric' => 'ຈຳນວນຄວນເປັນໂຕເລກ...',
+            // 'invoice_details.*.amount.required' => 'ກະລຸນາປ້ອນຈຳນວນກ່ອນ...',
+            // 'invoice_details.*.amount.numeric' => 'ຈຳນວນຄວນເປັນໂຕເລກ...',
 
-            'invoice_details.*.price.required' => 'ກະລຸນາປ້ອນລາຄາກ່ອນ...',
-            'invoice_details.*.price.numeric' => 'ລາຄາຄວນເປັນໂຕເລກ...',
+            // 'invoice_details.*.price.required' => 'ກະລຸນາປ້ອນລາຄາກ່ອນ...',
+            // 'invoice_details.*.price.numeric' => 'ລາຄາຄວນເປັນໂຕເລກ...',
 
             'id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
             'id.numeric' => 'id ຄວນເປັນໂຕເລກ...',

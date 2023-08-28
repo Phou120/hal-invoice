@@ -23,7 +23,7 @@ class InvoiceNoQuotationService
     }
 
     /** add invoice ທີ່ບໍ່ມີ id quotation */
-    public function addInvoice($request)
+    public function addInvoiceNoQuotationID($request)
     {
         DB::beginTransaction();
 
@@ -31,7 +31,7 @@ class InvoiceNoQuotationService
             $addInvoice->invoice_number = generateHelper::generateInvoiceNumber('IV- ', 8);
             $addInvoice->invoice_name = $request['invoice_name'];
             $addInvoice->currency_id = $request['currency_id'];
-            $addInvoice->quotation_id = $request['quotation_id'];
+            // $addInvoice->quotation_id = $request['quotation_id'];
             $addInvoice->customer_id = $request['customer_id'];
             $addInvoice->start_date = $request['start_date'];
             $addInvoice->discount = $request['discount'];
@@ -41,6 +41,7 @@ class InvoiceNoQuotationService
             $addInvoice->tax = filterHelper::TAX;
             $addInvoice->save();
 
+            $sumSubTotal = 0;
             if(!empty($request['invoice_details'])){
                 foreach($request['invoice_details'] as $item){
                     $total =  $item['amount'] * $item['price'];
@@ -54,8 +55,13 @@ class InvoiceNoQuotationService
                     $addDetail->description = $item['description'];
                     $addDetail->total = $total;
                     $addDetail->save();
+
+                    $sumSubTotal += $total;
                 }
             }
+
+             /**Calculate */
+        $this->calculateService->calculateInvoiceNoQuotation($request, $sumSubTotal, $addInvoice['id']);
 
         DB::commit();
 
@@ -66,7 +72,7 @@ class InvoiceNoQuotationService
     }
 
     /** add invoice detail ທີ່ບໍ່ມີ id quotation */
-    public function addInvoiceDetail($request)
+    public function addInvoiceDetailNoQuotationID($request)
     {
         $addDetail = new InvoiceDetail();
         $addDetail->description = $request['description'];
@@ -85,7 +91,7 @@ class InvoiceNoQuotationService
     }
 
     /** update invoice ທີ່ບໍ່ມີ id quotation */
-    public function editInvoice($request)
+    public function editInvoiceNoQuotationID($request)
     {
         $editInvoice = Invoice::find($request['id']);
         $editInvoice->invoice_name = $request['invoice_name'];
@@ -93,7 +99,6 @@ class InvoiceNoQuotationService
         $editInvoice->end_date = $request['end_date'];
         $editInvoice->note = $request['note'];
         $editInvoice->discount = $request['discount'];
-        $editInvoice->tax = filterHelper::TAX;
         $editInvoice->customer_id = $request['customer_id'];
         $editInvoice->currency_id = $request['currency_id'];
         $editInvoice->updated_by = Auth::user('api')->id;
