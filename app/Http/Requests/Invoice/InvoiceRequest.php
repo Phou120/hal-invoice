@@ -258,6 +258,16 @@ class InvoiceRequest extends FormRequest
                                         $fail('ລາຍການນີ້ຖືກສ້າງ invoice ແລ້ວ ' .$quotation_detail_id);
                                     }
                                 }
+                            },
+                            function ($attribute, $value, $fail) {
+                                $quotationIds = collect($value)
+                                ->map(fn($quotationDetailId) => optional(QuotationDetail::find($quotationDetailId))->quotation_id)
+                                ->unique()
+                                ->values();
+
+                                if ($quotationIds->count() > 1) {
+                                    $fail("ກະລຸນາເລືອກໃຫ້ຖືກຕ້ອງ...");
+                                }
                             }
 
                 ],

@@ -20,9 +20,9 @@ class InvoiceNoQuotationRequest extends FormRequest
 
     public function prepareForValidation()
     {
-        if($this->isMethod('put') && $this->routeIs('edit.invoice.noQuotation')
-             ||$this->isMethod('post') && $this->routeIs('add.invoice.detail.noQuotation')
-             ||$this->isMethod('put') && $this->routeIs('edit.invoice.detail.noQuotation')
+        if($this->isMethod('put') && $this->routeIs('edit.invoice.no.quotation')
+             ||$this->isMethod('post') && $this->routeIs('add.invoice.no.quotation.detail')
+             ||$this->isMethod('put') && $this->routeIs('edit.invoice.no.quotation.detail')
         ){
             $this->merge([
                 'id' => $this->route()->parameters['id'],
@@ -38,7 +38,7 @@ class InvoiceNoQuotationRequest extends FormRequest
      */
     public function rules()
     {
-        if($this->isMethod('put') && $this->routeIs('edit.invoice.detail.noQuotation'))
+        if($this->isMethod('put') && $this->routeIs('edit.invoice.no.quotation.detail'))
         {
             return [
                 'id' =>[
@@ -80,7 +80,7 @@ class InvoiceNoQuotationRequest extends FormRequest
             ];
         }
 
-        if($this->isMethod('post') && $this->routeIs('add.invoice.detail.noQuotation'))
+        if($this->isMethod('post') && $this->routeIs('add.invoice.no.quotation.detail'))
         {
             return [
                 'id' =>[
@@ -116,7 +116,7 @@ class InvoiceNoQuotationRequest extends FormRequest
             ];
         }
 
-        if($this->isMethod('put') && $this->routeIs('edit.invoice.noQuotation'))
+        if($this->isMethod('put') && $this->routeIs('edit.invoice.no.quotation'))
         {
             return [
                 'id' =>[
@@ -172,7 +172,7 @@ class InvoiceNoQuotationRequest extends FormRequest
             ];
         }
 
-        if($this->isMethod('post') && $this->routeIs('add.invoice.noQuotation'))
+        if($this->isMethod('post') && $this->routeIs('add.invoice.no.quotation'))
         {
             return [
                 'invoice_name' =>[

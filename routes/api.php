@@ -128,10 +128,10 @@ Route::group([
 
 
     /** CURD invoice no quotation id */
-    Route::post('add-invoice-noQuotationID', [InvoiceNoQuotationIDController::class, 'addInvoiceNoQuotationID'])->name('add.invoice.noQuotation');
-    Route::put('edit-invoice-noQuotationID/{id}', [InvoiceNoQuotationIDController::class, 'editInvoiceNoQuotationID'])->name('edit.invoice.noQuotation');
-    Route::post('add-invoice-detail-noQuotationID/{id}', [InvoiceNoQuotationIDController::class, 'addInvoiceDetailNoQuotationID'])->name('add.invoice.detail.noQuotation');
-    Route::put('edit-invoice-detail-noQuotationID/{id}', [InvoiceNoQuotationIDController::class, 'editInvoiceDetailNoQuotationID'])->name('edit.invoice.detail.noQuotation');
+    Route::post('add-invoice-no-quotation', [InvoiceNoQuotationIDController::class, 'addInvoiceNoQuotationID'])->name('add.invoice.no.quotation');
+    Route::put('edit-invoice-no-quotation/{id}', [InvoiceNoQuotationIDController::class, 'editInvoiceNoQuotationID'])->name('edit.invoice.no.quotation');
+    Route::post('add-invoice-no-quotation-detail/{id}', [InvoiceNoQuotationIDController::class, 'addInvoiceDetailNoQuotationID'])->name('add.invoice.no.quotation.detail');
+    Route::put('edit-invoice-no-quotation-detail/{id}', [InvoiceNoQuotationIDController::class, 'editInvoiceDetailNoQuotationID'])->name('edit.invoice.no.quotation.detail');
 
 
     /** CRUD Receipt */

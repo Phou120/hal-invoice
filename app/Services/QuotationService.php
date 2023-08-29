@@ -143,7 +143,9 @@ class QuotationService
         /** filter total */
         $query = filterHelper::filterTotal($query, $request);
 
-        $listQuotations = (clone $query)->orderBy('id', 'asc')->paginate($perPage);
+        $listQuotations = (clone $query)->orderBy('id', 'asc')
+        ->where('quotations.created_by', auth()->user()->id)
+        ->paginate($perPage);
 
         $listQuotations->map(function ($item) {
             TableHelper::loopDataInQuotation($item);

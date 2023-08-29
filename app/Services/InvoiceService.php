@@ -207,7 +207,9 @@ class InvoiceService
         $query = filterHelper::filterStatus($query, $request);
 
 
-        $listInvoice = (clone $query)->orderBy('invoices.id', 'asc')->paginate($perPage);
+        $listInvoice = (clone $query)->orderBy('invoices.id', 'asc')
+        ->where('invoices.created_by', auth()->user()->id)
+        ->paginate($perPage);
 
         $listInvoice = filterHelper::mapDataInvoice($listInvoice); // Apply transformation
 

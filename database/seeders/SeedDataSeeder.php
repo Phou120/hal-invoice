@@ -6,7 +6,11 @@ use App\Models\Company;
 use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\Quotation;
+use App\Models\CompanyUser;
+use App\Models\ModuleTitle;
+use App\Models\ModuleCategory;
 use Illuminate\Database\Seeder;
+use App\Models\CompanyBankAccount;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
@@ -20,8 +24,12 @@ class SeedDataSeeder extends Seeder
     public function run()
     {
         $this->createCustomers();
-        $this->createCurrencies();
         $this->createCompanies();
+        $this->createCurrencies();
+        $this->createCompanyUsers();
+        $this->createModuleCategories();
+        $this->createModuleTitles();
+        $this->createCompanyBankAccounts();
     }
 
 
@@ -241,17 +249,94 @@ class SeedDataSeeder extends Seeder
         ]);
     }
 
-    public function createQuotations()
+    public function createCompanyBankAccounts()
     {
-        // Quotation::create([
-        //     'customer_id' => 1,
-        //     'company_id' => 2,
-        //     'currency_id' => 9,
-        //     'created_by' => Auth::user('api')->id,
-        //     'quotation_name' => 'ໃບສະເໝີລາຄາ ລະບົບສຳລັບຜູ້ໃຫ່ຍ',
-        //     'start_date' => '2023-09-25',
-        //     'end_date' => '2023-12-02',
-        //     'note'
-        // ]);
+        CompanyBankAccount::create([
+            'company_id' => 1,
+            'bank_name' => 'JDB',
+            'account_name' => 'halTech',
+            'account_number' => '222455669872',
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        CompanyBankAccount::create([
+            'company_id' => 2,
+            'bank_name' => 'JDB',
+            'account_name' => 'dev',
+            'account_number' => '222455669843',
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        CompanyBankAccount::create([
+            'company_id' => 3,
+            'bank_name' => 'JDB',
+            'account_name' => 'ພັດທະນາລາວ',
+            'account_number' => '222455669889',
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    public function createCompanyUsers()
+    {
+        CompanyUser::create([
+            'company_id' => 1,
+            'user_id' => 2,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        CompanyUser::create([
+            'company_id' => 2,
+            'user_id' => 2,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        CompanyUser::create([
+            'company_id' => 3,
+            'user_id' => 2,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    public function createModuleCategories()
+    {
+        ModuleCategory::create([
+            'name' => 'hal',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        ModuleCategory::create([
+            'name' => 'tech',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    public function createModuleTitles()
+    {
+        ModuleTitle::create([
+            'module_category_id' => 1,
+            'name' => 'for',
+            'hour' => 3,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        ModuleTitle::create([
+            'module_category_id' => 2,
+            'name' => 'forget',
+            'hour' => 5,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }
