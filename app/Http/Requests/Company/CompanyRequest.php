@@ -14,7 +14,7 @@ class CompanyRequest extends FormRequest
      */
     public function authorize()
     {
-        return auth('api')->user()->hasRole('superadmin|admin');
+        return auth('api')->user()->hasRole('company-admin|company-user');
         // if($this->routeIs('edit.company')){
         //     return auth('api')->user()->hasRole('superAdmin');
         // }else if($this->routeIs('add.company')) {

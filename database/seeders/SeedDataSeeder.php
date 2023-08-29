@@ -292,7 +292,7 @@ class SeedDataSeeder extends Seeder
         ]);
 
         CompanyUser::create([
-            'company_id' => 2,
+            'company_id' => 12,
             'user_id' => 2,
             'created_at' => now(),
             'updated_at' => now(),

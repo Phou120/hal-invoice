@@ -164,7 +164,8 @@ class InvoiceService
         $totalPrice = $invoice->sum('total'); // sum total of invoices all
 
         /** where status = created */
-        $invoiceStatus = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CREATED'])->orderBy('invoices.id', 'asc')->get();
+        $invoiceStatus = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CREATED'])->orderBy('invoices.id', 'asc')
+        ->where('invoices.created_by', auth()->user()->id)->get();
 
         $invoiceStatus = filterHelper::getTotal($invoiceStatus); // Apply transformation
 
@@ -172,7 +173,8 @@ class InvoiceService
         $createdTotal = (clone $invoiceStatus)->sum('total'); // sum total of invoices all
 
         /** where status = approved */
-        $invoiceStatusApproved = (clone $query)->where('status', filterHelper::INVOICE_STATUS['APPROVED'])->orderBy('invoices.id', 'asc')->get();
+        $invoiceStatusApproved = (clone $query)->where('status', filterHelper::INVOICE_STATUS['APPROVED'])->orderBy('invoices.id', 'asc')
+        ->where('invoices.created_by', auth()->user()->id)->get();
 
         $invoiceStatusApproved = filterHelper::getTotal($invoiceStatusApproved); // Apply transformation
 
@@ -180,7 +182,8 @@ class InvoiceService
         $approvedTotal = (clone $invoiceStatusApproved)->sum('total'); // sum total of invoices all
 
         /** where status = inprogress */
-        $invoiceStatusInprogress = (clone $query)->where('status', filterHelper::INVOICE_STATUS['INPROGRESS'])->orderBy('invoices.id', 'asc')->get();
+        $invoiceStatusInprogress = (clone $query)->where('status', filterHelper::INVOICE_STATUS['INPROGRESS'])->orderBy('invoices.id', 'asc')
+        ->where('invoices.created_by', auth()->user()->id)->get();
 
         $invoiceStatusInprogress = filterHelper::getTotal($invoiceStatusInprogress); // Apply transformation
 
@@ -188,7 +191,8 @@ class InvoiceService
         $inprogressTotal = (clone $invoiceStatusInprogress)->sum('total'); // sum total of invoices all
 
         /** where status = completed */
-        $invoiceStatusCompleted = (clone $query)->where('status', filterHelper::INVOICE_STATUS['COMPLETED'])->orderBy('invoices.id', 'asc')->get();
+        $invoiceStatusCompleted = (clone $query)->where('status', filterHelper::INVOICE_STATUS['COMPLETED'])->orderBy('invoices.id', 'asc')
+        ->where('invoices.created_by', auth()->user()->id)->get();
 
         $invoiceStatusCompleted = filterHelper::getTotal($invoiceStatusCompleted); // Apply transformation
 
@@ -196,7 +200,8 @@ class InvoiceService
         $completedTotal = (clone $invoiceStatusCompleted)->sum('total'); // sum total of invoices all
 
         /** where status = canceled */
-        $invoiceStatusCanceled = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CANCELLED'])->orderBy('invoices.id', 'asc')->get();
+        $invoiceStatusCanceled = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CANCELLED'])->orderBy('invoices.id', 'asc')
+        ->where('invoices.created_by', auth()->user()->id)->get();
 
         $invoiceStatusCanceled = filterHelper::getTotal($invoiceStatusCanceled); // Apply transformation
 
