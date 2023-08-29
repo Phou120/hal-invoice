@@ -30,8 +30,6 @@ class ReportService
         // Initialize data array
         $responseData = (new ReturnService())->responseData($invoiceQuery);
 
-        //$countUser = $invoiceQuery->select(DB::raw('(SELECT COUNT(id) FROM users WHERE users.id) as user_count'))->first();
-
         /** foreach data */
         $foreach = (new ReturnService())->foreachData($statuses, $invoiceQuery, $responseData);
 

@@ -32,6 +32,7 @@ class InvoiceService
     {
         $quotationDetailId = $request['quotation_detail_id'];
         $quotationDetail = QuotationDetail::find($quotationDetailId);
+        // dd($quotationDetail);
 
         if(isset($quotationDetail)) {
             $getQuotation = DB::table('quotations')
@@ -78,7 +79,7 @@ class InvoiceService
                             $sumSubTotal += $total;
                         }
                         /**Calculate */
-                        $this->calculateService->sumTotalInvoice($taxRate, $discountRate, $sumSubTotal);
+                        $this->calculateService->sumTotalInvoice($taxRate, $discountRate, $sumSubTotal, $addInvoice['id']);
 
                 DB::commit();
 
@@ -239,10 +240,29 @@ class InvoiceService
             $invoiceId = $request->input('id');
 
             /** data in invoice_details */
-            $invoiceDetails = (new ReturnService())->invoiceDetail($quotation, $invoiceId);
+            // $invoiceDetails = (new ReturnService())->invoiceDetail($quotation, $invoiceId);
+
+            $invoiceDetails = [
+                'description' => $quotation->description,
+                'invoice_id' => $invoiceId,
+                'amount' => $quotation->amount,
+                'price' => $quotation->price,
+                'order' => $quotation->order,
+                'name' => $quotation->name,
+                'total' => $quotation->amount * $quotation->price,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
 
             /** insert invoice_details */
             InvoiceDetail::insert([$invoiceDetails]);
+
+             /**Update Invoice */
+            $editInvoice = Invoice::find($invoiceId);
+
+            /**Update Calculate */
+            $this->calculateService->calculateTotalInvoice_ByEdit($editInvoice);
+
         }
 
         return response()->json([

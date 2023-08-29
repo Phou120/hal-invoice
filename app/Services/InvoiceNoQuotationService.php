@@ -60,8 +60,8 @@ class InvoiceNoQuotationService
                 }
             }
 
-             /**Calculate */
-        $this->calculateService->calculateInvoiceNoQuotation($request, $sumSubTotal, $addInvoice['id']);
+            /**Calculate */
+            $this->calculateService->calculateInvoiceNoQuotation($request, $sumSubTotal, $addInvoice['id']);
 
         DB::commit();
 
@@ -83,6 +83,12 @@ class InvoiceNoQuotationService
         $addDetail->name = $request['name'];
         $addDetail->total = $request['amount'] * $request['price'];
         $addDetail->save();
+
+        /**Update Invoice */
+        $editInvoice = Invoice::find($request['id']);
+
+        /**Update Calculate */
+        $this->calculateService->calculateTotalInvoice_ByEdit($editInvoice);
 
         return response()->json([
             'error' => false,
@@ -121,6 +127,13 @@ class InvoiceNoQuotationService
         $editDetail->description = $request['description'];
         $editDetail->total = $request['amount'] * $request['price'];
         $editDetail->save();
+
+        /**Update Invoice */
+        $editInvoice = Invoice::find($editDetail['invoice_id']);
+
+        /**Update Calculate */
+        $this->calculateService->calculateTotalInvoice_ByEdit($editInvoice);
+
 
         return response()->json([
             'error' => false,

@@ -45,7 +45,7 @@ class QuotationService
         $addQuotation->note = $request['note'];
         $addQuotation->customer_id = $request['customer_id'];
         $addQuotation->quotation_type_id = $getQuotationType['id'];
-        $addQuotation->currency_id = $request['currency_id'];
+        $addQuotation->currency_id = $getQuotationType['currency_id'];
         $addQuotation->created_by = Auth::user('api')->id;
         $addQuotation->discount = $request['discount'];
         $addQuotation->save();
@@ -314,6 +314,22 @@ class QuotationService
         $updateStatus->status = $request['status'];
         $updateStatus->updated_by = Auth::user('api')->id;
         $updateStatus->save();
+
+        return response()->json([
+            'errors' => false,
+            'msg' => 'ສຳເລັດແລ້ວ',
+        ], 200);
+    }
+
+    public function updateDetailStatus($request)
+    {
+        $updateDetailStatus = QuotationDetail::find($request['id']);
+        $updateDetailStatus->status_create_invoice = $request['status_create_invoice'];
+        $updateDetailStatus->save();
+
+        $updateQuotation = Quotation::find($updateDetailStatus['quotation_id']);
+        $updateQuotation->updated_by = Auth::user('api')->id;
+        $updateQuotation->save();
 
         return response()->json([
             'errors' => false,

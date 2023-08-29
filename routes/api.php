@@ -103,6 +103,8 @@ Route::group([
 
     /** update status quotation */
     Route::put('update-quotation-status/{id}', [QuotationController::class, 'updateQuotationStatus'])->name('update.quotation.status');
+    /** update status in quotation_details */
+    Route::put('update-detail-status/{id}', [QuotationController::class, 'updateDetailStatus'])->name('update.detail.status');
 
 
     /** CRUD Invoice */
