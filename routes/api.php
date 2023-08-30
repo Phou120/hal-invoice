@@ -213,6 +213,8 @@ Route::group([
     Route::put('update-module-title/{id}', [ModuleTitleController::class, 'updateModuleTitle'])->name('update.module.title')->middleware('role:superadmin|admin');
     Route::delete('delete-module-title/{id}', [ModuleTitleController::class, 'deleteModuleTitle'])->name('delete.module.title')->middleware('role:superadmin|admin');
 
+    /** Filter Module Title */
+    Route::get('filter-module-title/{id}', [ModuleTitleController::class, 'filterModuleTitle'])->name('filter.module.title');
 
     /** CRUD quotation type */
     Route::get('list-quotation-types', [QuotationTypeController::class, 'listQuotationTypes'])->middleware('role:superadmin|admin');

@@ -58,4 +58,14 @@ class ModuleTitleService
             'msg' => 'ສຳເລັດແລ້ວ'
         ]);
     }
+
+
+    public function filterModuleTitleById($id)
+    {
+        $items = ModuleTitle::where('module_category_id', $id)->get();
+
+        return response()->json([
+            'module_titles' => $items
+        ]);
+    }
 }
