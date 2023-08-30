@@ -145,6 +145,8 @@ class InvoiceService
     /** ດຶງໃບບິນເກັບເງິນ */
     public function listInvoices($request)
     {
+        $user = Auth::user();
+
         $perPage = $request->per_page;
 
         $query = Invoice::select(
@@ -157,7 +159,8 @@ class InvoiceService
 
         $totalBill = (clone $query)->count(); // count all invoices
 
-        $invoice = (clone $query)->orderBy('invoices.id', 'asc')->get();
+        $invoice = (clone $query)->orderBy('invoices.id', 'asc')
+        ->where('invoices.created_by', auth()->user()->id)->get();
 
         $invoice = filterHelper::getTotal($invoice);
 
@@ -212,9 +215,19 @@ class InvoiceService
         $query = filterHelper::filterStatus($query, $request);
 
 
-        $listInvoice = (clone $query)->orderBy('invoices.id', 'asc')
-        ->where('invoices.created_by', auth()->user()->id)
-        ->paginate($perPage);
+        if ($user->hasRole(['superadmin', 'admin'])) {
+            $listInvoice = $query->orderBy('invoices.id', 'asc');
+        }
+
+        if ($user->hasRole(['company-admin', 'company-user'])) {
+            $listInvoice = $query
+                ->where(function ($query) use ($user) {
+                    $query->where('invoices.created_by', $user->id);
+                })
+                ->orderBy('invoices.id', 'asc');
+        }
+
+        $listInvoice = $listInvoice->paginate($perPage);
 
         $listInvoice = filterHelper::mapDataInvoice($listInvoice); // Apply transformation
 
@@ -305,34 +318,46 @@ class InvoiceService
     /** ດຶງລາຍລະອຽດໃບບິນ */
     public function listInvoiceDetail($request)
     {
-        //$perPage = $request->per_page;
+        $user = Auth::user();
         $invoiceId = $request->id;
 
         $item = DB::table('invoices')
             ->select(
                 'invoices.*',
                 DB::raw('(SELECT COUNT(*) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as count_details'),
-                DB::raw('(SELECT SUM(invoice_details.total) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as total')
+                // DB::raw('(SELECT SUM(invoice_details.total) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as total')
             )
-            ->where('invoices.id', $invoiceId)
-            ->first();
+            ->where('invoices.id', $invoiceId);
 
-        $total = $item->total;
+            if ($user->hasRole(['superadmin', 'admin'])) {
+                $item->where('invoices.id', $request->id)
+                    ->orderBy('invoices.id', 'asc');
+            }
 
-        $tax = $item->tax;
-        $discount = $item->discount;
+            if ($user->hasRole(['company-admin', 'company-user'])) {
+                $item->where('invoices.id', $request->id)
+                    ->where('invoices.created_by', $user->id)
+                    ->orderBy('invoices.id', 'asc');
+            }
 
-        // Calculate the tax amount
-        $taxAmount = ($total * $tax) / 100;
+            $item = $item->first();
 
-        // Calculate the discount amount
-        $discountAmount = ($total * $discount) / 100;
+        // $total = $item->total;
 
-        // Calculate the final payable amount
-        $sumTotal = ($total - $discountAmount) + $taxAmount;
+        // $tax = $item->tax;
+        // $discount = $item->discount;
 
-        // Update the item with the calculated total
-        $item->total = $sumTotal;
+        // // Calculate the tax amount
+        // $taxAmount = ($total * $tax) / 100;
+
+        // // Calculate the discount amount
+        // $discountAmount = ($total * $discount) / 100;
+
+        // // Calculate the final payable amount
+        // $sumTotal = ($total - $discountAmount) + $taxAmount;
+
+        // // Update the item with the calculated total
+        // $item->total = $sumTotal;
 
         /** loop data */
         TableHelper::formatDataInvoice($item);
