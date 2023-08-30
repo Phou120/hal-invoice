@@ -32,6 +32,14 @@ class UserSeeder extends Seeder
             'name' => 'admin', 'display_name' => 'admin'
         ]);
 
+        $roleCompanyAdmin  = Role::create([
+            'name' => 'company-admin', 'display_name' => 'admin'
+        ]);
+
+        $roleCompanyUser  = Role::create([
+            'name' => 'company-user', 'display_name' => 'admin'
+        ]);
+
         //Create User
         $createUserSuperAdmin = User::create([
             'name' => 'admin',
@@ -46,6 +54,21 @@ class UserSeeder extends Seeder
             'password' => Hash::make('admin@invoice2023g'),
         ]);
         $createUserAdmin->attachRoles([$roleAdmin]);
+
+        $createUserCompanyAdmin = User::create([
+            'name' => 'company-admin',
+            'email' => 'companyadmin@gmail.com',
+            'password' => Hash::make('company@admin2023g'),
+        ]);
+        $createUserCompanyAdmin->attachRoles([$roleCompanyAdmin]);
+
+        $createUserCompanyAdmin = User::create([
+            'name' => 'company-user',
+            'email' => 'companyuser@gmail.com',
+            'password' => Hash::make('company@user2023g'),
+        ]);
+        $createUserCompanyAdmin->attachRoles([$roleCompanyUser]);
+
     }
 
     public function CreatePermissions(){

@@ -42,7 +42,9 @@ class CustomerService
          /** search name */
         $query = filterHelper::filterCustomerName($query, $searchTerm);
 
-        $listCustomers = (clone $query)->orderBy('id', 'desc')->paginate($perPage);
+        $listCustomers = (clone $query)->orderBy('id', 'desc')
+        // ->where('apply_jobs.user_apply_id', auth()->user()->id)
+        ->paginate($perPage);
 
         $listCustomers->transform(function ($item){
             return $item->format();

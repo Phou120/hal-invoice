@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Invoice;
 
 use App\Models\Invoice;
+use App\Models\QuotationDetail;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -247,7 +248,28 @@ class InvoiceRequest extends FormRequest
                 'quotation_detail_id' =>[
                     'required',
                         'array',
-                            Rule::exists('quotation_details', 'id')->whereNull('deleted_at')
+                            Rule::exists('quotation_details', 'id')->whereNull('deleted_at'),
+                            function ($attribute, $value, $fail) {
+                                foreach ($value as $quotation_detail_id) {
+                                    $statusCreateInvoice = QuotationDetail::where('id', $quotation_detail_id)
+                                    ->value('status_create_invoice');
+
+                                    if ($statusCreateInvoice === 1) {
+                                        $fail('ລາຍການນີ້ຖືກສ້າງ invoice ແລ້ວ ' .$quotation_detail_id);
+                                    }
+                                }
+                            },
+                            function ($attribute, $value, $fail) {
+                                $quotationIds = collect($value)
+                                ->map(fn($quotationDetailId) => optional(QuotationDetail::find($quotationDetailId))->quotation_id)
+                                ->unique()
+                                ->values();
+
+                                if ($quotationIds->count() > 1) {
+                                    $fail("ກະລຸນາເລືອກໃຫ້ຖືກຕ້ອງ...");
+                                }
+                            }
+
                 ],
                 // 'customer_id' => [
                 //     'required',

@@ -14,11 +14,12 @@ class ExportPDFController extends Controller
 
     public function exportPDF()
     {
-        $invoice = resolve(InvoiceService::class)->listInvoiceDetail(1)->getData();
+        // $invoice = resolve(InvoiceService::class)->listInvoiceDetail(1)->getData();
+        $invoice = '';
         $view = view('invoices.invoice')
         ->with('invoice', $invoice)
         ->render();
-        return $view;
+        
         $file_name = 'invoice' . '.pdf';
         $file_url = public_path('images/invoice/pdf/' . $file_name);
         if (!File::isDirectory(public_path('images/invoice/pdf/'))) {
@@ -29,7 +30,7 @@ class ExportPDFController extends Controller
         ->noSandbox()
         ->format('A4')
         ->landscape(false)
-        ->margins(0, 1, 0, 1)
+        ->margins(1, 1, 1, 1)
         ->save($file_url);
     }
 }

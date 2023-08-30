@@ -106,7 +106,9 @@ class ReceiptService
 
         $totalPrice = $receipt->sum('total'); // sum total of invoices all
 
-        $listReceipt = (clone $query)->orderBy('receipts.id', 'asc')->paginate($perPage);
+        $listReceipt = (clone $query)->orderBy('receipts.id', 'asc')
+        ->where('receipts.created_by', auth()->user()->id)
+        ->paginate($perPage);
 
         $listReceipt = filterHelper::mapDataReceipt($listReceipt);
 

@@ -12,6 +12,7 @@
         "laravel/sanctum": "^2.14",
         "laravel/tinker": "^2.7",
         "santigarcor/laratrust": "^7.2",
+        "spatie/browsershot": "^3.58",
         "tymon/jwt-auth": "^2.0"
     },
     "require-dev": {

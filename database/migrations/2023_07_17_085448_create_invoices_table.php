@@ -25,10 +25,10 @@ return new class extends Migration
             $table->dateTime('start_date');
             $table->dateTime('end_date');
             $table->text('note')->nullable();
-            // $table->double('sub_total')->default(0);
+            $table->double('sub_total')->default(0);
             $table->double('discount')->default(0);
             $table->double('tax')->default(0);
-            // $table->double('total')->default(0);
+            $table->double('total')->default(0);
             $table->enum('status', ['created', 'approved', 'inprogress', 'completed', 'canceled'])->default('created');
             $table->timestamps();
             $table->softDeletes();

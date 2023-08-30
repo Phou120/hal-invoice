@@ -15,6 +15,7 @@ class QuotationTypeService
         $createType = new QuotationType();
         $createType->name = $request['name'];
         $createType->rate = $request['rate'];
+        $createType->currency_id = $request['currency_id'];
         $createType->save();
 
         return response()->json([
@@ -39,6 +40,7 @@ class QuotationTypeService
         $updateType = QuotationType::find($request['id']);
         $updateType->name = $request['name'];
         $updateType->rate = $request['rate'];
+        $updateType->currency_id = $request['currency_id'];
         $updateType->save();
 
         return response()->json([

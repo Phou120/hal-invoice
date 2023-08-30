@@ -16,14 +16,18 @@ class CalculateService
     use ResponseAPI;
 
     /** Sum Total invoice */
-    public function sumTotalInvoice($taxRate, $discountRate, $sumSubTotal)
+    public function sumTotalInvoice($taxRate, $discountRate, $sumSubTotal, $id)
     {
         /** Calculate */
         $sumTotalTax = $sumSubTotal * $taxRate / 100;
         $sumTotalDiscount = $sumSubTotal * $discountRate / 100;
         $sumTotal = $sumSubTotal - $sumTotalDiscount + $sumTotalTax;
 
-        return $sumTotal;
+        /** Update Total invoice */
+        $addQuotation = Invoice::find($id);
+        $addQuotation->sub_total = $sumSubTotal;
+        $addQuotation->total = $sumTotal;
+        $addQuotation->save();
     }
 
     // public function sumTotalQuotation($data)
@@ -101,13 +105,18 @@ class CalculateService
     }
 
     /** Calculate invoice noQuotation */
-    public function calculateInvoiceNoQuotation($request, $sumSubTotal) {
+    public function calculateInvoiceNoQuotation($request, $sumSubTotal, $id) {
         /** Calculate **/
         $sumTotalTax = $sumSubTotal * filterHelper::TAX / 100;
         $sumTotalDiscount = $sumSubTotal * $request['discount'] / 100;
         $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
 
-        return $sumTotal;
+        /** Update Total invoice */
+        $addInvoice = Invoice::find($id);
+        $addInvoice->tax = filterHelper::TAX;
+        $addInvoice->sub_total = $sumSubTotal;
+        $addInvoice->total = $sumTotal;
+        $addInvoice->save();
      }
 
     /** calculate quotation */
@@ -142,6 +151,23 @@ class CalculateService
         $editQuotation->sub_total = $sumSubTotalPrice;
         $editQuotation->total = $sumTotal;
         $editQuotation->save();
+    }
+
+    /** calculate invoice */
+    public function calculateTotalInvoice_ByEdit($editInvoice)
+    {
+        /** Calculate */
+        $sumSubTotalPrice = InvoiceDetail::where('invoice_id', $editInvoice['id'])->get()->sum('total');
+        $sumTotalTax = $sumSubTotalPrice * filterHelper::TAX / 100;
+        $sumTotalDiscount = $sumSubTotalPrice * $editInvoice['discount'] / 100;
+        $sumTotal = ($sumSubTotalPrice - $sumTotalDiscount) + $sumTotalTax;
+
+        /** Update Total invoice */
+        $editInvoice = Invoice::find($editInvoice['id']);
+        $editInvoice->tax = filterHelper::TAX;
+        $editInvoice->sub_total = $sumSubTotalPrice;
+        $editInvoice->total = $sumTotal;
+        $editInvoice->save();
     }
 
      /** calculate PurchaseOrder */

@@ -49,52 +49,52 @@ Route::group([
 
 });
 
-
+Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
 
 Route::group([
     'middleware' => [
         'auth.jwt',
     ],
-    'role:superadmin|admin', 
+    'role:superadmin|admin|company-admin|company-user',
     'prefix' => 'admin',
 ], function() {
 
     /** CRUD Customers */
     Route::post('add-customer', [CustomerController::class, 'addCustomer'])->name('add.customer');
-    Route::get('list-customers', [CustomerController::class, 'listCustomers']);
+    Route::get('list-customers', [CustomerController::class, 'listCustomers'])->middleware('role:superadmin');
     Route::put('edit-customer/{id}', [CustomerController::class, 'editCustomer'])->name('edit.customer');
     Route::delete('delete-customer/{id}', [CustomerController::class, 'deleteCustomer'])->name('delete.customer');
 
     /** list customer to use skip */
-    Route::get('list-customer-skips', [CustomerController::class, 'listCustomersSkip']);
+    Route::get('list-customer-skips', [CustomerController::class, 'listCustomersSkip'])->middleware('role:superadmin');
 
 
     /** CRUD Currency */
     Route::post('add-currency', [CurrencyController::class, 'addCurrency'])->name('add.currency');
-    Route::get('list-currencies', [CurrencyController::class, 'listCurrency']);
+    Route::get('list-currencies', [CurrencyController::class, 'listCurrency'])->middleware('role:superadmin');
     Route::put('edit-currency/{id}', [CurrencyController::class, 'editCurrency'])->name('edit.currency');
     Route::delete('delete-currency/{id}', [CurrencyController::class, 'deleteCurrency'])->name('delete.currency');
 
 
     /** CRUD Company */
     Route::post('add-company', [CompanyController::class, 'addCompany'])->name('add.company');
-    Route::get('list-companies', [CompanyController::class, 'listCompanies']);
+    Route::get('list-companies', [CompanyController::class, 'listCompanies'])->middleware('role:superadmin');
     Route::put('edit-company/{id}', [CompanyController::class, 'editCompany'])->name('edit.company');
     Route::delete('delete-company/{id}', [CompanyController::class, 'deleteCompany'])->name('delete.company');
 
     /** list companies to use skip */
-    Route::get('list-companies-skip', [CompanyController::class, 'listCompanyToUseSkip']);
+    Route::get('list-companies-skip', [CompanyController::class, 'listCompanyToUseSkip'])->middleware('role:superadmin');
 
 
     /** CRUD Quotation and CRUD Quotation Detail */
     Route::post('add-quotation', [QuotationController::class, 'addQuotation'])->name('add.quotation');
-    Route::get('list-quotations', [QuotationController::class, 'listQuotations']);
+    Route::get('list-quotations', [QuotationController::class, 'listQuotations'])->middleware('role:superadmin');
     Route::put('edit-quotation/{id}', [QuotationController::class, 'editQuotation'])->name('edit.quotation');
     Route::delete('delete-quotation/{id}', [QuotationController::class, 'deleteQuotation'])->name('delete.quotation');
 
     /** list-quotation-detail/{id} = {id} = ແມ່ນ id quotation  *** And ***  add-quotation-detail/{id} = {id} = ແມ່ນ id quotation */
     Route::post('add-quotation-detail/{id}', [QuotationController::class, 'addQuotationDetail'])->name('add.quotation.detail');
-    Route::get('list-quotation-details/{id}', [QuotationController::class, 'listQuotationDetail'])->name('list.quotation.detail');
+    Route::get('list-quotation-details/{id}', [QuotationController::class, 'listQuotationDetail'])->name('list.quotation.detail')->middleware('role:superadmin');
 
     /** edit-quotation-detail/{id} = {id} = ແມ່ນແກ້ໄຂ id detail  *** And ***  delete-quotation-detail/{id} = {id} = ແມ່ນລຶບ id detail */
     Route::put('edit-quotation-detail/{id}', [QuotationController::class, 'editQuotationDetail'])->name('edit.quotation.detail');
@@ -102,18 +102,19 @@ Route::group([
 
     /** update status quotation */
     Route::put('update-quotation-status/{id}', [QuotationController::class, 'updateQuotationStatus'])->name('update.quotation.status');
+    /** update status in quotation_details */
+    Route::put('update-detail-status/{id}', [QuotationController::class, 'updateDetailStatus'])->name('update.detail.status');
 
 
     /** CRUD Invoice */
     Route::post('add-invoice', [InvoiceController::class, 'addInvoice'])->name('add.invoice');
-    // ->middleware('role:superAdmin');
-    Route::get('list-invoices', [InvoiceController::class, 'listInvoices']);
+    Route::get('list-invoices', [InvoiceController::class, 'listInvoices'])->middleware('role:superadmin');
     Route::put('edit-invoice/{id}', [InvoiceController::class, 'editInvoice'])->name('edit.invoice');
     Route::delete('delete-invoice/{id}', [InvoiceController::class, 'deleteInvoice'])->name('delete.invoice');
 
     /** list-invoice-detail/{id} = {id} = ແມ່ນ id invoice  *** And ***  add-invoice-detail/{id} = {id} = ແມ່ນ id invoice */
     Route::post('add-invoice-detail/{id}', [InvoiceController::class, 'addInvoiceDetail'])->name('add.invoice.detail');
-    Route::get('list-invoice-detail/{id}', [InvoiceController::class, 'listInvoiceDetail'])->name('list.invoice.detail');
+    Route::get('list-invoice-detail/{id}', [InvoiceController::class, 'listInvoiceDetail'])->name('list.invoice.detail')->middleware('role:superadmin');
 
     /** edit-invoice-detail/{id} = {id} = ແມ່ນແກ້ໄຂ id detail  *** And ***  delete-invoice-detail/{id} = {id} = ແມ່ນລຶບ id detail */
     //Route::put('edit-invoice-detail/{id}', [InvoiceController::class, 'editInvoiceDetail'])->name('edit.invoice.detail');
@@ -121,19 +122,18 @@ Route::group([
 
     /** update status in table Invoice */
     Route::put('update-invoice-status/{id}', [InvoiceController::class, 'updateInvoiceStatus'])->name('update.invoice.status');
-    Route::get('list-invoices', [InvoiceController::class, 'listInvoices']);
 
 
     /** CURD invoice no quotation id */
-    Route::post('add-invoice-noQuotationID', [InvoiceNoQuotationIDController::class, 'addInvoiceNoQuotationID'])->name('add.invoice.noQuotation');
-    Route::put('edit-invoice-noQuotationID/{id}', [InvoiceNoQuotationIDController::class, 'editInvoiceNoQuotationID'])->name('edit.invoice.noQuotation');
-    Route::post('add-invoice-detail-noQuotationID/{id}', [InvoiceNoQuotationIDController::class, 'addInvoiceDetailNoQuotationID'])->name('add.invoice.detail.noQuotation');
-    Route::put('edit-invoice-detail-noQuotationID/{id}', [InvoiceNoQuotationIDController::class, 'editInvoiceDetailNoQuotationID'])->name('edit.invoice.detail.noQuotation');
+    Route::post('add-invoice-no-quotation', [InvoiceNoQuotationIDController::class, 'addInvoiceNoQuotationID'])->name('add.invoice.no.quotation');
+    Route::put('edit-invoice-no-quotation/{id}', [InvoiceNoQuotationIDController::class, 'editInvoiceNoQuotationID'])->name('edit.invoice.no.quotation');
+    Route::post('add-invoice-no-quotation-detail/{id}', [InvoiceNoQuotationIDController::class, 'addInvoiceDetailNoQuotationID'])->name('add.invoice.no.quotation.detail');
+    Route::put('edit-invoice-no-quotation-detail/{id}', [InvoiceNoQuotationIDController::class, 'editInvoiceDetailNoQuotationID'])->name('edit.invoice.no.quotation.detail');
 
 
     /** CRUD Receipt */
     Route::post('add-receipt', [ReceiptController::class, 'addReceipt'])->name('add.receipt');
-    Route::get('list-receipts', [ReceiptController::class, 'listReceipts']);
+    Route::get('list-receipts', [ReceiptController::class, 'listReceipts'])->middleware('role:superadmin');
     Route::put('edit-receipt/{id}', [ReceiptController::class, 'editReceipt'])->name('edit.receipt');
     Route::delete('delete-receipt/{id}', [ReceiptController::class, 'deleteReceipt'])->name('delete.receipt');
 
@@ -160,7 +160,7 @@ Route::group([
 
     /** CRUD of User */
     Route::post('add-user', [UserController::class, 'addUser'])->name('add.user');
-    Route::get('list-users', [UserController::class, 'listUsers']);
+    Route::get('list-users', [UserController::class, 'listUsers'])->middleware('role:superadmin');
     Route::put('edit-user/{id}', [UserController::class, 'editUser'])->name('edit.user');
     Route::delete('delete-user/{id}', [UserController::class, 'deleteUser'])->name('delete.user');
 
@@ -168,11 +168,11 @@ Route::group([
     Route::put('change-password/{id}', [UserController::class, 'changePassword'])->name('change.password');
 
     /** Get User profile */
-    Route::get('user-profile', [UserProfileController::class, 'ListUserProfile'])->middleware('auth');
+    Route::get('user-profile', [UserProfileController::class, 'ListUserProfile'])->middleware('role:superadmin');
 
     /** CRUD CompanyUser */
-    Route::get('list-company-users', [CompanyUserController::class, 'listCompanyUser']);
-    Route::post('create-company-user', [CompanyUserController::class, 'createCompanyUser'])->name('create.company.user');
+    Route::get('list-company-users', [CompanyUserController::class, 'listCompanyUser'])->middleware('role:superadmin');
+    Route::post('create-company-user', [CompanyUserController::class, 'createCompanyUser'])->name('create.company.user')->middleware('role:company-admin|company-user');
     Route::put('update-company-user/{id}', [CompanyUserController::class, 'updateCompanyUser'])->name('update.company.user');
     Route::delete('delete-company-user/{id}', [CompanyUserController::class, 'deleteCompanyUser'])->name('delete.company.user');
 
@@ -189,11 +189,9 @@ Route::group([
     /** report company */
     Route::get('report-company-customer', [ReportController::class, 'reportCompanyCustomer']);
 
-    //Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
-
 
     /** CRUD company_bank_account */
-    Route::get('list-company-bank-accounts', [CompanyBankAccountController::class, 'listCompanyBankAccount']);
+    Route::get('list-company-bank-accounts', [CompanyBankAccountController::class, 'listCompanyBankAccount'])->middleware('role:superadmin');
     Route::post('create-company-bank-account', [CompanyBankAccountController::class, 'createCompanyBankAccount'])->name('create.bank.account');
     Route::put('update-company-bank-account/{id}', [CompanyBankAccountController::class, 'updateCompanyBankAccount'])->name('update.bank.account');
     Route::delete('delete-company-bank-account/{id}', [CompanyBankAccountController::class, 'deleteCompanyBankAccount'])->name('delete.bank.account');
@@ -203,21 +201,21 @@ Route::group([
 
 
     /** CRUD module categories */
-    Route::get('list-module-categories', [ModuleCategoryController::class, 'listModuleCategory']);
+    Route::get('list-module-categories', [ModuleCategoryController::class, 'listModuleCategory'])->middleware('role:superadmin');
     Route::post('create-module-category', [ModuleCategoryController::class, 'createModuleCategory'])->name('create.module.category');
     Route::put('update-module-category/{id}', [ModuleCategoryController::class, 'updateModuleCategory'])->name('update.module.category');
     Route::delete('delete-module-category/{id}', [ModuleCategoryController::class, 'deleteModuleCategory'])->name('delete.module.category');
 
 
     /** CRUD module title */
-    Route::get('list-module-titles', [ModuleTitleController::class, 'listModuleTitle']);
+    Route::get('list-module-titles', [ModuleTitleController::class, 'listModuleTitle'])->middleware('role:superadmin');
     Route::post('create-module-title', [ModuleTitleController::class, 'createModuleTitle'])->name('create.module.title');
     Route::put('update-module-title/{id}', [ModuleTitleController::class, 'updateModuleTitle'])->name('update.module.title');
     Route::delete('delete-module-title/{id}', [ModuleTitleController::class, 'deleteModuleTitle'])->name('delete.module.title');
 
 
     /** CRUD quotation type */
-    Route::get('list-quotation-types', [QuotationTypeController::class, 'listQuotationTypes']);
+    Route::get('list-quotation-types', [QuotationTypeController::class, 'listQuotationTypes'])->middleware('role:superadmin');
     Route::post('create-quotation-type', [QuotationTypeController::class, 'createQuotationType'])->name('create.quotation.type');
     Route::put('update-quotation-type/{id}', [QuotationTypeController::class, 'updateQuotationType'])->name('update.quotation.type');
     Route::delete('delete-quotation-type/{id}', [QuotationTypeController::class, 'deleteQuotationType'])->name('delete.quotation.type');

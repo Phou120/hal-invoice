@@ -45,7 +45,7 @@ class QuotationService
         $addQuotation->note = $request['note'];
         $addQuotation->customer_id = $request['customer_id'];
         $addQuotation->quotation_type_id = $getQuotationType['id'];
-        $addQuotation->currency_id = $request['currency_id'];
+        $addQuotation->currency_id = $getQuotationType['currency_id'];
         $addQuotation->created_by = Auth::user('api')->id;
         $addQuotation->discount = $request['discount'];
         $addQuotation->save();
@@ -102,31 +102,36 @@ class QuotationService
         $totalPrice = $quotation->sum('total'); // sum all Quotations
 
 
-        $quotationStatusCreated = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CREATED'])->orderBy('quotations.id', 'asc')->get();
+        $quotationStatusCreated = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CREATED'])->orderBy('quotations.id', 'asc')
+        ->where('quotations.created_by', auth()->user()->id)->get();
 
         $created = (clone $quotationStatusCreated)->count(); // count status
         $createdTotal = (clone $quotationStatusCreated)->sum('total'); // sum total of quotation all
 
 
-        $quotationStatusApproved = (clone $query)->where('status', filterHelper::INVOICE_STATUS['APPROVED'])->orderBy('quotations.id', 'asc')->get();
+        $quotationStatusApproved = (clone $query)->where('status', filterHelper::INVOICE_STATUS['APPROVED'])->orderBy('quotations.id', 'asc')
+        ->where('quotations.created_by', auth()->user()->id)->get();
 
         $approved = (clone $quotationStatusApproved)->count(); // count status
         $approvedTotal = (clone $quotationStatusApproved)->sum('total'); // sum total of quotation all
 
 
-        $quotationStatusInprogress = (clone $query)->where('status', filterHelper::INVOICE_STATUS['INPROGRESS'])->orderBy('quotations.id', 'asc')->get();
+        $quotationStatusInprogress = (clone $query)->where('status', filterHelper::INVOICE_STATUS['INPROGRESS'])->orderBy('quotations.id', 'asc')
+        ->where('quotations.created_by', auth()->user()->id)->get();
 
         $inprogress = (clone $quotationStatusInprogress)->count(); // count status
         $inprogressTotal = (clone $quotationStatusInprogress)->sum('total'); // sum total of quotation all
 
 
-        $quotationStatusCompleted = (clone $query)->where('status', filterHelper::INVOICE_STATUS['COMPLETED'])->orderBy('quotations.id', 'asc')->get();
+        $quotationStatusCompleted = (clone $query)->where('status', filterHelper::INVOICE_STATUS['COMPLETED'])->orderBy('quotations.id', 'asc')
+        ->where('quotations.created_by', auth()->user()->id)->get();
 
         $completed = (clone $quotationStatusCompleted)->count(); // count status
         $completedTotal = (clone $quotationStatusCompleted)->sum('total'); // sum total of quotation all
 
 
-        $quotationStatusCancelled = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CANCELLED'])->orderBy('quotations.id', 'asc')->get();
+        $quotationStatusCancelled = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CANCELLED'])->orderBy('quotations.id', 'asc')
+        ->where('quotations.created_by', auth()->user()->id)->get();
 
         $cancelled = (clone $quotationStatusCancelled)->count(); // count status
         $cancelledTotal = (clone $quotationStatusCancelled)->sum('total'); // sum total of quotation all
@@ -143,7 +148,9 @@ class QuotationService
         /** filter total */
         $query = filterHelper::filterTotal($query, $request);
 
-        $listQuotations = (clone $query)->orderBy('id', 'asc')->paginate($perPage);
+        $listQuotations = (clone $query)->orderBy('id', 'asc')
+        ->where('quotations.created_by', auth()->user()->id)
+        ->paginate($perPage);
 
         $listQuotations->map(function ($item) {
             TableHelper::loopDataInQuotation($item);
@@ -314,6 +321,22 @@ class QuotationService
         $updateStatus->status = $request['status'];
         $updateStatus->updated_by = Auth::user('api')->id;
         $updateStatus->save();
+
+        return response()->json([
+            'errors' => false,
+            'msg' => 'ສຳເລັດແລ້ວ',
+        ], 200);
+    }
+
+    public function updateDetailStatus($request)
+    {
+        $updateDetailStatus = QuotationDetail::find($request['id']);
+        $updateDetailStatus->status_create_invoice = $request['status_create_invoice'];
+        $updateDetailStatus->save();
+
+        $updateQuotation = Quotation::find($updateDetailStatus['quotation_id']);
+        $updateQuotation->updated_by = Auth::user('api')->id;
+        $updateQuotation->save();
 
         return response()->json([
             'errors' => false,
