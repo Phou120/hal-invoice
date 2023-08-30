@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice Form</title>
+    <title>Quotation Form</title>
     {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css"> --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
   </head>
@@ -186,35 +186,41 @@
         <div class="invoice">
           <div class="invoice-header">
             <div class="columns">
-              <div class="column is-8">
-                <div class="header columns">
-                    <div class="logo column is-4">
-                    <img src="https://admin.haltech.la/generated/admin/img/logo.74a3eec9.png" alt="logo" width="152">
-                    </div>
-                    <div class="bill-from column is-8">
-                      <h1 class="title">HOUNG AH LOUN TECHNOLOGY CO.,LTD</h1>
-                      <p><strong>Business Number </strong>020 99999564</p>
-                      <p class="label">info@haltech.la</p>
-                      <p class="label">Don koi Village, Sisattanak District, Vientiane Capital, Laos</p>
-                    </div>
-                </div>
-              </div>
-              <div class="column is-4">
-                <div class="field is-horizontal">
-                    <div class="field-label is-normal">
-                      <p class="sub-title">ໃບສະເໜີລາຄາ ລະບົບຂົນສົ່ງດ່ວນ</p>
-                      <p class="label">IV00B883EV9</p>
-                      <p class="sub-title">Created Date</p>
-                      <p class="label">2023-08-20</p>
-                      <p class="sub-title">DUE DATE</p>
-                      <p class="label">2023-12-20</p>
-                      <p class="sub-title">BALANCE DUE</p>
-                      <p>$ 50,000</p>
+                {{-- ຂໍ້ມູນບໍລິສັດເຮົາ --}}
+                <div class="column is-8">
+                    <div class="header columns">
+                        <div class="logo column is-4">
+                        <img src="https://admin.haltech.la/generated/admin/img/logo.74a3eec9.png" alt="logo" width="152">
+                        </div>
+                        <div class="bill-from column is-8">
+                        <h1 class="title">HOUNG AH LOUN TECHNOLOGY CO.,LTD</h1>
+                        <p><strong>Business Number </strong>020 99999564</p>
+                        <p class="label">info@haltech.la</p>
+                        <p class="label">Don koi Village, Sisattanak District, Vientiane Capital, Laos</p>
+                        </div>
                     </div>
                 </div>
-              </div>
+                {{-- end Company --}}
+
+                {{-- ຂໍ້ມູນ Quotation --}}
+                <div class="column is-4">
+                    <div class="field is-horizontal">
+                        <div class="field-label is-normal">
+                            <p class="sub-title">ໃບສະເໜີລາຄາ ລະບົບຂົນສົ່ງດ່ວນ</p>
+                            <p class="label">IV00B883EV9</p>
+                            <p class="sub-title">Created Date</p>
+                            <p class="label">2023-08-20</p>
+                            <p class="sub-title">DUE DATE</p>
+                            <p class="label">2023-12-20</p>
+                            <p class="sub-title">BALANCE DUE</p>
+                            <p>$ 50,000</p>
+                        </div>
+                    </div>
+                </div>
+                {{-- End Quotation--}}
             </div>
             <hr class="border">
+
             {{-- ຂໍ້ມູນ ລູກຄ້າ --}}
             <div class="columns">
               <div class="column">
@@ -227,15 +233,16 @@
                       <p>hallogistics@gmail.com</p>
                       <p>Hongkha Rd, Vientiane Capital</p>
                   </div>
-  
               </div>
             </div>
-            {{-- end --}}
+            {{-- End Customer --}}
           </div>
           <div class="invoice-body">
             <div class="invoice-content">
               <div class="card-layout">
                 <div class="bill">
+
+                {{-- Quotation Detail --}}
                   <table class="table">
                     <thead>
                         <tr style="border-bottom: 2px solid #222;border-top:2px solid #222;background-color:#eee">
@@ -246,42 +253,15 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{-- @foreach($invoiceDetails as $invoiceDetail) --}}
+                        {{-- @foreach($data['quotation_details'] as $quotation_detail) --}}
                         <tr class="h-table">
                           <td class="width:50%;">
-                          <div class="desc-title">ໃບສະເໜີລາຄາພັດທະນາເສີມລະບົບຕີກັບ</div>
+                            <div class="desc-title">
+                                {{-- {{$quotation_detail['name']}} --}}
+                              ໃບສະເໜີລາຄາພັດທະນາເສີມລະບົບຕີກັບ
+                            </div>
                           <div class="desc">
-                              {{-- {!!$invoiceDetail->description!!} --}}
-                              1 . ເພີ່ມແຈ້ງເຕືອນຫາລູກຄ້າເວລາກົດຕີກັບ ຂໍ້ຄວາມ "ພັດສະດຸຖືກຕີກັບ
-                              ສາຂາຕົ້ນທາງແລ້ວ - ສາຂາ........" (ໃຫ້ແຈ້ງທັງຜູ້ຝາກ ແລະ ຜູ້ຮັບ)
-                              2 . ປ່ຽນຂໍ້ຄວາມແຈ້ງເຕືອນເວລາເຄື່ອງຮອດປາຍທາງ
-                              - ເງື່ອນໄຂຂອງວັນທີບວກໄປ 10 ມື້ຫຼັງຈາກຮອດປາຍທາງ
-                              ຕົວຢ່າງ: ເຄື່ອງຮອດວັນທີ1/7 ຂໍ້ຄວາມ "ພັດສະດຸຮອດປາຍທາງແລ້ວ
-                              ທ່ານສາມາດເຂົ້າຮັບພັດສະດຸໄດ້ທີ່ສາຂາປາຍທາງ ກ່ອນວັນທີ
-                              11/07/2023 ຫາກເກີນກໍານົດພັດສະດຸຈະຖືກຕີກັບສາຂາຕົ້ນທາງ"
-                              3 . ປ່ຽນຂໍ້ຄວາມແຈ້ງເຕືອນລູກຄ້າກໍລະນີຕີກັບຮອດຕົ້ນທາງແລ້ວ
-                              - ເງື່ອນໄຂຂອງວັນທີບວກໄປ 30 ມື້ຫຼັງຈາກຕີກັບຮອດຕົ້ນທາງ
-                              ຕົວຢ່າງ: "ພັດສະດຸຕີກັບຮອດສາຂາ..........ແລ້ວ ທ່ານສາມາດເຂົ້າຮັບ
-                              ພັດສະດຸໄດ້ທີ່ສາຂາ.......... ກ່ອນວັນທີ30/07/2023 ຫາກເກີນກໍານົດຖືວ່າ
-                              ລູກຄ້າສະລະສິດໃນການຮັບເຄື່ອງ"
-                              4 . ເພີ່ມ ບິນຕີກັບດໍາເນີນການ ກັບ ຕີກັບສໍາເລັດ ພາກສ່ວນຂອງບິນຕີກັບ
-                              ໄວ້ຕ່າງຫາກໃນແອັບລູກຄ້າ
-                              5 . ເພີ່ມ tab ບິນຕີກັບດໍາເນີນການ ກັບ ຕີກັບສໍາເລັດ ໄວ້ຕ່າງຫາກໃນແອັບ
-                              ລູກຄ້າ
-                              6 . ເຄື່ອງຕີກັບຮອດສາຂາປາຍທາງໃຫມ່ໃຫ້ປ່ຽນຂໍ້ຄວາມ tracking ໃຫມ່
-                              ເປັນ ສໍາລັບ ເຄື່ອງຄ້າງສາງເກີນ 30 ວັນຈະຫມົດສິດຮັບ
-                              7 . ເຄື່ອງຕີກັບໃຫ້ສ້າງ tracking ໃຫມ່ສໍາລັບການຕີກັບ
-                          </div>
-                          </td>
-                          <td>$ 250</td>
-                          <td>2</td>
-                          <td>$ 500</td>
-                        </tr>
-                        <tr class="h-table">
-                          <td class="width:50%;">
-                          <div class="desc-title">ໃບສະເໜີລາຄາພັດທະນາເສີມລະບົບຕີກັບ</div>
-                          <div class="desc">
-                              {{-- {!!$invoiceDetail->description!!} --}}
+                              {{-- {!!$quotation_detail->description!!} --}}
                               1 . ເພີ່ມແຈ້ງເຕືອນຫາລູກຄ້າເວລາກົດຕີກັບ ຂໍ້ຄວາມ "ພັດສະດຸຖືກຕີກັບ
                               ສາຂາຕົ້ນທາງແລ້ວ - ສາຂາ........" (ໃຫ້ແຈ້ງທັງຜູ້ຝາກ ແລະ ຜູ້ຮັບ)
                               2 . ປ່ຽນຂໍ້ຄວາມແຈ້ງເຕືອນເວລາເຄື່ອງຮອດປາຍທາງ
@@ -310,6 +290,8 @@
                         {{-- @endforeach --}}
                     </tbody>
                   </table>
+                {{-- End Quotation Detail --}}
+
                   <div class="columns">
                     <div class="column">
                         <div class="signature">
@@ -341,12 +323,12 @@
                     </div>
                   </div> 
                   {{-- @if(isset($invoice->note)) --}}
-                    {{-- <hr class="small-border">
+                    <hr class="small-border">
                     <div class="invoice-footer">
                         <p class="note">
                           ຖ້າເຮັດສຳເລັດເເລ້ວເຮົາຈະອະທິບາຍຕື່ມເດີ.
                         </p>
-                    </div> --}}
+                    </div>
                   {{-- @endif --}}
                 </div>
               </div>

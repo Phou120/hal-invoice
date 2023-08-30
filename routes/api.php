@@ -49,7 +49,7 @@ Route::group([
 
 });
 
-
+Route::get('export-pdf-quotation', [ExportPDFController::class, 'exportPDFQuotation']);
 
 Route::group([
     'middleware' => [
@@ -57,7 +57,6 @@ Route::group([
     ],
     'role:superadmin|admin|admin|company-admin|company-user',
     'prefix' => 'admin',
-
 ], function() {
 
     /** CRUD Customers */
@@ -190,9 +189,6 @@ Route::group([
     /** report company */
     Route::get('report-company-customer', [ReportController::class, 'reportCompanyCustomer'])->middleware('role:superadmin|admin');
 
-    // Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
-
-
     /** CRUD company_bank_account */
     Route::get('list-company-bank-accounts', [CompanyBankAccountController::class, 'listCompanyBankAccount'])->middleware('role:superadmin|admin');
     Route::post('create-company-bank-account', [CompanyBankAccountController::class, 'createCompanyBankAccount'])->name('create.bank.account')->middleware('role:superadmin|admin');
@@ -200,7 +196,7 @@ Route::group([
     Route::delete('delete-company-bank-account/{id}', [CompanyBankAccountController::class, 'deleteCompanyBankAccount'])->name('delete.bank.account')->middleware('role:superadmin|admin');
 
     /** update status */
-    Route::put('update-status/{id}', [CompanyBankAccountController::class, 'updateStatus'])->name('update.status')->middleware('role:superadmin|admin');
+    Route::put('update-status-bank-account/{id}', [CompanyBankAccountController::class, 'updateStatusBankAccount'])->name('update.status.bank.account')->middleware('role:superadmin|admin');
 
 
     /** CRUD module categories */
@@ -216,6 +212,8 @@ Route::group([
     Route::put('update-module-title/{id}', [ModuleTitleController::class, 'updateModuleTitle'])->name('update.module.title')->middleware('role:superadmin|admin');
     Route::delete('delete-module-title/{id}', [ModuleTitleController::class, 'deleteModuleTitle'])->name('delete.module.title')->middleware('role:superadmin|admin');
 
+    /** Filter Module Title */
+    Route::get('filter-module-title/{id}', [ModuleTitleController::class, 'filterModuleTitle'])->name('filter.module.title');
 
     /** CRUD quotation type */
     Route::get('list-quotation-types', [QuotationTypeController::class, 'listQuotationTypes'])->middleware('role:superadmin|admin');
@@ -226,5 +224,4 @@ Route::group([
 
 });
 
-Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
 

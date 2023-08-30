@@ -35,4 +35,9 @@ class ModuleTitleController extends Controller
     {
         return $this->moduleTitleService->deleteModuleTitle($request);
     }
+
+    public function filterModuleTitle($id)
+    {
+        return $this->moduleTitleService->filterModuleTitleById($id);
+    }
 }

@@ -102,9 +102,13 @@ class ReportService
 
         $receipt = (clone $query)->orderBy('receipts.id', 'asc')->paginate($perPage);
 
-        $receipt = filterHelper::getReceipt($receipt); // Apply transformation
+        //$receipt = filterHelper::getReceipt($receipt); // Apply transformation
 
         $totalPrice = $receipt->sum('total');
+
+        $receipt->map(function ($item) {
+            TableHelper::loopInvoice($item);
+        });
 
         /** return data */
         $response = (new ReturnService())->returnReceipt($totalReceipt, $totalPrice, $receipt);

@@ -16,6 +16,11 @@ class TableHelper
         $item->user = DB::table('users')->where('id', $item->created_by)->first();
     }
 
+    public static function loopInvoice($item)
+    {
+        $item->invoice = DB::table('invoices')->where('id', $item->invoice_id)->first();
+    }
+
     public static function formatDataInvoice($item)
     {
         $item->customer = DB::table('customers')->where('id', $item->customer_id)->first();

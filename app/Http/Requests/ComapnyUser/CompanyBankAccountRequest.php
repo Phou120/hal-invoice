@@ -21,8 +21,7 @@ class CompanyBankAccountRequest extends FormRequest
     {
         if($this->isMethod('put') && $this->routeIs('update.bank.account')
              || $this->isMethod('delete') && $this->routeIs('delete.bank.account')
-             || $this->isMethod('put') && $this->routeIs('update.status')
-
+             || $this->isMethod('put') && $this->routeIs('update.status.bank.account')
         ){
             $this->merge([
                 'id' => $this->route()->parameters['id'],
@@ -38,7 +37,7 @@ class CompanyBankAccountRequest extends FormRequest
      */
     public function rules()
     {
-        if($this->isMethod('put') && $this->routeIs('update.status'))
+        if($this->isMethod('put') && $this->routeIs('update.status.bank.account'))
         {
             return[
                 'id' =>[

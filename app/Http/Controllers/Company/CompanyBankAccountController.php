@@ -36,8 +36,8 @@ class CompanyBankAccountController extends Controller
         return $this->companyBankAccountService->deleteCompanyBankAccount($request);
     }
 
-    public function updateStatus(CompanyBankAccountRequest $request)
+    public function updateStatusBankAccount(CompanyBankAccountRequest $request)
     {
-        return $this->companyBankAccountService->updateStatus($request);
+        return $this->companyBankAccountService->updateStatusBankAccount($request);
     }
 }
