@@ -197,7 +197,7 @@ Route::group([
     Route::delete('delete-company-bank-account/{id}', [CompanyBankAccountController::class, 'deleteCompanyBankAccount'])->name('delete.bank.account')->middleware('role:superadmin|admin');
 
     /** update status */
-    Route::put('update-status/{id}', [CompanyBankAccountController::class, 'updateStatus'])->name('update.status')->middleware('role:superadmin|admin');
+    Route::put('update-status-bank-account/{id}', [CompanyBankAccountController::class, 'updateStatusBankAccount'])->name('update.status.bank.account')->middleware('role:superadmin|admin');
 
 
     /** CRUD module categories */

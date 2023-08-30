@@ -64,7 +64,7 @@ class CompanyBankAccountService
         ], 200);
     }
 
-    public function updateStatus($request)
+    public function updateStatusBankAccount($request)
     {
         $updateStatus = CompanyBankAccount::find($request['id']);
         $updateStatus->status = $request['status'];
