@@ -14,7 +14,7 @@ class QuotationRequest extends FormRequest
      */
     public function authorize()
     {
-        return auth('api')->user()->hasRole('superadmin|admin');
+        return auth('api')->user()->hasRole('superadmin|admin|company-admin|company-user');
     }
 
 

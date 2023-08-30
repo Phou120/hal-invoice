@@ -85,6 +85,7 @@ class QuotationService
     /** list quotation */
     public function listQuotations($request)
     {
+        $user = Auth::user();
         $perPage = $request->per_page;
 
         $query = Quotation::select(
@@ -148,9 +149,19 @@ class QuotationService
         /** filter total */
         $query = filterHelper::filterTotal($query, $request);
 
-        $listQuotations = (clone $query)->orderBy('id', 'asc')
-        ->where('quotations.created_by', auth()->user()->id)
-        ->paginate($perPage);
+        if ($user->hasRole(['superadmin', 'admin'])) {
+            $listQuotations = $query->orderBy('quotations.id', 'asc');
+        }
+
+        if ($user->hasRole(['company-admin', 'company-user'])) {
+            $listQuotations = $query
+                ->where(function ($query) use ($user) {
+                    $query->where('quotations.created_by', $user->id);
+                })
+                ->orderBy('quotations.id', 'asc');
+        }
+
+        $listQuotations = $listQuotations->paginate($perPage);
 
         $listQuotations->map(function ($item) {
             TableHelper::loopDataInQuotation($item);
@@ -195,21 +206,48 @@ class QuotationService
 
     public function listQuotationDetail($request)
     {
-        $item = DB::table('quotations')
-        ->select('quotations.*',
-        DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_id = quotations.id) AS count_detail')
-        )
-        ->leftJoin('customers', 'quotations.customer_id', 'customers.id')
-        ->leftJoin('currencies', 'quotations.currency_id', 'currencies.id')
-        ->leftJoin('users', 'quotations.created_by', 'users.id')
-        ->where('quotations.id', $request->id)
-        ->orderBy('id', 'desc')->first();
+        $user = Auth::user();
 
+        $itemQuery = DB::table('quotations')
+            ->select('quotations.*', DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_id = quotations.id) AS count_detail'))
+            ->leftJoin('customers', 'quotations.customer_id', 'customers.id')
+            ->leftJoin('currencies', 'quotations.currency_id', 'currencies.id')
+            ->leftJoin('users', 'quotations.created_by', 'users.id');
+            // ->where('quotations.id', $request->id);
+
+            if ($user->hasRole(['superadmin', 'admin'])) {
+                $itemQuery->where('quotations.id', $request->id)
+                    ->orderBy('quotations.id', 'asc');
+            }
+
+            if ($user->hasRole(['company-admin', 'company-user'])) {
+                $itemQuery->where('quotations.id', $request->id)
+                    ->where('quotations.created_by', $user->id)
+                    ->orderBy('quotations.id', 'asc');
+            }
+
+            $item = $itemQuery->first();
+        // dd($item);
         /** loop data */
-        TableHelper::loopDataInQuotation($item);
+        // TableHelper::loopDataInQuotation($item);
 
         /**Detail */
-        $details = QuotationDetail::where('quotation_id', $request->id)->get();
+        $details = QuotationDetail::select('quotation_details.*')
+        ->join('quotations', 'quotation_details.quotation_id', 'quotations.id')
+        ->where('quotation_id', $request->id);
+
+        if ($user->hasRole(['superadmin', 'admin'])) {
+            $details->where('quotation_id', $request->id)
+                ->orderBy('quotations.id', 'asc');
+        }
+
+        if ($user->hasRole(['company-admin', 'company-user'])) {
+            $details->where('quotation_id', $request->id)
+                ->where('quotations.created_by', $user->id)
+                ->orderBy('quotations.id', 'asc');
+        }
+
+        $details = $details->get();
 
 
         return response()->json([
