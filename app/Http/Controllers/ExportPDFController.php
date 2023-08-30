@@ -26,11 +26,28 @@ class ExportPDFController extends Controller
             File::makeDirectory(public_path('images/invoice/pdf/'), 0777, true, true);
         }
 
+        $footerHtml ='<br><br>
+            <p style="font-size: 10px;color: #999; margin: 15px 40px; clear:both; position: relative; top: 20px;text-align:right;display: block;
+            margin-block-end: 1em;
+            margin-inline-end: 0px;">
+            <span class="pageNumber"></span>/<span class="totalPages"></span>
+            </p>';
+
         Browsershot::html($view)
-        ->noSandbox()
-        ->format('A4')
+        ->userAgent('Mozilla/5.0 (Linux; Android 9; Redmi Note 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.99 Mobile Safari/537.36')
+        ->windowSize(250, 450)
+        ->deviceScaleFactor(3)
+        ->touch()
+        ->mobile()
         ->landscape(false)
-        ->margins(1, 1, 1, 1)
+        ->fullPage()
+        ->showBrowserHeaderAndFooter(true)
+        ->footerHtml($footerHtml)
+        ->hideHeader()
+        ->disableJavascript()
+        ->format('A4')
+        ->margins(6, 0, 8, 0)
+        ->timeout(60)
         ->save($file_url);
     }
 }
