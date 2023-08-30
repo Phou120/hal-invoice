@@ -12,18 +12,25 @@ use Illuminate\Support\Facades\File;
 class ExportPDFController extends Controller
 {
 
-    public function exportPDF()
+    public function exportPDFQuotation()
     {
         // $invoice = resolve(InvoiceService::class)->listInvoiceDetail(1)->getData();
-        $invoice = '';
-        $view = view('invoices.invoice')
-        ->with('invoice', $invoice)
+        $quotation = '';
+        $quotationDetails = [];
+
+        $mergeData = [
+            'quotation' => '',
+            'quotation_details' => $quotationDetails
+        ];
+
+        $view = view('quotations.quotation')
+        ->with('data', $mergeData)
         ->render();
         
-        $file_name = 'invoice' . '.pdf';
-        $file_url = public_path('images/invoice/pdf/' . $file_name);
-        if (!File::isDirectory(public_path('images/invoice/pdf/'))) {
-            File::makeDirectory(public_path('images/invoice/pdf/'), 0777, true, true);
+        $file_name = 'quotation' . '.pdf';
+        $file_url = public_path('images/quotation/pdf/' . $file_name);
+        if (!File::isDirectory(public_path('images/quotation/pdf/'))) {
+            File::makeDirectory(public_path('images/quotation/pdf/'), 0777, true, true);
         }
 
         $footerHtml ='<br><br>

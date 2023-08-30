@@ -49,7 +49,7 @@ Route::group([
 
 });
 
-Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
+Route::get('export-pdf-quotation', [ExportPDFController::class, 'exportPDFQuotation']);
 
 Route::group([
     'middleware' => [
