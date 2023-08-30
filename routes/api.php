@@ -55,9 +55,8 @@ Route::group([
     'middleware' => [
         'auth.jwt',
     ],
-    'role:superadmin|admin',
+    'role:superadmin|admin', 
     'prefix' => 'admin',
-
 ], function() {
 
     /** CRUD Customers */
