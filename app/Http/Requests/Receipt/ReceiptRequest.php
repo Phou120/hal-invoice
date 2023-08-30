@@ -14,7 +14,7 @@ class ReceiptRequest extends FormRequest
      */
     public function authorize()
     {
-        return auth('api')->user()->hasRole('superadmin|admin');
+        return auth('api')->user()->hasRole('company-admin|company-user');
     }
 
 

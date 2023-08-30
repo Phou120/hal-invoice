@@ -134,7 +134,7 @@ Route::group([
 
     /** CRUD Receipt */
     Route::post('add-receipt', [ReceiptController::class, 'addReceipt'])->name('add.receipt')->middleware('role:company-admin|company-user');
-    Route::get('list-receipts', [ReceiptController::class, 'listReceipts'])->middleware('role:superadmin|admin');
+    Route::get('list-receipts', [ReceiptController::class, 'listReceipts']);
     Route::put('edit-receipt/{id}', [ReceiptController::class, 'editReceipt'])->name('edit.receipt')->middleware('role:company-admin|company-user');
     Route::delete('delete-receipt/{id}', [ReceiptController::class, 'deleteReceipt'])->name('delete.receipt')->middleware('role:company-admin|company-user');
 
@@ -190,7 +190,7 @@ Route::group([
     /** report company */
     Route::get('report-company-customer', [ReportController::class, 'reportCompanyCustomer'])->middleware('role:superadmin|admin');
 
-    //Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
+    // Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
 
 
     /** CRUD company_bank_account */
@@ -226,4 +226,5 @@ Route::group([
 
 });
 
+Route::get('export-pdf', [ExportPDFController::class, 'exportPDF']);
 

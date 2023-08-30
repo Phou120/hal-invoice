@@ -95,26 +95,27 @@ class filterHelper
         return $invoiceStatus;
     }
 
-    public static function getReceipt($listReceipt)
-    {
-        $listReceipt->transform(function($item) {
-            $receiptDetail = ReceiptDetail::where('receipt_id', $item->id)
-                ->select(DB::raw("IFNULL(sum(total), 0) as total"))
-                ->first()->total;
+    /** sum total in receipt */
+    // public static function getReceipt($listReceipt)
+    // {
+    //     $listReceipt->transform(function($item) {
+    //         $receiptDetail = ReceiptDetail::where('receipt_id', $item->id)
+    //             ->select(DB::raw("IFNULL(sum(total), 0) as total"))
+    //             ->first()->total;
 
-            $tax = $item->tax;
-            $discount = $item->discount;
+    //         $tax = $item->tax;
+    //         $discount = $item->discount;
 
-            $sumTotal = (new CalculateService())->calculateTotalInvoice($receiptDetail, $tax, $discount);
+    //         $sumTotal = (new CalculateService())->calculateTotalInvoice($receiptDetail, $tax, $discount);
 
-            // Update the item with the calculated total
-            $item->total = $sumTotal;
+    //         // Update the item with the calculated total
+    //         $item->total = $sumTotal;
 
-            return $item;
-        });
+    //         return $item;
+    //     });
 
-        return $listReceipt;
-    }
+    //     return $listReceipt;
+    // }
 
     /** map data in invoice */
     public static function mapDataInvoice($listInvoice)
@@ -141,28 +142,28 @@ class filterHelper
     }
 
 
-    public static function mapDataReceipt($listReceipt)
-    {
-        $listReceipt->transform(function($item) {
-            $receiptDetail = ReceiptDetail::where('receipt_id', $item->id)
-                ->select(DB::raw("IFNULL(sum(total), 0) as total"))
-                ->first()->total;
+    // public static function mapDataReceipt($listReceipt)
+    // {
+    //     $listReceipt->transform(function($item) {
+    //         $receiptDetail = ReceiptDetail::where('receipt_id', $item->id)
+    //             ->select(DB::raw("IFNULL(sum(total), 0) as total"))
+    //             ->first()->total;
 
-            $tax = $item->tax;
-            $discount = $item->discount;
+    //         $tax = $item->tax;
+    //         $discount = $item->discount;
 
-            $sumTotal = (new CalculateService())->calculateTotalInvoice($receiptDetail, $tax, $discount);
+    //         $sumTotal = (new CalculateService())->calculateTotalInvoice($receiptDetail, $tax, $discount);
 
-            // Update the item with the calculated total
-            $item->total = $sumTotal;
+    //         // Update the item with the calculated total
+    //         $item->total = $sumTotal;
 
-            TableHelper::loopDataOfReceipt($item);
+    //         TableHelper::loopDataOfReceipt($item);
 
-            return $item;
-        });
+    //         return $item;
+    //     });
 
-        return $listReceipt;
-    }
+    //     return $listReceipt;
+    // }
 
 
     public static function filterDate($query, $request)

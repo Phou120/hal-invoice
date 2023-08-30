@@ -17,6 +17,7 @@ class CompanyBankAccountService
         $createBankAccount->bank_name = $request['bank_name'];
         $createBankAccount->account_name = $request['account_name'];
         $createBankAccount->account_number = $request['account_number'];
+        $createBankAccount->description = $request['description'];
         $createBankAccount->save();
 
         return response()->json([
@@ -45,6 +46,7 @@ class CompanyBankAccountService
         $updateBankAccount->bank_name = $request['bank_name'];
         $updateBankAccount->account_name = $request['account_name'];
         $updateBankAccount->account_number = $request['account_number'];
+        $updateBankAccount->description = $request['description'];
         $updateBankAccount->save();
 
         return response()->json([

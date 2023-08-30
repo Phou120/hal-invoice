@@ -8,7 +8,6 @@ use App\Services\InvoiceService;
 use Spatie\Browsershot\Browsershot;
 use Illuminate\Support\Facades\File;
 
-
 class ExportPDFController extends Controller
 {
 

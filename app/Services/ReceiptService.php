@@ -9,6 +9,7 @@ use App\Helpers\TableHelper;
 use App\Helpers\filterHelper;
 use App\Models\InvoiceDetail;
 use App\Models\ReceiptDetail;
+use App\Helpers\generateHelper;
 use App\Services\CalculateService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -44,27 +45,30 @@ class ReceiptService
 
                     $addReceipt = new Receipt();
                     $addReceipt->invoice_id = $getInvoice['id'];
-                    $addReceipt->customer_id = $getInvoice['customer_id'];
-                    $addReceipt->currency_id = $getInvoice['currency_id'];
+                    $addReceipt->receipt_number = generateHelper::generateReceiptNumber('RN-', 8);
+                    // $addReceipt->customer_id = $getInvoice['customer_id'];
+                    // $addReceipt->currency_id = $getInvoice['currency_id'];
                     $addReceipt->receipt_name = $request['receipt_name'];
                     $addReceipt->receipt_date = $request['receipt_date'];
                     $addReceipt->created_by = Auth::user('api')->id;
                     $addReceipt->discount = $getInvoice['discount'];
                     $addReceipt->tax = $getInvoice['tax'];
                     $addReceipt->note = $request['note'];
+                    $addReceipt->sub_total = $getInvoice['sub_total'];
+                    $addReceipt->total = $getInvoice['total'];
                     $addReceipt->save();
 
-                    foreach($getInvoiceDetail as $item){
-                        $addDetail = new ReceiptDetail();
-                        $addDetail->receipt_id = $addReceipt['id'];
-                        $addDetail->order = $item['order'];
-                        $addDetail->name = $item['name'];
-                        $addDetail->description = $item['description'];
-                        $addDetail->amount = $item['amount'];
-                        $addDetail->price = $item['price'];
-                        $addDetail->total = $item['total'];
-                        $addDetail->save();
-                    }
+                    // foreach($getInvoiceDetail as $item){
+                    //     $addDetail = new ReceiptDetail();
+                    //     $addDetail->receipt_id = $addReceipt['id'];
+                    //     $addDetail->order = $item['order'];
+                    //     $addDetail->name = $item['name'];
+                    //     $addDetail->description = $item['description'];
+                    //     $addDetail->amount = $item['amount'];
+                    //     $addDetail->price = $item['price'];
+                    //     $addDetail->total = $item['total'];
+                    //     $addDetail->save();
+                    // }
 
                 DB::commit();
 
@@ -88,12 +92,13 @@ class ReceiptService
     /** ດຶງຂໍມູນໃບຮັບເງິນ */
     public function listReceipts($request)
     {
+        $user = Auth::user();
         $perPage = $request->per_page;
 
         $query = DB::table('receipts')
         ->select('receipts.*',
-        DB::raw('(SELECT COUNT(*) FROM receipt_details WHERE receipt_details.receipt_id = receipts.id) as count_details')
-        );
+        // DB::raw('(SELECT COUNT(*) FROM receipt_details WHERE receipt_details.receipt_id = receipts.id) as count_details')
+        )->whereNull('deleted_at');
 
         /** query: status, start_date and end_date */
         $query = filterHelper::receiptFilter($query, $request);
@@ -102,15 +107,25 @@ class ReceiptService
 
         $receipt = (clone $query)->orderBy('receipts.id', 'asc')->get();
 
-        $receipt = filterHelper::getReceipt($receipt); // Apply transformation
+        // $receipt = filterHelper::getReceipt($receipt); // Apply transformation
 
         $totalPrice = $receipt->sum('total'); // sum total of invoices all
 
-        $listReceipt = (clone $query)->orderBy('receipts.id', 'asc')
-        ->where('receipts.created_by', auth()->user()->id)
-        ->paginate($perPage);
+        if ($user->hasRole(['superadmin', 'admin'])) {
+            $listReceipt = $query->orderBy('receipts.id', 'asc');
+        }
 
-        $listReceipt = filterHelper::mapDataReceipt($listReceipt);
+        if ($user->hasRole(['company-admin', 'company-user'])) {
+            $listReceipt = $query
+                ->where(function ($query) use ($user) {
+                    $query->where('receipts.created_by', $user->id);
+                })
+                ->orderBy('receipts.id', 'asc');
+        }
+
+        $listReceipt = $listReceipt->paginate($perPage);
+
+        // $listReceipt = filterHelper::mapDataReceipt($listReceipt);
 
         /** return data */
         $response = (new ReturnService())->returnDataReceipt($totalBill, $totalPrice, $listReceipt);
@@ -119,31 +134,31 @@ class ReceiptService
     }
 
     /** ດຶງຂໍມູນລາຍລະອຽດໃບຮັບເງິນ */
-    public function listReceiptDetail($request)
-    {
-        $item = DB::table('receipts')
-            ->select('receipts.*',
-            DB::raw('(SELECT COUNT(*) FROM receipt_details WHERE receipt_details.receipt_id = Receipts.id) as count_details')
-            )
-            ->leftJoin('invoices', 'receipts.invoice_id', 'invoices.id')
-            ->leftJoin('customers', 'receipts.customer_id', 'customers.id')
-            ->leftJoin('currencies', 'receipts.currency_id', 'currencies.id')
-            ->leftJoin('users', 'receipts.created_by', 'users.id')
-            ->where('receipts.id', $request->id)
-            ->orderBy('receipts.id', 'desc')
-            ->first();
+    // public function listReceiptDetail($request)
+    // {
+    //     $item = DB::table('receipts')
+    //         ->select('receipts.*',
+    //         DB::raw('(SELECT COUNT(*) FROM receipt_details WHERE receipt_details.receipt_id = Receipts.id) as count_details')
+    //         )
+    //         ->leftJoin('invoices', 'receipts.invoice_id', 'invoices.id')
+    //         ->leftJoin('customers', 'receipts.customer_id', 'customers.id')
+    //         ->leftJoin('currencies', 'receipts.currency_id', 'currencies.id')
+    //         ->leftJoin('users', 'receipts.created_by', 'users.id')
+    //         ->where('receipts.id', $request->id)
+    //         ->orderBy('receipts.id', 'desc')
+    //         ->first();
 
-        /** loop data */
-        TableHelper::loopDataOfReceipt($item);
+    //     /** loop data */
+    //     TableHelper::loopDataOfReceipt($item);
 
-        /**Detail */
-        $details = DB::table('receipt_details')->where('receipt_id', $request->id)->get();
+    //     /**Detail */
+    //     $details = DB::table('receipt_details')->where('receipt_id', $request->id)->get();
 
-        return response()->json([
-            'receipt' => $item,
-            'details' => $details,
-        ], 200);
-    }
+    //     return response()->json([
+    //         'receipt' => $item,
+    //         'details' => $details,
+    //     ], 200);
+    // }
 
     /** ແກ້ໄຂໃບຮັບເງິນ */
     public function editReceipt($request)
@@ -175,7 +190,7 @@ class ReceiptService
                 $receipt->delete();
 
                 // Delete the ReceiptDetail
-                ReceiptDetail::where('receipt_id', $request['id'])->delete();
+                // ReceiptDetail::where('receipt_id', $request['id'])->delete();
 
             DB::commit();
 

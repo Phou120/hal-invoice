@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Quotation;
 use App\Models\CompanyUser;
 use App\Models\ModuleTitle;
+use App\Models\QuotationType;
 use App\Models\ModuleCategory;
 use Illuminate\Database\Seeder;
 use App\Models\CompanyBankAccount;
@@ -27,6 +28,7 @@ class SeedDataSeeder extends Seeder
         $this->createCompanies();
         $this->createCurrencies();
         $this->createCompanyUsers();
+        $this->createQuotationTypes();
         $this->createModuleCategories();
         $this->createModuleTitles();
         $this->createCompanyBankAccounts();
@@ -335,6 +337,33 @@ class SeedDataSeeder extends Seeder
             'module_category_id' => 2,
             'name' => 'forget',
             'hour' => 5,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    public function createQuotationTypes()
+    {
+        QuotationType::create([
+            'currency_id' => 1,
+            'name' => 'big',
+            'rate' => 200,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        QuotationType::create([
+            'currency_id' => 2,
+            'name' => 'big',
+            'rate' => 300,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        QuotationType::create([
+            'currency_id' => 3,
+            'name' => 'big',
+            'rate' => 210,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
