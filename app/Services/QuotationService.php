@@ -93,50 +93,42 @@ class QuotationService
             DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details')
         );
 
-        /** filter: start_date and end_date */
+        /** filter start_date and end_date */
         $query = filterHelper::quotationFilter($query, $request);
 
-        $totalQuotation = (clone $query)->count(); // count all Quotations
+        if ($user->hasRole(['superadmin', 'admin'])) {
+            $query->orderBy('quotations.id', 'asc');
+        } elseif ($user->hasRole(['company-admin', 'company-user'])) {
+            $query->where('quotations.created_by', $user->id);
+        }
 
-        $quotation = (clone $query)->orderBy('quotations.id', 'asc')->get();
+        $quotation = $query->orderBy('quotations.id', 'asc')->get();
+        $totalQuotation = $quotation->count();
+        $totalPrice = $quotation->sum('total');
 
-        $totalPrice = $quotation->sum('total'); // sum all Quotations
+        function filterQuotationStatus($query, $status) {
+            return $query->where('status', filterHelper::INVOICE_STATUS[$status]);
+        }
 
+        $quotationStatusCreated = filterQuotationStatus(clone $query, 'CREATED');
+        $created = $quotationStatusCreated->count();
+        $createdTotal = $quotationStatusCreated->sum('total');
 
-        $quotationStatusCreated = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CREATED'])->orderBy('quotations.id', 'asc')
-        ->where('quotations.created_by', auth()->user()->id)->get();
+        $quotationStatusApproved = filterQuotationStatus(clone $query, 'APPROVED');
+        $approved = $quotationStatusApproved->count();
+        $approvedTotal = $quotationStatusApproved->sum('total');
 
-        $created = (clone $quotationStatusCreated)->count(); // count status
-        $createdTotal = (clone $quotationStatusCreated)->sum('total'); // sum total of quotation all
+        $quotationStatusInprogress = filterQuotationStatus(clone $query, 'INPROGRESS');
+        $inprogress = $quotationStatusInprogress->count();
+        $inprogressTotal = $quotationStatusInprogress->sum('total');
 
+        $quotationStatusCompleted = filterQuotationStatus(clone $query, 'COMPLETED');
+        $completed = $quotationStatusCompleted->count();
+        $completedTotal = $quotationStatusCompleted->sum('total');
 
-        $quotationStatusApproved = (clone $query)->where('status', filterHelper::INVOICE_STATUS['APPROVED'])->orderBy('quotations.id', 'asc')
-        ->where('quotations.created_by', auth()->user()->id)->get();
-
-        $approved = (clone $quotationStatusApproved)->count(); // count status
-        $approvedTotal = (clone $quotationStatusApproved)->sum('total'); // sum total of quotation all
-
-
-        $quotationStatusInprogress = (clone $query)->where('status', filterHelper::INVOICE_STATUS['INPROGRESS'])->orderBy('quotations.id', 'asc')
-        ->where('quotations.created_by', auth()->user()->id)->get();
-
-        $inprogress = (clone $quotationStatusInprogress)->count(); // count status
-        $inprogressTotal = (clone $quotationStatusInprogress)->sum('total'); // sum total of quotation all
-
-
-        $quotationStatusCompleted = (clone $query)->where('status', filterHelper::INVOICE_STATUS['COMPLETED'])->orderBy('quotations.id', 'asc')
-        ->where('quotations.created_by', auth()->user()->id)->get();
-
-        $completed = (clone $quotationStatusCompleted)->count(); // count status
-        $completedTotal = (clone $quotationStatusCompleted)->sum('total'); // sum total of quotation all
-
-
-        $quotationStatusCancelled = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CANCELLED'])->orderBy('quotations.id', 'asc')
-        ->where('quotations.created_by', auth()->user()->id)->get();
-
-        $cancelled = (clone $quotationStatusCancelled)->count(); // count status
-        $cancelledTotal = (clone $quotationStatusCancelled)->sum('total'); // sum total of quotation all
-
+        $quotationStatusCancelled = filterQuotationStatus(clone $query, 'CANCELLED');
+        $cancelled = $quotationStatusCancelled->count();
+        $cancelledTotal = $quotationStatusCancelled->sum('total');
 
         /** query: status */
         $query = filterHelper::filterStatus($query, $request);
@@ -213,7 +205,6 @@ class QuotationService
             ->leftJoin('customers', 'quotations.customer_id', 'customers.id')
             ->leftJoin('currencies', 'quotations.currency_id', 'currencies.id')
             ->leftJoin('users', 'quotations.created_by', 'users.id');
-            // ->where('quotations.id', $request->id);
 
             if ($user->hasRole(['superadmin', 'admin'])) {
                 $itemQuery->where('quotations.id', $request->id)
@@ -227,9 +218,6 @@ class QuotationService
             }
 
             $item = $itemQuery->first();
-        // dd($item);
-        /** loop data */
-        // TableHelper::loopDataInQuotation($item);
 
         /**Detail */
         $details = QuotationDetail::select('quotation_details.*')
@@ -237,18 +225,15 @@ class QuotationService
         ->where('quotation_id', $request->id);
 
         if ($user->hasRole(['superadmin', 'admin'])) {
-            $details->where('quotation_id', $request->id)
-                ->orderBy('quotations.id', 'asc');
+            $details->where('quotation_id')->orderBy('quotations.id', 'asc');
         }
 
         if ($user->hasRole(['company-admin', 'company-user'])) {
-            $details->where('quotation_id', $request->id)
-                ->where('quotations.created_by', $user->id)
-                ->orderBy('quotations.id', 'asc');
+            $details->where('quotation_id')->where('quotations.created_by', $user->id)
+                    ->orderBy('quotations.id', 'asc');
         }
 
         $details = $details->get();
-
 
         return response()->json([
             'quotation' => $item,

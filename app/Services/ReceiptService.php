@@ -36,7 +36,7 @@ class ReceiptService
             )
             ->join('invoices as invoice', 'invoice_details.invoice_id', 'invoice.id')
             ->where('invoice_details.invoice_id', $getInvoice['id'])
-            ->where('status', filterHelper::INVOICE_STATUS['APPROVED'])
+            ->where('status', filterHelper::INVOICE_STATUS['COMPLETED'])
             ->get();
 
             if(count($getInvoiceDetail) > 0) {
@@ -95,39 +95,22 @@ class ReceiptService
         $user = Auth::user();
         $perPage = $request->per_page;
 
-        $query = DB::table('receipts')
-        ->select('receipts.*',
-        // DB::raw('(SELECT COUNT(*) FROM receipt_details WHERE receipt_details.receipt_id = receipts.id) as count_details')
-        )->whereNull('deleted_at');
+        $query = DB::table('receipts')->select('receipts.*')->whereNull('deleted_at');
 
-        /** query: status, start_date and end_date */
+        /** filter date */
         $query = filterHelper::receiptFilter($query, $request);
 
-        $totalBill = (clone $query)->count(); // count all invoices
-
-        $receipt = (clone $query)->orderBy('receipts.id', 'asc')->get();
-
-        // $receipt = filterHelper::getReceipt($receipt); // Apply transformation
-
-        $totalPrice = $receipt->sum('total'); // sum total of invoices all
-
         if ($user->hasRole(['superadmin', 'admin'])) {
-            $listReceipt = $query->orderBy('receipts.id', 'asc');
+            $query->orderBy('receipts.id', 'asc');
+        } elseif ($user->hasRole(['company-admin', 'company-user'])) {
+            $query->where('receipts.created_by', $user->id)->orderBy('receipts.id', 'asc');
         }
 
-        if ($user->hasRole(['company-admin', 'company-user'])) {
-            $listReceipt = $query
-                ->where(function ($query) use ($user) {
-                    $query->where('receipts.created_by', $user->id);
-                })
-                ->orderBy('receipts.id', 'asc');
-        }
+        $listReceipt = $query->paginate($perPage);
 
-        $listReceipt = $listReceipt->paginate($perPage);
+        $totalBill = $listReceipt->total(); // count all invoices
+        $totalPrice = $listReceipt->sum('total'); // sum total of invoices all
 
-        // $listReceipt = filterHelper::mapDataReceipt($listReceipt);
-
-        /** return data */
         $response = (new ReturnService())->returnDataReceipt($totalBill, $totalPrice, $listReceipt);
 
         return response()->json($response, 200);

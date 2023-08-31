@@ -29,7 +29,7 @@ return new class extends Migration
             $table->double('discount')->default(0);
             $table->double('tax')->default(0);
             $table->double('total')->default(0);
-            $table->enum('status', ['created', 'approved', 'inprogress', 'completed', 'canceled'])->default('created');
+            $table->enum('status', ['created', 'approved', 'inprogress', 'completed', 'cancelled'])->default('created');
             $table->timestamps();
             $table->softDeletes();
 

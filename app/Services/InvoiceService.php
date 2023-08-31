@@ -157,59 +157,99 @@ class InvoiceService
         /** filter start_date and end_date */
         $query = filterHelper::filterDate($query, $request);
 
-        $totalBill = (clone $query)->count(); // count all invoices
+        if ($user->hasRole(['superadmin', 'admin'])) {
+            $query->orderBy('invoices.id', 'asc');
+        } elseif ($user->hasRole(['company-admin', 'company-user'])) {
+            $query->where('invoices.created_by', $user->id);
+        }
 
-        $invoice = (clone $query)->orderBy('invoices.id', 'asc')
-        ->where('invoices.created_by', auth()->user()->id)->get();
+        $invoice = $query->orderBy('invoices.id', 'asc')->get();
+        $totalBill = $invoice->count();
+        $totalPrice = $invoice->sum('total');
 
-        $invoice = filterHelper::getTotal($invoice);
 
-        $totalPrice = $invoice->sum('total'); // sum total of invoices all
+        function filterQuotationStatus($query, $status) {
+            return $query->where('status', filterHelper::INVOICE_STATUS[$status]);
+        }
 
         /** where status = created */
-        $invoiceStatus = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CREATED'])->orderBy('invoices.id', 'asc')
-        ->where('invoices.created_by', auth()->user()->id)->get();
-
-        $invoiceStatus = filterHelper::getTotal($invoiceStatus); // Apply transformation
-
-        $created = (clone $invoiceStatus)->count(); // count status
-        $createdTotal = (clone $invoiceStatus)->sum('total'); // sum total of invoices all
+        $invoiceStatusCreated = filterQuotationStatus(clone $query, 'CREATED');
+        $created = $invoiceStatusCreated->count();
+        $createdTotal = $invoiceStatusCreated->sum('total');
 
         /** where status = approved */
-        $invoiceStatusApproved = (clone $query)->where('status', filterHelper::INVOICE_STATUS['APPROVED'])->orderBy('invoices.id', 'asc')
-        ->where('invoices.created_by', auth()->user()->id)->get();
-
-        $invoiceStatusApproved = filterHelper::getTotal($invoiceStatusApproved); // Apply transformation
-
-        $approved = (clone $invoiceStatusApproved)->count(); // count status
-        $approvedTotal = (clone $invoiceStatusApproved)->sum('total'); // sum total of invoices all
+        $invoiceStatusApproved = filterQuotationStatus(clone $query, 'APPROVED');
+        $approved = $invoiceStatusApproved->count();
+        $approvedTotal = $invoiceStatusApproved->sum('total');
 
         /** where status = inprogress */
-        $invoiceStatusInprogress = (clone $query)->where('status', filterHelper::INVOICE_STATUS['INPROGRESS'])->orderBy('invoices.id', 'asc')
-        ->where('invoices.created_by', auth()->user()->id)->get();
-
-        $invoiceStatusInprogress = filterHelper::getTotal($invoiceStatusInprogress); // Apply transformation
-
-        $inprogress = (clone $invoiceStatusInprogress)->count(); // count status
-        $inprogressTotal = (clone $invoiceStatusInprogress)->sum('total'); // sum total of invoices all
+        $invoiceStatusInprogress = filterQuotationStatus(clone $query, 'INPROGRESS');
+        $inprogress = $invoiceStatusInprogress->count();
+        $inprogressTotal = $invoiceStatusInprogress->sum('total');
 
         /** where status = completed */
-        $invoiceStatusCompleted = (clone $query)->where('status', filterHelper::INVOICE_STATUS['COMPLETED'])->orderBy('invoices.id', 'asc')
-        ->where('invoices.created_by', auth()->user()->id)->get();
-
-        $invoiceStatusCompleted = filterHelper::getTotal($invoiceStatusCompleted); // Apply transformation
-
-        $completed = (clone $invoiceStatusCompleted)->count(); // count status
-        $completedTotal = (clone $invoiceStatusCompleted)->sum('total'); // sum total of invoices all
+        $invoiceStatusCompleted = filterQuotationStatus(clone $query, 'COMPLETED');
+        $completed = $invoiceStatusCompleted->count();
+        $completedTotal = $invoiceStatusCompleted->sum('total');
 
         /** where status = canceled */
-        $invoiceStatusCanceled = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CANCELLED'])->orderBy('invoices.id', 'asc')
-        ->where('invoices.created_by', auth()->user()->id)->get();
+        $invoiceStatusCanceled = filterQuotationStatus(clone $query, 'CANCELLED');
+        $canceled = $invoiceStatusCanceled->count();
+        $canceledTotal = $invoiceStatusCanceled->sum('total');
 
-        $invoiceStatusCanceled = filterHelper::getTotal($invoiceStatusCanceled); // Apply transformation
+        //$totalBill = (clone $query)->count(); // count all invoices
 
-        $canceled = (clone $invoiceStatusCanceled)->count(); // count status
-        $canceledTotal = (clone $invoiceStatusCanceled)->sum('total'); // sum total of invoices all
+        // $invoice = (clone $query)->orderBy('invoices.id', 'asc')
+        // ->where('invoices.created_by', auth()->user()->id)->get();
+
+        // $invoice = filterHelper::getTotal($invoice);
+
+        // $totalPrice = $invoice->sum('total'); // sum total of invoices all
+
+        /** where status = created */
+        // $invoiceStatus = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CREATED'])->orderBy('invoices.id', 'asc')
+        // ->where('invoices.created_by', auth()->user()->id)->get();
+
+        // $invoiceStatus = filterHelper::getTotal($invoiceStatus); // Apply transformation
+
+        // $created = (clone $invoiceStatus)->count(); // count status
+        // $createdTotal = (clone $invoiceStatus)->sum('total'); // sum total of invoices all
+
+        /** where status = approved */
+        // $invoiceStatusApproved = (clone $query)->where('status', filterHelper::INVOICE_STATUS['APPROVED'])->orderBy('invoices.id', 'asc')
+        // ->where('invoices.created_by', auth()->user()->id)->get();
+
+        // $invoiceStatusApproved = filterHelper::getTotal($invoiceStatusApproved); // Apply transformation
+
+        // $approved = (clone $invoiceStatusApproved)->count(); // count status
+        // $approvedTotal = (clone $invoiceStatusApproved)->sum('total'); // sum total of invoices all
+
+        /** where status = inprogress */
+        // $invoiceStatusInprogress = (clone $query)->where('status', filterHelper::INVOICE_STATUS['INPROGRESS'])->orderBy('invoices.id', 'asc')
+        // ->where('invoices.created_by', auth()->user()->id)->get();
+
+        // $invoiceStatusInprogress = filterHelper::getTotal($invoiceStatusInprogress); // Apply transformation
+
+        // $inprogress = (clone $invoiceStatusInprogress)->count(); // count status
+        // $inprogressTotal = (clone $invoiceStatusInprogress)->sum('total'); // sum total of invoices all
+
+        /** where status = completed */
+        // $invoiceStatusCompleted = (clone $query)->where('status', filterHelper::INVOICE_STATUS['COMPLETED'])->orderBy('invoices.id', 'asc')
+        // ->where('invoices.created_by', auth()->user()->id)->get();
+
+        // $invoiceStatusCompleted = filterHelper::getTotal($invoiceStatusCompleted); // Apply transformation
+
+        // $completed = (clone $invoiceStatusCompleted)->count(); // count status
+        // $completedTotal = (clone $invoiceStatusCompleted)->sum('total'); // sum total of invoices all
+
+        /** where status = canceled */
+        // $invoiceStatusCanceled = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CANCELLED'])->orderBy('invoices.id', 'asc')
+        // ->where('invoices.created_by', auth()->user()->id)->get();
+
+        // $invoiceStatusCanceled = filterHelper::getTotal($invoiceStatusCanceled); // Apply transformation
+
+        // $canceled = (clone $invoiceStatusCanceled)->count(); // count status
+        // $canceledTotal = (clone $invoiceStatusCanceled)->sum('total'); // sum total of invoices all
 
         /** filter status */
         $query = filterHelper::filterStatus($query, $request);
@@ -321,49 +361,34 @@ class InvoiceService
         $user = Auth::user();
         $invoiceId = $request->id;
 
-        $item = DB::table('invoices')
-            ->select(
-                'invoices.*',
-                DB::raw('(SELECT COUNT(*) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as count_details'),
-                // DB::raw('(SELECT SUM(invoice_details.total) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as total')
-            )
+        $query = DB::table('invoices')
+            ->select('invoices.*', DB::raw('(SELECT COUNT(*) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as count_details'))
+            ->leftJoin('customers', 'invoices.customer_id', 'customers.id')
+            ->leftJoin('currencies', 'invoices.currency_id', 'currencies.id')
+            ->leftJoin('users', 'invoices.created_by', 'users.id')
             ->where('invoices.id', $invoiceId);
 
-            if ($user->hasRole(['superadmin', 'admin'])) {
-                $item->where('invoices.id', $request->id)
-                    ->orderBy('invoices.id', 'asc');
-            }
+        if ($user->hasRole(['superadmin', 'admin'])) {
+            $query->orderBy('invoices.id', 'asc');
+        } elseif ($user->hasRole(['company-admin', 'company-user'])) {
+            $query->where('invoices.created_by', $user->id)
+                ->orderBy('invoices.id', 'asc');
+        }
 
-            if ($user->hasRole(['company-admin', 'company-user'])) {
-                $item->where('invoices.id', $request->id)
-                    ->where('invoices.created_by', $user->id)
-                    ->orderBy('invoices.id', 'asc');
-            }
+        $item = $query->first();
 
-            $item = $item->first();
+        $detailsQuery = InvoiceDetail::select('invoice_details.*')
+            ->join('invoices', 'invoice_details.invoice_id', 'invoices.id')
+            ->where('invoice_id', $invoiceId);
 
-        // $total = $item->total;
+        if ($user->hasRole(['superadmin', 'admin'])) {
+            $detailsQuery->orderBy('invoices.id', 'asc');
+        } elseif ($user->hasRole(['company-admin', 'company-user'])) {
+            $detailsQuery->where('invoices.created_by', $user->id)
+                ->orderBy('invoices.id', 'asc');
+        }
 
-        // $tax = $item->tax;
-        // $discount = $item->discount;
-
-        // // Calculate the tax amount
-        // $taxAmount = ($total * $tax) / 100;
-
-        // // Calculate the discount amount
-        // $discountAmount = ($total * $discount) / 100;
-
-        // // Calculate the final payable amount
-        // $sumTotal = ($total - $discountAmount) + $taxAmount;
-
-        // // Update the item with the calculated total
-        // $item->total = $sumTotal;
-
-        /** loop data */
-        TableHelper::formatDataInvoice($item);
-
-        /**Detail */
-        $details = InvoiceDetail::where('invoice_id', $invoiceId)->get();
+        $details = $detailsQuery->get();
 
         return response()->json([
             'invoice' => $item,
