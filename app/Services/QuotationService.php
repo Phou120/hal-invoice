@@ -65,14 +65,14 @@ class QuotationService
             $sumSubTotal = 0;
             if(!empty($request['quotation_details'])){
                 foreach($request['quotation_details'] as $item){
-                    $total = $item['amount'] * $getQuotationType['rate'];
+                    $total = $item['hour'] * $getQuotationType['rate'];
 
                     $addDetail = new QuotationDetail();
                     $addDetail->order = $item['order'];
                     $addDetail->quotation_id = $addQuotation['id'];
                     $addDetail->name = $item['name'];
-                    $addDetail->amount = $item['amount'];
-                    $addDetail->price = $getQuotationType['rate'];
+                    $addDetail->hour = $item['hour'];
+                    $addDetail->rate = $getQuotationType['rate'];
                     $addDetail->description = $item['description'];
                     $addDetail->total = $total;
                     $addDetail->save();
@@ -216,7 +216,7 @@ class QuotationService
         if ($queryQuotationType) {
             $rate = $queryQuotationType->rate;
             $detailData['price'] = $rate;
-            $detailData['total'] = $request['amount'] * $rate;
+            $detailData['total'] = $request['hour'] * $rate;
 
             DB::table('quotation_details')->insert($detailData);
         }

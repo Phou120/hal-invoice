@@ -64,14 +64,14 @@ class InvoiceService
                     $discountRate = $getQuotation->discount;
                     $sumSubTotal = 0;
                     foreach ($quotationDetail as $item) {
-                            $total = $item['amount'] * $item['price'];
+                            $total = $item['hour'] * $item['rate'];
 
                             $addDetail = new InvoiceDetail();
                             $addDetail->order = $item['order'];
                             $addDetail->invoice_id = $addInvoice->id; // Use object syntax
                             $addDetail->name = $item['name'];
-                            $addDetail->amount = $item['amount'];
-                            $addDetail->price = $item['price'];
+                            $addDetail->hour = $item['hour'];
+                            $addDetail->rate = $item['rate'];
                             $addDetail->description = $item['description'];
                             $addDetail->total = $total;
                             $addDetail->save();
@@ -305,11 +305,11 @@ class InvoiceService
             $invoiceDetails = [
                 'description' => $quotation->description,
                 'invoice_id' => $invoiceId,
-                'amount' => $quotation->amount,
-                'price' => $quotation->price,
+                'hour' => $quotation->hour,
+                'rate' => $quotation->rate,
                 'order' => $quotation->order,
                 'name' => $quotation->name,
-                'total' => $quotation->amount * $quotation->price,
+                'total' => $quotation->hour * $quotation->rate,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

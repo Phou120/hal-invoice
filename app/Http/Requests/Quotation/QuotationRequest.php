@@ -126,7 +126,7 @@ class QuotationRequest extends FormRequest
                     'required',
                         'max:255'
                 ],
-                'amount' => [
+                'hour' => [
                     'required',
                         'numeric'
                 ],
@@ -209,7 +209,7 @@ class QuotationRequest extends FormRequest
                     'required',
                         'max:255'
                 ],
-                'amount' => [
+                'hour' => [
                     'required',
                         'numeric'
                 ],
@@ -289,7 +289,7 @@ class QuotationRequest extends FormRequest
                     'required',
                         'max:255'
                 ],
-                'quotation_details.*.amount' => [
+                'quotation_details.*.hour' => [
                     'required',
                         'numeric'
                 ],
@@ -344,8 +344,8 @@ class QuotationRequest extends FormRequest
             'quotation_details.*.name.required' => 'ກະລຸນາປ້ອນຊື່ກ່ອນ...',
             'quotation_details.*.name.max' => 'ຊື່ບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
 
-            'quotation_details.*.amount.required' => 'ກະລຸນາປ້ອນຈຳນວນກ່ອນ...',
-            'quotation_details.*.amount.numeric' => 'ຈຳນວນຄວນເປັນໂຕເລກ...',
+            'quotation_details.*.hour.required' => 'ກະລຸນາປ້ອນຊົ່ວໂມງກ່ອນ...',
+            'quotation_details.*.hour.numeric' => 'ຊົ່ວໂມງຄວນເປັນໂຕເລກ...',
 
             'quotation_details.*.price.required' => 'ກະລຸນາປ້ອນລາຄາກ່ອນ...',
             'quotation_details.*.price.numeric' => 'ລາຄາຄວນເປັນໂຕເລກ...',
@@ -362,8 +362,8 @@ class QuotationRequest extends FormRequest
             'name.required' => 'ກະລຸນາປ້ອນຊື່ກ່ອນ...',
             'name.max' => 'ຊື່ບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
 
-            'amount.required' => 'ກະລຸນາປ້ອນຈຳນວນກ່ອນ...',
-            'amount.numeric' => 'ຈຳນວນຄວນເປັນໂຕເລກ...',
+            'hour.required' => 'ກະລຸນາປ້ອນຊົ່ວໂມງກ່ອນ...',
+            'hour.numeric' => 'ຊົ່ວໂມງຄວນເປັນໂຕເລກ...',
 
             'price.required' => 'ກະລຸນາປ້ອນລາຄາກ່ອນ...',
             'price.numeric' => 'ລາຄາຄວນເປັນໂຕເລກ...',

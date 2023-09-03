@@ -141,10 +141,10 @@ class ReturnService
          $updateData = [
             'order' => $request['order'],
             'name' => $request['name'],
-            'amount' => $request['amount'],
+            'hour' => $request['hour'],
             'description' => $request['description'],
-            'price' => $editDetail->rate,
-            'total' => $request['amount'] * $editDetail->rate
+            'rate' => $editDetail->rate,
+            'total' => $request['hour'] * $editDetail->rate
         ];
 
         return $updateData;
@@ -157,7 +157,7 @@ class ReturnService
             'order' => $request['order'],
             'quotation_id' => $request['id'],
             'name' => $request['name'],
-            'amount' => $request['amount'],
+            'hour' => $request['hour'],
             'description' => $request['description'],
             'created_at' => now(),
             'updated_at' => now(),
