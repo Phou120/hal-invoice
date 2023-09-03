@@ -66,7 +66,9 @@ class filterHelper
     /** filter start_date and end_date */
     public static function quotationFilter($query, $request)
     {
-        if ($request->start_date && $request->end_date) {
+        if(!isset($request->start_date) && !isset($request->end_date)) {
+            $query->whereRaw("DATE(quotations.start_date)");
+        } elseif ($request->start_date && $request->end_date) {
             $query->whereRaw("DATE(quotations.start_date) BETWEEN ? AND ?", [$request->start_date, $request->end_date]);
         }
 

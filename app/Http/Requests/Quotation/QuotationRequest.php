@@ -173,12 +173,12 @@ class QuotationRequest extends FormRequest
                         'numeric',
                             Rule::exists('quotation_types', 'id')
                 ],
-                'customer_id' => [
-                    'required',
-                        'numeric',
-                            Rule::exists('customers', 'id')
-                                ->whereNull('deleted_at')
-                ],
+                // 'customer_id' => [
+                //     'required',
+                //         'numeric',
+                //             Rule::exists('customers', 'id')
+                //                 ->whereNull('deleted_at')
+                // ],
                 // 'currency_id' => [
                 //     'required',
                 //         'numeric',
@@ -262,6 +262,18 @@ class QuotationRequest extends FormRequest
                 //                 ->whereNull('deleted_at')
                 // ],
                 'discount' => [
+                    'required',
+                        'numeric'
+                ],
+                'rate_kip' =>[
+                    'required',
+                        'numeric'
+                ],
+                'rate_dollar' =>[
+                    'required',
+                        'numeric'
+                ],
+                'rate_baht' =>[
                     'required',
                         'numeric'
                 ],
@@ -362,7 +374,16 @@ class QuotationRequest extends FormRequest
             'status.in' => 'ສະຖານະຄວນມີຢູ່ໃນນີ້: created, approved, inprogress, completed, canceled...',
 
             'status_create_invoice.required' => 'ກະລຸນາປ້ອນສະຖານະກ່ອນ...',
-            'status_create_invoice.in' => 'ສະຖານະຄວນມີຢູ່ໃນນີ້: 0-1...'
+            'status_create_invoice.in' => 'ສະຖານະຄວນມີຢູ່ໃນນີ້: 0-1...',
+
+            'rate_kip.required' => 'ກະລຸນາປ້ອນອັດຕາເງິນກີບກ່ອນ...',
+            'rate_kip.numeric' => 'ອັດຕາເງິນກີບຄວນເປັນຕົວເລກ...',
+
+            'rate_dollar.required' => 'ກະລຸນາປ້ອນອັດຕາເງິນໂດລາກ່ອນ...',
+            'rate_dollar.numeric' => 'ອັດຕາເງິນໂດລາຄວນເປັນຕົວເລກ...',
+
+            'rate_baht.required' => 'ກະລຸນາປ້ອນອັດຕາເງິນບາດກ່ອນ...',
+            'rate_baht.numeric' => 'ອັດຕາເງິນບາດຄວນເປັນຕົວເລກ...',
         ];
     }
 }

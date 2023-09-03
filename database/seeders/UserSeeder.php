@@ -33,11 +33,11 @@ class UserSeeder extends Seeder
         ]);
 
         $roleCompanyAdmin  = Role::create([
-            'name' => 'company-admin', 'display_name' => 'admin'
+            'name' => 'company-admin', 'display_name' => 'company-admin'
         ]);
 
         $roleCompanyUser  = Role::create([
-            'name' => 'company-user', 'display_name' => 'admin'
+            'name' => 'company-user', 'display_name' => 'company-user'
         ]);
 
         //Create User

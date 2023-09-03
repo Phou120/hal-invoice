@@ -8,6 +8,7 @@ use App\Helpers\TableHelper;
 use App\Helpers\filterHelper;
 use App\Helpers\generateHelper;
 use App\Models\QuotationDetail;
+use App\Models\QuotationRate;
 use App\Models\QuotationType;
 use App\Services\CalculateService;
 use Illuminate\Support\Facades\DB;
@@ -50,6 +51,15 @@ class QuotationService
         $addQuotation->discount = $request['discount'];
         $addQuotation->save();
 
+        /** create quotation_rate */
+        if(isset($addQuotation)){
+            $addQuotationRate = new QuotationRate();
+            $addQuotationRate->quotation_id = $addQuotation['id'];
+            $addQuotationRate->rate_kip = $request['rate_kip'];
+            $addQuotationRate->rate_dollar = $request['rate_dollar'];
+            $addQuotationRate->rate_baht = $request['rate_baht'];
+            $addQuotationRate->save();
+        }
 
             /** add detail */
             $sumSubTotal = 0;
@@ -86,19 +96,24 @@ class QuotationService
     public function listQuotations($request)
     {
         $user = Auth::user();
-        $perPage = $request->per_page;
 
         $query = Quotation::select(
             'quotations.*',
-            DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details')
-        );
+            DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details'),
+        )
+        ->leftJoin('customers', 'quotations.customer_id', '=', 'customers.id')
+        ->leftJoin('currencies', 'quotations.currency_id', '=', 'currencies.id')
+        ->leftJoin('users', 'quotations.created_by', '=', 'users.id')
+        ->leftJoin('company_users', 'company_users.user_id', 'users.id')
+        ->leftJoin('companies', 'company_users.company_id', 'companies.id');
 
         /** filter start_date and end_date */
         $query = filterHelper::quotationFilter($query, $request);
 
         if ($user->hasRole(['superadmin', 'admin'])) {
             $query->orderBy('quotations.id', 'asc');
-        } elseif ($user->hasRole(['company-admin', 'company-user'])) {
+        }
+        if ($user->hasRole(['company-admin', 'company-user'])) {
             $query->where('quotations.created_by', $user->id);
         }
 
@@ -153,7 +168,11 @@ class QuotationService
                 ->orderBy('quotations.id', 'asc');
         }
 
-        $listQuotations = $listQuotations->paginate($perPage);
+        if (!isset($request->per_page)) {
+            $listQuotations = $listQuotations->get();
+        } else {
+            $listQuotations = $listQuotations->paginate($request->per_page);
+        }
 
         $listQuotations->map(function ($item) {
             TableHelper::loopDataInQuotation($item);
@@ -167,6 +186,24 @@ class QuotationService
         );
 
         return response()->json($responseQuotationData, 200);
+    }
+
+    public function listQuotation($request)
+    {
+        // $user = Auth::user();
+
+        $query = Quotation::select(
+            'quotations.*', 'companies.company_name as company_name'
+            // DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details'),
+        )
+        ->leftJoin('customers', 'quotations.customer_id', '=', 'customers.id')
+        ->leftJoin('currencies', 'quotations.currency_id', '=', 'currencies.id')
+        ->leftJoin('users', 'quotations.created_by', '=', 'users.id')
+        ->leftJoin('company_users', 'company_users.user_id', 'users.id')
+        ->leftJoin('companies', 'company_users.company_id', 'companies.id')
+        ->orderBy('id', 'asc')->get();
+
+        return response()->json(['listQuotations' => $query,], 200);
     }
 
     /** add quotation detail */
@@ -224,15 +261,15 @@ class QuotationService
         ->join('quotations', 'quotation_details.quotation_id', 'quotations.id')
         ->where('quotation_id', $request->id);
 
+        // Check user roles and apply appropriate conditions
         if ($user->hasRole(['superadmin', 'admin'])) {
-            $details->where('quotation_id')->orderBy('quotations.id', 'asc');
+            $details->orderBy('quotations.id', 'asc');
+        } elseif ($user->hasRole(['company-admin', 'company-user'])) {
+            $details->where('quotations.created_by', $user->id)
+                ->orderBy('quotations.id', 'asc');
         }
 
-        if ($user->hasRole(['company-admin', 'company-user'])) {
-            $details->where('quotation_id')->where('quotations.created_by', $user->id)
-                    ->orderBy('quotations.id', 'asc');
-        }
-
+        // Get the results
         $details = $details->get();
 
         return response()->json([
@@ -250,12 +287,11 @@ class QuotationService
         $editQuotation->end_date = $request['end_date'];
         $editQuotation->note = $request['note'];
         $editQuotation->quotation_type_id = $request['quotation_type_id'];
-        $editQuotation->customer_id = $request['customer_id'];
-        $editQuotation->currency_id = $request['currency_id'];
+        // $editQuotation->customer_id = $request['customer_id'];
+        // $editQuotation->currency_id = $request['currency_id'];
         $editQuotation->discount = $request['discount'];
         $editQuotation->updated_by = Auth::user('api')->id;
         $editQuotation->save();
-
 
         /**Update Calculate */
         $this->calculateService->calculateTotal_ByEdit($editQuotation);
@@ -313,14 +349,17 @@ class QuotationService
         try {
             DB::beginTransaction();
 
-            // Find the Quotation model
-            $quotation = Quotation::findOrFail($request['id']);
-            $quotation->updated_by = Auth::user('api')->id;
-            $quotation->save();
+                $quotationId = $request->id;
 
-            // Delete the Quotation details and the Quotation model
-            $quotation->delete();
-            QuotationDetail::where('quotation_id', $request['id'])->delete();
+                // Find the Quotation model
+                $quotation = Quotation::findOrFail($quotationId);
+                $quotation->updated_by = Auth::user('api')->id;
+                $quotation->save();
+
+                // Delete the Quotation and related records
+                $quotation->delete();
+                QuotationRate::where('quotation_id', $quotationId)->delete();
+                QuotationDetail::where('quotation_id', $quotationId)->delete();
 
             DB::commit();
 
@@ -333,7 +372,7 @@ class QuotationService
 
             return response()->json([
                 'error' => true,
-                'msg' => 'ບໍ່ສາມາດລຶບລາຍກນ້ໄດ້...'
+                'msg' => 'ບໍ່ສາມາດລຶບໄດ້...'
             ], 422);
         }
     }

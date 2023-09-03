@@ -17,7 +17,7 @@
     }
     .invoice-border-top{
         margin-top: 10px;
-        border-top: 20px solid #222; 
+        border-top: 20px solid #222;
     }
     .desc ol ul li, .desc ol li {
       list-style-type: decimal;
@@ -56,7 +56,7 @@
     .list_tatal .sub{
       padding-left: 20px;
       color: #444;
-    } 
+    }
     .sub{
       padding-left: 8px;
       font-weight: 500;
@@ -193,7 +193,12 @@
                         <img src="https://admin.haltech.la/generated/admin/img/logo.74a3eec9.png" alt="logo" width="152">
                         </div>
                         <div class="bill-from column is-8">
-                        <h1 class="title">HOUNG AH LOUN TECHNOLOGY CO.,LTD</h1>
+                        {{-- <h1 class="title">HOUNG AH LOUN TECHNOLOGY CO.,LTD</h1> --}}
+                        {{-- @if(property_exists($data, 'quotation')) --}}
+                            <h1 class="title">{{ $data->$quotation->quotation_number }}</h1>
+                        {{-- @else
+                            <h1 class="title">Quotation Not Found</h1>
+                        @endif --}}
                         <p><strong>Business Number </strong>020 99999564</p>
                         <p class="label">info@haltech.la</p>
                         <p class="label">Don koi Village, Sisattanak District, Vientiane Capital, Laos</p>
@@ -303,7 +308,7 @@
                         <ul style="list-style:none;">
                             <div class="list-total">
                             <li>
-                            SUB-TOTAL                    
+                            SUB-TOTAL
                                 <span class="sub">$ 500</span>
                             </li>
                             <li>
@@ -321,7 +326,7 @@
                             </div>
                         </ul>
                     </div>
-                  </div> 
+                  </div>
                   {{-- @if(isset($invoice->note)) --}}
                     <hr class="small-border">
                     <div class="invoice-footer">

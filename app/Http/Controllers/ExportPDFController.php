@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invoice;
+use App\Models\Quotation;
 use Illuminate\Http\Request;
 use App\Services\InvoiceService;
+use App\Services\QuotationService;
 use Spatie\Browsershot\Browsershot;
 use Illuminate\Support\Facades\File;
 
@@ -14,18 +16,22 @@ class ExportPDFController extends Controller
     public function exportPDFQuotation()
     {
         // $invoice = resolve(InvoiceService::class)->listInvoiceDetail(1)->getData();
-        $quotation = '';
-        $quotationDetails = [];
+        $quotation = resolve(QuotationService::class)->listQuotation(1)->getData();
+
+        // $quotations = $quotation->company->company_name;
+        // $quotationDetails = [];
 
         $mergeData = [
             'quotation' => '',
-            'quotation_details' => $quotationDetails
+            // 'quotation_details' => $quotationDetails,
         ];
 
         $view = view('quotations.quotation')
-        ->with('data', $mergeData)
-        ->render();
-        
+            ->with('data', $quotation)
+            ->render();
+
+        return $view;
+
         $file_name = 'quotation' . '.pdf';
         $file_url = public_path('images/quotation/pdf/' . $file_name);
         if (!File::isDirectory(public_path('images/quotation/pdf/'))) {

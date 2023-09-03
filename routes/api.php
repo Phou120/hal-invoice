@@ -15,6 +15,7 @@ use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Quotation\QuotationController;
 use App\Http\Controllers\Invoice\ReportInvoiceController;
 use App\Http\Controllers\CompanyUser\CompanyUserController;
+use App\Http\Controllers\Quotation\QuotationRateController;
 use App\Http\Controllers\Quotation\QuotationTypeController;
 use App\Http\Controllers\Company\CompanyBankAccountController;
 use App\Http\Controllers\moduleCategory\ModuleTitleController;
@@ -165,14 +166,14 @@ Route::group([
     Route::delete('delete-user/{id}', [UserController::class, 'deleteUser'])->name('delete.user')->middleware('role:superadmin|admin');
 
     /** change password */
-    Route::put('change-password/{id}', [UserController::class, 'changePassword'])->name('change.password')->middleware('role:admin');
+    Route::put('change-password/{id}', [UserController::class, 'changePassword'])->name('change.password')->middleware('role:superadmin|admin');
 
     /** Get User profile */
     Route::get('user-profile', [UserProfileController::class, 'ListUserProfile'])->middleware('role:superadmin|admin');
 
     /** CRUD CompanyUser */
-    Route::get('list-company-users', [CompanyUserController::class, 'listCompanyUser'])->middleware('role:superadmin|admin');
-    Route::post('create-company-user', [CompanyUserController::class, 'createCompanyUser'])->name('create.company.user')->middleware('role:company-admin|company-user');
+    Route::get('list-company-users', [CompanyUserController::class, 'listCompanyUser'])->middleware('role:company-admin|company-user');
+    Route::post('create-company-user', [CompanyUserController::class, 'createCompanyUser'])->name('create.company.user')->middleware('role:superadmin|admin');
     Route::put('update-company-user/{id}', [CompanyUserController::class, 'updateCompanyUser'])->name('update.company.user')->middleware('role:company-admin|company-user');
     Route::delete('delete-company-user/{id}', [CompanyUserController::class, 'deleteCompanyUser'])->name('delete.company.user')->middleware('role:company-admin|company-user');
 
@@ -222,6 +223,8 @@ Route::group([
     Route::delete('delete-quotation-type/{id}', [QuotationTypeController::class, 'deleteQuotationType'])->name('delete.quotation.type')->middleware('role:superadmin|admin');
 
 
+    /** get quotation_rate */
+    Route::get('list-quotation-rates', [QuotationRateController::class, 'listQuotationRates']);
 });
 
 
