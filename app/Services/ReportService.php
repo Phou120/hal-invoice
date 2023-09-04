@@ -2,10 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\Receipt;
-use App\Models\Customer;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;

@@ -16,18 +16,18 @@ class ExportPDFController extends Controller
     public function exportPDFQuotation()
     {
         // $invoice = resolve(InvoiceService::class)->listInvoiceDetail(1)->getData();
-        $quotation = resolve(QuotationService::class)->listQuotation(1)->getData();
+        $quotationData = resolve(QuotationService::class)->listQuotations(1)->getData();
 
-        // $quotations = $quotation->company->company_name;
-        // $quotationDetails = [];
+        $companyName = $quotationData->company_name;
 
+        // Create an array to hold the merged data
         $mergeData = [
-            'quotation' => '',
-            // 'quotation_details' => $quotationDetails,
+            'company_name' => $companyName,
         ];
 
+        // Render the view with the merged data
         $view = view('quotations.quotation')
-            ->with('data', $quotation)
+            ->with('data', $mergeData)
             ->render();
 
         return $view;

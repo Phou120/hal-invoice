@@ -23,12 +23,12 @@ class InvoiceRequest extends FormRequest
     public function prepareForValidation()
     {
         if($this->isMethod('put') && $this->routeIs('edit.invoice')
-            ||$this->isMethod('delete') && $this->routeIs('delete.invoice')
-            ||$this->isMethod('put') && $this->routeIs('edit.invoice.detail')
-            ||$this->isMethod('post') && $this->routeIs('add.invoice.detail')
-            ||$this->isMethod('put') && $this->routeIs('update.invoice.status')
-            ||$this->isMethod('delete') && $this->routeIs('delete.invoice.detail')
-            ||$this->isMethod('get') && $this->routeIs('list.invoice.detail')
+             ||$this->isMethod('delete') && $this->routeIs('delete.invoice')
+             ||$this->isMethod('put') && $this->routeIs('edit.invoice.detail')
+             ||$this->isMethod('post') && $this->routeIs('add.invoice.detail')
+             ||$this->isMethod('put') && $this->routeIs('update.invoice.status')
+             ||$this->isMethod('delete') && $this->routeIs('delete.invoice.detail')
+             ||$this->isMethod('get') && $this->routeIs('list.invoice.detail')
 
         ){
             $this->merge([
@@ -68,7 +68,7 @@ class InvoiceRequest extends FormRequest
                 ],
                 'status' =>[
                     'required',
-                        Rule::in('created', 'approved', 'inprogress', 'completed', 'canceled')
+                        Rule::in('created', 'approved', 'inprogress', 'completed', 'cancelled')
                 ]
             ];
         }
@@ -84,9 +84,9 @@ class InvoiceRequest extends FormRequest
                                     $q->whereNull('deleted_at');
                                 }),
                                 function($attribute, $value, $fail){
-                                    $checkItem = Invoice::where('id', $value)->where('status', 'approved')->exists();
+                                    $checkItem = Invoice::where('id', $value)->where('status', 'completed')->exists();
                                     if($checkItem){
-                                        $fail('ບໍ່ສາມາດລຶບໃບເກັບເງິນນີ້ໄດ້ເພາະວ່າຖືກອະນຸມັດແລ້ວ...');
+                                        $fail('ບໍ່ສາມາດລຶບໃບເກັບເງິນນີ້ໄດ້ ເພາະວ່າຖືກອອກໃບເກັບເງິນແລ້ວ...');
                                     }
                                 }
                 ],
@@ -104,9 +104,9 @@ class InvoiceRequest extends FormRequest
                                     $query->whereNull('deleted_at');
                                 }),
                                 function($attribute, $value, $fail){
-                                    $checkItem = Invoice::where('id', $value)->where('status', 'approved')->exists();
+                                    $checkItem = Invoice::where('id', $value)->where('status', 'completed')->exists();
                                     if($checkItem){
-                                        $fail('ບໍ່ສາມາດລຶບລາຍລະອຽດໃບເກັບເງິນນີ້ໄດ້ເພາະວ່າຖືກອະນຸມັດແລ້ວ...');
+                                        $fail('ບໍ່ສາມາດລຶບລາຍລະອຽດໃບເກັບເງິນນີ້ໄດ້ ເພາະວ່າຖືກອອກໃບເກັບເງິນແລ້ວ...');
                                     }
                                 }
                 ],
@@ -124,9 +124,9 @@ class InvoiceRequest extends FormRequest
                                     $query->whereNull('deleted_at');
                                 }),
                                 function($attribute, $value, $fail){
-                                    $checkItem = Invoice::where('id', $value)->where('status', 'approved')->exists();
+                                    $checkItem = Invoice::where('id', $value)->where('status', 'completed')->exists();
                                     if($checkItem){
-                                        $fail('ບໍ່ສາມາດແກ້ໄຂລາຍລະອຽດໃບເກັບເງິນນີ້ໄດ້ເພາະວ່າຖືກອະນຸມັດແລ້ວ...');
+                                        $fail('ບໍ່ສາມາດແກ້ໄຂລາຍລະອຽດໃບເກັບເງິນນີ້ໄດ້ ເພາະວ່າຖືກອອກໃບເກັບເງິນແລ້ວ...');
                                     }
                                 }
                 ],
@@ -160,9 +160,9 @@ class InvoiceRequest extends FormRequest
                                     $q->whereNull('deleted_at');
                                 }),
                             function($attribute, $value, $fail){
-                                $checkItem = Invoice::where('id', $value)->where('status', 'approved')->exists();
+                                $checkItem = Invoice::where('id', $value)->where('status', 'completed')->exists();
                                 if($checkItem){
-                                    $fail('ບໍ່ສາມາດແກ້ໄຂໃບເກັບເງິນນີ້ໄດ້ເພາະວ່າຖືກອະນຸມັດແລ້ວ...');
+                                    $fail('ບໍ່ສາມາດແກ້ໄຂໃບເກັບເງິນນີ້ໄດ້ ເພາະວ່າຖືກອອກໃບເກັບເງິນແລ້ວ...');
                                 }
                             }
                 ],
@@ -207,7 +207,27 @@ class InvoiceRequest extends FormRequest
                 'quotation_detail_id' =>[
                     'required',
                         'array',
-                            Rule::exists('quotation_details', 'id')->whereNull('deleted_at')
+                            Rule::exists('quotation_details', 'id')->whereNull('deleted_at'),
+                            function ($attribute, $value, $fail) {
+                                foreach ($value as $quotation_detail_id) {
+                                    $statusCreateInvoice = QuotationDetail::where('id', $quotation_detail_id)
+                                    ->value('status_create_invoice');
+
+                                    if ($statusCreateInvoice === 1) {
+                                        $fail('ລາຍການນີ້ຖືກອອກໃບເກັບເງິນແລ້ວ ' .$quotation_detail_id);
+                                    }
+                                }
+                            },
+                            function ($attribute, $value, $fail) {
+                                $quotationIds = collect($value)
+                                ->map(fn($quotationDetailId) => optional(QuotationDetail::find($quotationDetailId))->quotation_id)
+                                ->unique()
+                                ->values();
+
+                                if ($quotationIds->count() > 1) {
+                                    $fail("ກະລຸນາເລືອກໃຫ້ຖືກຕ້ອງ...");
+                                }
+                            }
                 ],
                 // 'order' => [
                 //     'required',
@@ -255,7 +275,7 @@ class InvoiceRequest extends FormRequest
                                     ->value('status_create_invoice');
 
                                     if ($statusCreateInvoice === 1) {
-                                        $fail('ລາຍການນີ້ຖືກສ້າງ invoice ແລ້ວ ' .$quotation_detail_id);
+                                        $fail('ລາຍການນີ້ຖືກອອກໃບເກັບເງິນແລ້ວ ' .$quotation_detail_id);
                                     }
                                 }
                             },

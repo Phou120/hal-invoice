@@ -194,11 +194,7 @@
                         </div>
                         <div class="bill-from column is-8">
                         {{-- <h1 class="title">HOUNG AH LOUN TECHNOLOGY CO.,LTD</h1> --}}
-                        {{-- @if(property_exists($data, 'quotation')) --}}
-                            <h1 class="title">{{ $data->$quotation->quotation_number }}</h1>
-                        {{-- @else
-                            <h1 class="title">Quotation Not Found</h1>
-                        @endif --}}
+                        <h1 class="title">{{ $data['company_name'] }}</h1>
                         <p><strong>Business Number </strong>020 99999564</p>
                         <p class="label">info@haltech.la</p>
                         <p class="label">Don koi Village, Sisattanak District, Vientiane Capital, Laos</p>

@@ -21,13 +21,13 @@ class QuotationRequest extends FormRequest
     public function prepareForValidation()
     {
         if($this->isMethod('put') && $this->routeIs('edit.quotation')
-            ||$this->isMethod('delete') && $this->routeIs('delete.quotation.detail')
-            ||$this->isMethod('post') && $this->routeIs('add.quotation.detail')
-            ||$this->isMethod('put') && $this->routeIs('edit.quotation.detail')
-            ||$this->isMethod('delete') && $this->routeIs('delete.quotation')
-            ||$this->isMethod('get') && $this->routeIs('list.quotation.detail')
-            ||$this->isMethod('put') && $this->routeIs('update.quotation.status')
-            ||$this->ismethod('put') && $this->routeIs('update.detail.status')
+             ||$this->isMethod('delete') && $this->routeIs('delete.quotation.detail')
+             ||$this->isMethod('post') && $this->routeIs('add.quotation.detail')
+             ||$this->isMethod('put') && $this->routeIs('edit.quotation.detail')
+             ||$this->isMethod('delete') && $this->routeIs('delete.quotation')
+             ||$this->isMethod('get') && $this->routeIs('list.quotation.detail')
+             ||$this->isMethod('put') && $this->routeIs('update.quotation.status')
+             ||$this->isMethod('put') && $this->routeIs('update.detail.status')
         ){
             $this->merge([
                 'id' => $this->route()->parameters['id'],
@@ -68,7 +68,7 @@ class QuotationRequest extends FormRequest
                 ],
                 'status' =>[
                     'required',
-                        Rule::in('created', 'approved', 'inprogress', 'completed', 'canceled')
+                        Rule::in('created', 'approved', 'inprogress', 'completed', 'cancelled')
                 ]
             ];
         }
@@ -371,7 +371,7 @@ class QuotationRequest extends FormRequest
             'description.max' => 'ລາຍລະອຽດບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
 
             'status.required' => 'ກະລຸນາປ້ອນສະຖານະກ່ອນ...',
-            'status.in' => 'ສະຖານະຄວນມີຢູ່ໃນນີ້: created, approved, inprogress, completed, canceled...',
+            'status.in' => 'ສະຖານະຄວນມີຢູ່ໃນນີ້: created, approved, inprogress, completed, cancelled...',
 
             'status_create_invoice.required' => 'ກະລຸນາປ້ອນສະຖານະກ່ອນ...',
             'status_create_invoice.in' => 'ສະຖານະຄວນມີຢູ່ໃນນີ້: 0-1...',

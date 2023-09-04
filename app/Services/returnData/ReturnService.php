@@ -19,7 +19,7 @@ class ReturnService
             'approved' => FilterHelper::INVOICE_STATUS['APPROVED'],
             'inprogress' => FilterHelper::INVOICE_STATUS['INPROGRESS'],
             'completed' => FilterHelper::INVOICE_STATUS['COMPLETED'],
-            'canceled' => FilterHelper::INVOICE_STATUS['CANCELLED'],
+            'cancelled' => FilterHelper::INVOICE_STATUS['CANCELLED'],
         ];
 
         return $invoiceQuery;
@@ -27,11 +27,10 @@ class ReturnService
 
     public function countUserCompany($invoiceQuery)
     {
-        return $invoiceQuery->select
-            (
-                DB::raw('(SELECT COUNT(id) FROM companies) as company_count'),
-                DB::raw('(SELECT COUNT(id) FROM customers) as customer_count')
-            )->first();
+        return $invoiceQuery->select(
+            DB::raw('(SELECT COUNT(id) FROM companies) as company_count'),
+            DB::raw('(SELECT COUNT(id) FROM customers) as customer_count')
+        )->first();
     }
 
     public function outputData($foreach, $countUserCompany)
@@ -253,7 +252,7 @@ class ReturnService
                 'amount' => $completed,
                 'total' => $completedTotal,
              ],
-             'canceled' => [
+             'cancelled' => [
                 'amount' => $canceled,
                 'total' => $canceledTotal,
              ],
@@ -287,7 +286,7 @@ class ReturnService
                 'amount' => $completed,
                 'total' => $completedTotal,
              ],
-             'canceled' => [
+             'cancelled' => [
                 'amount' => $cancelled,
                 'total' => $cancelledTotal,
              ],

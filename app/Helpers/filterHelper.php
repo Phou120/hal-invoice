@@ -19,7 +19,7 @@ class filterHelper
         'APPROVED' => 'approved',
         'INPROGRESS' => 'inprogress',
         'COMPLETED' => 'completed',
-        'CANCELLED' => 'canceled'
+        'CANCELLED' => 'cancelled'
     ];
 
 
