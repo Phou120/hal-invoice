@@ -17,7 +17,7 @@
     }
     .invoice-border-top{
         margin-top: 10px;
-        border-top: 20px solid #222; 
+        border-top: 20px solid #222;
     }
     .desc ol ul li, .desc ol li {
       list-style-type: decimal;
@@ -56,7 +56,7 @@
     .list_tatal .sub{
       padding-left: 20px;
       color: #444;
-    } 
+    }
     .sub{
       padding-left: 8px;
       font-weight: 500;
@@ -219,7 +219,7 @@
             <div class="columns">
               <div class="column">
                   <div class="field is-horizontal">
-                      <label class="label-title">QUOTATION TO</label>
+                      <label class="label-title">INVOICE TO</label>
                   </div>
                   <div>
                       <label class="title">HAL Logistics</label>
@@ -227,7 +227,7 @@
                       <p>hallogistics@gmail.com</p>
                       <p>Hongkha Rd, Vientiane Capital</p>
                   </div>
-  
+
               </div>
             </div>
             {{-- end --}}
@@ -321,7 +321,7 @@
                         <ul style="list-style:none;">
                             <div class="list-total">
                             <li>
-                            SUB-TOTAL                    
+                            SUB-TOTAL
                                 <span class="sub">$ 500</span>
                             </li>
                             <li>
@@ -339,7 +339,7 @@
                             </div>
                         </ul>
                     </div>
-                  </div> 
+                  </div>
                   {{-- @if(isset($invoice->note)) --}}
                     {{-- <hr class="small-border">
                     <div class="invoice-footer">

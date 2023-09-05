@@ -108,27 +108,6 @@ class SeedDataSeeder extends Seeder
         ]);
 
         Currency::create([
-            'name' => 'ໂດລາ',
-            'short_name' => '$',
-            'created_at' => '2023-06-30',
-            'updated_at' => '2023-12-25'
-        ]);
-
-        Currency::create([
-            'name' => 'ຢວນ',
-            'short_name' => '¥',
-            'created_at' => '2023-07-12',
-            'updated_at' => '2023-12-25'
-        ]);
-
-        Currency::create([
-            'name' => 'ໂດລາ',
-            'short_name' => '$',
-            'created_at' => '2023-01-30',
-            'updated_at' => '2023-10-25'
-        ]);
-
-        Currency::create([
             'name' => 'ບາດ',
             'short_name' => '฿',
             'created_at' => '2023-03-31',
@@ -136,44 +115,9 @@ class SeedDataSeeder extends Seeder
         ]);
 
         Currency::create([
-            'name' => 'ໂດລາ',
-            'short_name' => '$',
-            'created_at' => '2023-09-30',
-            'updated_at' => '2023-10-25'
-        ]);
-
-        Currency::create([
             'name' => 'ກີບ',
             'short_name' => '₭',
             'created_at' => '2023-04-10',
-            'updated_at' => '2023-10-25'
-        ]);
-
-        Currency::create([
-            'name' => 'ຢວນ',
-            'short_name' => '¥',
-            'created_at' => '2023-08-12',
-            'updated_at' => '2023-12-25'
-        ]);
-
-        Currency::create([
-            'name' => 'ບາດ',
-            'short_name' => '฿',
-            'created_at' => '2023-08-31',
-            'updated_at' => '2023-10-15'
-        ]);
-
-        Currency::create([
-            'name' => 'ກີບ',
-            'short_name' => '₭',
-            'created_at' => '2023-08-10',
-            'updated_at' => '2023-10-25'
-        ]);
-
-        Currency::create([
-            'name' => 'ໂດລາ',
-            'short_name' => '$',
-            'created_at' => '2023-08-30',
             'updated_at' => '2023-10-25'
         ]);
     }

@@ -51,6 +51,8 @@ Route::group([
 });
 
 Route::get('export-pdf-quotation', [ExportPDFController::class, 'exportPDFQuotation']);
+Route::get('list-quotation', [QuotationController::class, 'listQuotation']);
+
 
 Route::group([
     'middleware' => [
@@ -104,7 +106,7 @@ Route::group([
     /** update status quotation */
     Route::put('update-quotation-status/{id}', [QuotationController::class, 'updateQuotationStatus'])->name('update.quotation.status')->middleware('role:company-admin|company-user');
     /** update status in quotation_details */
-    Route::put('update-detail-status/{id}', [QuotationController::class, 'updateDetailStatus'])->name('update.detail.status')->middleware('role:company-admin|company-user');
+    //Route::put('update-detail-status/{id}', [QuotationController::class, 'updateDetailStatus'])->name('update.detail.status')->middleware('role:company-admin|company-user');
 
 
     /** CRUD Invoice */

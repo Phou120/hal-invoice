@@ -194,7 +194,7 @@
                         </div>
                         <div class="bill-from column is-8">
                         {{-- <h1 class="title">HOUNG AH LOUN TECHNOLOGY CO.,LTD</h1> --}}
-                        <h1 class="title">{{ $data['company_name'] }}</h1>
+                        <h1 class="title">{{ $data->quotations->quotation_number }}</h1>
                         <p><strong>Business Number </strong>020 99999564</p>
                         <p class="label">info@haltech.la</p>
                         <p class="label">Don koi Village, Sisattanak District, Vientiane Capital, Laos</p>

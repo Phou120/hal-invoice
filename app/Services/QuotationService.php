@@ -78,7 +78,6 @@ class QuotationService
                     $addDetail->save();
 
                     $sumSubTotal += $total;
-                    // dd($sumSubTotal);
                 }
             }
             /**Calculate */
@@ -188,23 +187,29 @@ class QuotationService
         return response()->json($responseQuotationData, 200);
     }
 
-    public function listQuotation($request)
+    public function listQuotation()
     {
         // $user = Auth::user();
 
         $query = Quotation::select([
-            'quotations.quotation_number as quotation_number',
+            'quotations.*',
             'companies.company_name as company_name',
         ])
         ->leftJoin('customers', 'quotations.customer_id', '=', 'customers.id')
         ->leftJoin('currencies', 'quotations.currency_id', '=', 'currencies.id')
         ->leftJoin('users', 'quotations.created_by', '=', 'users.id')
         ->leftJoin('company_users', 'company_users.user_id', '=', 'users.id')
-        ->leftJoin('companies', 'company_users.company_id', '=', 'companies.id')
-        ->orderBy('quotations.id', 'asc') // Specify the table alias for 'id' column
-        ->get();
+        ->leftJoin('companies', 'company_users.company_id', '=', 'companies.id');
 
-        return response()->json(['listQuotations' => $query], 200);
+        $quotation = $query->orderBy('quotations.id', 'asc')->get();
+        $totalQuotation = $quotation->count();
+        $totalPrice = $quotation->sum('total');
+
+        return response()->json([
+            'listQuotations' => $quotation,
+            'totalQuotation' => $totalQuotation,
+            'totalPrice' => $totalPrice
+        ], 200);
     }
 
     /** add quotation detail */
@@ -384,22 +389,6 @@ class QuotationService
         $updateStatus->status = $request['status'];
         $updateStatus->updated_by = Auth::user('api')->id;
         $updateStatus->save();
-
-        return response()->json([
-            'errors' => false,
-            'msg' => 'ສຳເລັດແລ້ວ',
-        ], 200);
-    }
-
-    public function updateDetailStatus($request)
-    {
-        $updateDetailStatus = QuotationDetail::find($request['id']);
-        $updateDetailStatus->status_create_invoice = $request['status_create_invoice'];
-        $updateDetailStatus->save();
-
-        $updateQuotation = Quotation::find($updateDetailStatus['quotation_id']);
-        $updateQuotation->updated_by = Auth::user('api')->id;
-        $updateQuotation->save();
 
         return response()->json([
             'errors' => false,

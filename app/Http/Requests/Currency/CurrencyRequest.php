@@ -59,11 +59,13 @@ class CurrencyRequest extends FormRequest
                 ],
                 'name' =>[
                     'required',
-                    'max:255',
+                        'max:255',
+                            Rule::unique('currencies', 'name')->ignore($this->id)
                 ],
                 'short_name' =>[
                     'required',
-                    'regex:/^(\$|₭|฿|¥)$/'
+                    'regex:/^(\$|₭|฿|¥)$/',
+                    Rule::unique('currencies', 'short_name')->ignore($this->id)
                 ]
             ];
         }
@@ -73,11 +75,13 @@ class CurrencyRequest extends FormRequest
             return [
                 'name' =>[
                     'required',
-                    'max:255'
+                        'max:255',
+                            Rule::unique('currencies', 'name')
                 ],
                 'short_name' =>[
                     'required',
-                    'regex:/^(\$|₭|฿|¥)$/'
+                    'regex:/^(\$|₭|฿|¥)$/',
+                    Rule::unique('currencies', 'short_name')
                 ]
             ];
         }
@@ -89,9 +93,11 @@ class CurrencyRequest extends FormRequest
         return [
             'name.required' => 'ກະລຸນາປ້ອນຊື່ສະກຸນກ່ອນ...',
             'name.max' => 'ຊື່ບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
+            'name.unique' => 'ຊື່ນີ້ມີໃນລະບົບແລ້ວ...',
 
             'short_name.required' => 'ກະລຸນາປ້ອນສັນຍາລັກກ່ອນ...',
             'short_name.regex' => 'ຄວນເປັນສັນຍາລັກ $|₭|฿|¥...',
+            'short_name.unique' => 'ສັນຍາລັກນີ້ມີໃນລະບົບແລ້ວ...',
 
             'id.required' => 'ກະລຸນາປ້ອນ ID ກ່ອນ...',
             'id.numeric' => 'ID ຄວນເປັນໂຕເລກ...',

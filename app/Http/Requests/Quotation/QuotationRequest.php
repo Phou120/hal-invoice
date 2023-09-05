@@ -27,7 +27,6 @@ class QuotationRequest extends FormRequest
              ||$this->isMethod('delete') && $this->routeIs('delete.quotation')
              ||$this->isMethod('get') && $this->routeIs('list.quotation.detail')
              ||$this->isMethod('put') && $this->routeIs('update.quotation.status')
-             ||$this->isMethod('put') && $this->routeIs('update.detail.status')
         ){
             $this->merge([
                 'id' => $this->route()->parameters['id'],
@@ -43,21 +42,6 @@ class QuotationRequest extends FormRequest
      */
     public function rules()
     {
-        if($this->isMethod('put') && $this->routeIs('update.detail.status'))
-        {
-            return [
-                'id' =>[
-                    'required',
-                        'numeric',
-                            Rule::exists('quotation_details', 'id')->whereNull('deleted_at')
-                ],
-                'status_create_invoice' =>[
-                    'required',
-                        Rule::in([0,1])
-                ]
-            ];
-        }
-
         if($this->isMethod('put') && $this->routeIs('update.quotation.status'))
         {
             return [

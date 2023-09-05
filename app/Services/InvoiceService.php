@@ -77,6 +77,10 @@ class InvoiceService
                             $addDetail->save();
 
                             $sumSubTotal += $total;
+
+                            /** update quotation_detail status_create_invoice  */
+                            $item->status_create_invoice = 1;
+                            $item->save();
                         }
                         /**Calculate */
                         $this->calculateService->sumTotalInvoice($taxRate, $discountRate, $sumSubTotal, $addInvoice['id']);
@@ -323,6 +327,11 @@ class InvoiceService
             /**Update Calculate */
             $this->calculateService->calculateTotalInvoice_ByEdit($editInvoice);
 
+            /** update quotation_detail status_create_invoice */
+            foreach ($quotationDetail as $item) {
+                $item->status_create_invoice = 1;
+                $item->save();
+            }
         }
 
         return response()->json([

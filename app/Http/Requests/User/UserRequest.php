@@ -88,8 +88,6 @@ class UserRequest extends FormRequest
                                 'min:5',
                                     Rule::unique('users', 'email')
                                         ->ignore($this->id)
-                                        ->whereNull('deleted_at')
-
                 ],
                 'tel' =>[
                     'required',
@@ -97,7 +95,6 @@ class UserRequest extends FormRequest
                             'digits_between:6,15',
                                 Rule::unique('users', 'tel')
                                 ->ignore($this->id)
-                                ->whereNull('deleted_at')
                 ]
             ];
         }
@@ -115,7 +112,6 @@ class UserRequest extends FormRequest
                             'email',
                                 'min:5',
                                     Rule::unique('users', 'email')
-                                        ->whereNull('deleted_at')
 
                 ],
                 'password' =>[
@@ -128,7 +124,6 @@ class UserRequest extends FormRequest
                         'numeric',
                             'digits_between:6,15',
                                 Rule::unique('users', 'tel')
-                                ->whereNull('deleted_at')
                 ]
             ];
         }

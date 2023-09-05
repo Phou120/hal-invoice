@@ -62,8 +62,8 @@ class QuotationController extends Controller
         return $this->quotationService->updateQuotationStatus($request);
     }
 
-    public function updateDetailStatus(QuotationRequest $request)
+    public function listQuotation()
     {
-        return $this->quotationService->updateDetailStatus($request);
+        return $this->quotationService->listQuotation();
     }
 }
