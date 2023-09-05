@@ -189,8 +189,6 @@ class QuotationService
 
     public function listQuotation()
     {
-        // $user = Auth::user();
-
         $query = Quotation::select([
             'quotations.*',
             'companies.company_name as company_name',
@@ -206,9 +204,9 @@ class QuotationService
         $totalPrice = $quotation->sum('total');
 
         return response()->json([
-            'listQuotations' => $quotation,
             'totalQuotation' => $totalQuotation,
-            'totalPrice' => $totalPrice
+            'totalPrice' => $totalPrice,
+            'listQuotations' => $quotation,
         ], 200);
     }
 

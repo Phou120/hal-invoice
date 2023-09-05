@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invoice;
+use App\Models\Quotation;
 use App\Services\InvoiceService;
 use App\Services\QuotationService;
 use Spatie\Browsershot\Browsershot;
@@ -10,13 +11,10 @@ use Illuminate\Support\Facades\File;
 
 class ExportPDFController extends Controller
 {
-
     public function exportPDFQuotation()
     {
         // $invoice = resolve(InvoiceService::class)->listInvoiceDetail(1)->getData();
         $quotation = resolve(QuotationService::class)->listQuotation(1)->getData();
-
-        // $companyName = $quotationData->company_name;
 
         // Create an array to hold the merged data
         // $mergeData = [

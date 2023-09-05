@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Currency;
 use App\Traits\ResponseAPI;
+use Illuminate\Support\Str;
 
 class CurrencyService
 {
@@ -54,6 +55,9 @@ class CurrencyService
     public function deleteCurrency($request)
     {
         $deleteCurrency = Currency::find($request['id']);
+        $deleteCurrency->name = $deleteCurrency->name . '_deleted_' . Str::random(3);
+        $deleteCurrency->short_name = $deleteCurrency->short_name . '_deleted_' . Str::random(3);
+        $deleteCurrency->save();
         $deleteCurrency->delete();
 
         return response()->json([
