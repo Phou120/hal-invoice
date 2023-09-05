@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Currency;
 use App\Traits\ResponseAPI;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class CurrencyService
 {
@@ -13,16 +14,24 @@ class CurrencyService
     /** add currency */
     public function addCurrency($request)
     {
-        $addCurrency = new Currency();
-        $addCurrency->name = $request['name'];
-        $addCurrency->short_name = $request['short_name'];
-        $addCurrency->save();
+        try {
+            $addCurrency = new Currency();
+            $addCurrency->name = $request['name'];
+            $addCurrency->short_name = $request['short_name'];
+            $addCurrency->save();
 
-        return response()->json([
-            'error' => false,
-            'msg' => 'ສຳເລັດແລ້ວ'
-        ], 200);
+            return response()->json([
+                'error' => false,
+                'msg' => 'ສຳເລັດແລ້ວ'
+            ], 200);
 
+        } catch (\Exception $e) {
+            // Handle any exceptions that may occur during the database operation.
+            return response()->json([
+                'error' => true,
+                'msg' => 'ມີບັນຫາໃນການບັນທຶກ'
+            ], 500);
+        }
     }
 
     /** list currency */

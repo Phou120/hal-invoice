@@ -37,29 +37,28 @@ class QuotationService
         }
 
         DB::beginTransaction();
-        /** add quotation */
-        $addQuotation = new Quotation();
-        $addQuotation->quotation_number = generateHelper::generateQuotationNumber('QT- ', 8);
-        $addQuotation->quotation_name = $request['quotation_name'];
-        $addQuotation->start_date = $request['start_date'];
-        $addQuotation->end_date = $request['end_date'];
-        $addQuotation->note = $request['note'];
-        $addQuotation->customer_id = $request['customer_id'];
-        $addQuotation->quotation_type_id = $getQuotationType['id'];
-        $addQuotation->currency_id = $getQuotationType['currency_id'];
-        $addQuotation->created_by = Auth::user('api')->id;
-        $addQuotation->discount = $request['discount'];
-        $addQuotation->save();
+            /** add quotation */
+            $addQuotation = new Quotation();
+            $addQuotation->quotation_number = generateHelper::generateQuotationNumber('QT- ', 8);
+            $addQuotation->quotation_name = $request['quotation_name'];
+            $addQuotation->start_date = $request['start_date'];
+            $addQuotation->end_date = $request['end_date'];
+            $addQuotation->note = $request['note'];
+            $addQuotation->customer_id = $request['customer_id'];
+            $addQuotation->quotation_type_id = $getQuotationType['id'];
+            $addQuotation->currency_id = $getQuotationType['currency_id'];
+            $addQuotation->created_by = Auth::user('api')->id;
+            $addQuotation->discount = $request['discount'];
+            $addQuotation->save();
 
-        /** create quotation_rate */
-        if(isset($addQuotation)){
+            /** create quotation_rate */
             $addQuotationRate = new QuotationRate();
             $addQuotationRate->quotation_id = $addQuotation['id'];
             $addQuotationRate->rate_kip = $request['rate_kip'];
             $addQuotationRate->rate_dollar = $request['rate_dollar'];
             $addQuotationRate->rate_baht = $request['rate_baht'];
             $addQuotationRate->save();
-        }
+
 
             /** add detail */
             $sumSubTotal = 0;
