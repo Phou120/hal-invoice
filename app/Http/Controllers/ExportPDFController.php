@@ -20,7 +20,7 @@ class ExportPDFController extends Controller
         // $mergeData = [
         //     'quotation' => $quotation,
         // ];
-
+            
         $view = view('quotations.quotation')
             ->with('data', $quotation)
             ->render();

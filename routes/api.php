@@ -201,7 +201,7 @@ Route::group([
     /** update status */
     Route::put('update-status-bank-account/{id}', [CompanyBankAccountController::class, 'updateStatusBankAccount'])->name('update.status.bank.account')->middleware('role:superadmin|admin');
 
-
+    
     /** CRUD module categories */
     Route::get('list-module-categories', [ModuleCategoryController::class, 'listModuleCategory'])->middleware('role:superadmin|admin');
     Route::post('create-module-category', [ModuleCategoryController::class, 'createModuleCategory'])->name('create.module.category')->middleware('role:superadmin|admin');
