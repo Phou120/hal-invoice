@@ -33,6 +33,13 @@ class ReturnService
         )->first();
     }
 
+    public function countQuotationDetail($quotation)
+    {
+        return $quotation->select(
+            DB::raw('(SELECT COUNT(id) FROM quotation_details) as count_detail')
+        )->first();
+    }
+
     public function outputData($foreach, $countUserCompany)
     {
         $output = [
@@ -295,13 +302,13 @@ class ReturnService
 
     /** return quotation data */
     public function QuotationData(
-        $totalQuotation, $totalPrice, $created, $createdTotal,
+        $totalDetail, $totalPrice, $created, $createdTotal,
         $approved, $approvedTotal,$inprogress, $inprogressTotal,
         $completed, $completedTotal, $cancelled,$cancelledTotal, $listQuotations
     )
     {
         return [
-            'totalQuotation' => $totalQuotation,
+            'totalDetail' => $totalDetail,
             'totalPrice' => $totalPrice,
             'created' =>[
                 'amount' => $created,

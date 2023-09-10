@@ -79,7 +79,7 @@ class ReceiptService
             }
 
             return response()->json([
-                'msg' => 'ສະຖານະຂອງໃບເກັບເງິນຄວນເປັນ approved ພວກເຮົາຈື່ງສາມາດອອກໃບຮັບເງິນໄດ້...'
+                'msg' => 'ສະຖານະຂອງໃບເກັບເງິນຄວນເປັນ completed ພວກເຮົາຈື່ງສາມາດອອກໃບຮັບເງິນໄດ້...'
             ], 422);
         }
 
@@ -147,16 +147,25 @@ class ReceiptService
     public function editReceipt($request)
     {
         $editReceipt = Receipt::find($request['id']);
-        $editReceipt->receipt_name = $request['receipt_name'];
-        $editReceipt->receipt_date = $request['receipt_date'];
-        $editReceipt->note = $request['note'];
-        $editReceipt->updated_by = Auth::user('api')->id;
-        $editReceipt->save();
 
-        return response()->json([
-            'error' => false,
-            'msg' => 'ສຳເລັດແລ້ວ'
-        ], 200);
+        if ($editReceipt) {
+            $editReceipt->receipt_name = $request['receipt_name'];
+            $editReceipt->receipt_date = $request['receipt_date'];
+            $editReceipt->note = $request['note'];
+            $editReceipt->updated_by = Auth::user('api')->id;
+            $editReceipt->save();
+
+            return response()->json([
+                'error' => false,
+                'msg' => 'ສຳເລັດແລ້ວ'
+            ], 200);
+
+        } else {
+            return response()->json([
+                'error' => true,
+                'msg' => 'Receipt not found'
+            ], 404);
+        }
     }
 
     /** ລຶບໃບຮັບເງິນ */
@@ -186,7 +195,7 @@ class ReceiptService
             DB::rollback();
             return response()->json([
                 'error' => true,
-                'msg' => 'ບໍ່ສາມາດລຶບລາຍການນີ້ໄດ້...'
+                'msg' => 'Receipt not found...'
             ], 422);
         }
     }

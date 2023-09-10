@@ -96,13 +96,14 @@ class ReportService
 
         $query = Receipt::query();
 
-        $totalReceipt = (clone $query)->count(); // count all invoices
+        // count all invoices
+        $totalReceipt = (clone $query)->count();
+
+        $totalPrice = $query->sum('total');
 
         $receipt = (clone $query)->orderBy('receipts.id', 'asc')->paginate($perPage);
 
         //$receipt = filterHelper::getReceipt($receipt); // Apply transformation
-
-        $totalPrice = $receipt->sum('total');
 
         $receipt->map(function ($item) {
             TableHelper::loopInvoice($item);

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Invoice;
 
 use App\Models\Invoice;
+use App\Models\InvoiceDetail;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -48,16 +49,23 @@ class InvoiceNoQuotationRequest extends FormRequest
                                 ->where(function ($query) {
                                     $query->whereNull('deleted_at');
                                 }),
-                                function($attribute, $value, $fail){
-                                    $checkItem = Invoice::where('id', $value)->where('status', 'approved')->exists();
-                                    if($checkItem){
-                                        $fail('ບໍ່ສາມາດແກ້ໄຂລາຍລະອຽດໃບເກັບເງິນນີ້ໄດ້ເພາະວ່າຖືກອະນຸມັດແລ້ວ...');
-                                    }
-                                },
                                 function ($attribute, $value, $fail) {
-                                    $checkItem = Invoice::where('id', $value)->whereNotNull('quotation_id')->exists();
-                                    if ($checkItem) {
-                                        $fail('id ນີ້ແມ່ນຂອງ invoice ທີ່ມີ quotation...');
+                                    $invoiceDetailId = $value;
+                                    // Get the corresponding invoice_id for the invoice_detail
+                                    $invoiceDetail = InvoiceDetail::find($invoiceDetailId);
+
+                                    if ($invoiceDetail) {
+                                        // Check if the corresponding invoice status is 'completed'
+                                        $invoice = Invoice::where('id', $invoiceDetail->invoice_id)->first();
+                                        $invoiceNullQuotation = Invoice::where('id', $invoiceDetail->invoice_id)->whereNotNull('quotation_id')->exists();
+
+                                        if ($invoice && $invoice->status == 'completed') {
+                                            $fail('ບໍ່ສາມາດແກ້ໄຂໃບເກັບເງິນນີ້ໄດ້ເພາະວ່າສະຖານະເທົ່າ ສໍາເລັດ ແລ້ວ...');
+                                        }
+
+                                        if($invoiceNullQuotation){
+                                            $fail('id ນີ້ແມ່ນຂອງ invoice ທີ່ມີ quotation...');
+                                        }
                                     }
                                 }
                 ],
@@ -69,11 +77,11 @@ class InvoiceNoQuotationRequest extends FormRequest
                     'required',
                         'max:255'
                 ],
-                'amount' => [
+                'hour' => [
                     'required',
                         'numeric'
                 ],
-                'price' => [
+                'rate' => [
                     'required',
                         'numeric'
                 ]
@@ -105,11 +113,11 @@ class InvoiceNoQuotationRequest extends FormRequest
                     'required',
                         'max:255'
                 ],
-                'amount' => [
+                'hour' => [
                     'required',
                         'numeric'
                 ],
-                'price' => [
+                'rate' => [
                     'required',
                         'numeric'
                 ]
@@ -126,18 +134,18 @@ class InvoiceNoQuotationRequest extends FormRequest
                                 ->where(function ($query) {
                                     $query->whereNull('deleted_at');
                                 }),
-                            function($attribute, $value, $fail){
-                                $checkItem = Invoice::where('id', $value)->where('status', 'approved')->exists();
-                                if($checkItem){
-                                    $fail('ບໍ່ສາມາດແກ້ໄຂໃບເກັບເງິນນີ້ໄດ້ເພາະວ່າຖືກອະນຸມັດແລ້ວ...');
-                                }
-                            },
-                            function ($attribute, $value, $fail) {
-                                $checkItem = Invoice::where('id', $value)->whereNotNull('quotation_id')->exists();
-                                if ($checkItem) {
-                                    $fail('id ນີ້ແມ່ນຂອງ invoice ທີ່ມີ quotation...');
-                                }
-                            }
+                                function ($attribute, $value, $fail) {
+                                    $checkCompleted = Invoice::where('id', $value)->where('status', 'completed')->exists();
+                                    $checkQuotation = Invoice::where('id', $value)->whereNotNull('quotation_id')->exists();
+
+                                    if ($checkCompleted) {
+                                        $fail('ບໍ່ສາມາດແກ້ໄຂໃບເກັບເງິນນີ້ໄດ້ເພາະວ່າຖືກອອກໃບຮັບເງິນແລ້ວ...');
+                                    }
+
+                                    if ($checkQuotation) {
+                                        $fail('id ນີ້ແມ່ນຂອງ invoice ທີ່ມີ quotation...');
+                                    }
+                                },
                 ],
                 'invoice_name' =>[
                     'required',
@@ -223,11 +231,11 @@ class InvoiceNoQuotationRequest extends FormRequest
                     'required',
                         'max:255'
                 ],
-                'invoice_details.*.amount' => [
+                'invoice_details.*.hour' => [
                     'required',
                         'numeric'
                 ],
-                'invoice_details.*.price' => [
+                'invoice_details.*.rate' => [
                     'required',
                         'numeric'
                 ]
@@ -273,11 +281,11 @@ class InvoiceNoQuotationRequest extends FormRequest
             'invoice_details.*.name.required' => 'ກະລຸນາປ້ອນຊື່ກ່ອນ...',
             'invoice_details.*.name.max' => 'ຊື່ບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
 
-            'invoice_details.*.amount.required' => 'ກະລຸນາປ້ອນຈຳນວນກ່ອນ...',
-            'invoice_details.*.amount.numeric' => 'ຈຳນວນຄວນເປັນໂຕເລກ...',
+            'invoice_details.*.hour.required' => 'ກະລຸນາປ້ອນຈຳນວນກ່ອນ...',
+            'invoice_details.*.hour.numeric' => 'ຈຳນວນຄວນເປັນໂຕເລກ...',
 
-            'invoice_details.*.price.required' => 'ກະລຸນາປ້ອນລາຄາກ່ອນ...',
-            'invoice_details.*.price.numeric' => 'ລາຄາຄວນເປັນໂຕເລກ...',
+            'invoice_details.*.rate.required' => 'ກະລຸນາປ້ອນລາຄາກ່ອນ...',
+            'invoice_details.*.rate.numeric' => 'ລາຄາຄວນເປັນໂຕເລກ...',
 
             'id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
             'id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
@@ -289,11 +297,11 @@ class InvoiceNoQuotationRequest extends FormRequest
             'name.required' => 'ກະລຸນາປ້ອນຊື່ກ່ອນ...',
             'name.max' => 'ຊື່ບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
 
-            'amount.required' => 'ກະລຸນາປ້ອນຈຳນວນກ່ອນ...',
-            'amount.numeric' => 'ຈຳນວນຄວນເປັນໂຕເລກ...',
+            'hour.required' => 'ກະລຸນາປ້ອນຈຳນວນກ່ອນ...',
+            'hour.numeric' => 'ຈຳນວນຄວນເປັນໂຕເລກ...',
 
-            'price.required' => 'ກະລຸນາປ້ອນລາຄາກ່ອນ...',
-            'price.numeric' => 'ລາຄາຄວນເປັນໂຕເລກ...',
+            'rate.required' => 'ກະລຸນາປ້ອນລາຄາກ່ອນ...',
+            'rate.numeric' => 'ລາຄາຄວນເປັນໂຕເລກ...',
 
             'description.max' => 'ລາຍລະອຽດບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
 

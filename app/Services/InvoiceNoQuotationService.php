@@ -44,14 +44,14 @@ class InvoiceNoQuotationService
             $sumSubTotal = 0;
             if(!empty($request['invoice_details'])){
                 foreach($request['invoice_details'] as $item){
-                    $total =  $item['amount'] * $item['price'];
+                    $total =  $item['hour'] * $item['rate'];
 
                     $addDetail = new InvoiceDetail();
                     $addDetail->order = $item['order'];
                     $addDetail->invoice_id = $addInvoice['id'];
                     $addDetail->name = $item['name'];
-                    $addDetail->amount = $item['amount'];
-                    $addDetail->price = $item['price'];
+                    $addDetail->hour = $item['hour'];
+                    $addDetail->rate = $item['rate'];
                     $addDetail->description = $item['description'];
                     $addDetail->total = $total;
                     $addDetail->save();
@@ -77,11 +77,11 @@ class InvoiceNoQuotationService
         $addDetail = new InvoiceDetail();
         $addDetail->description = $request['description'];
         $addDetail->invoice_id = $request['id'];
-        $addDetail->amount = $request['amount'];
-        $addDetail->price = $request['price'];
+        $addDetail->hour = $request['hour'];
+        $addDetail->rate = $request['rate'];
         $addDetail->order = $request['order'];
         $addDetail->name = $request['name'];
-        $addDetail->total = $request['amount'] * $request['price'];
+        $addDetail->total = $request['hour'] * $request['rate'];
         $addDetail->save();
 
         /**Update Invoice */
@@ -122,10 +122,10 @@ class InvoiceNoQuotationService
         $editDetail = InvoiceDetail::find($request['id']);
         $editDetail->order = $request['order'];
         $editDetail->name = $request['name'];
-        $editDetail->amount = $request['amount'];
-        $editDetail->price = $request['price'];
+        $editDetail->hour = $request['hour'];
+        $editDetail->rate = $request['rate'];
         $editDetail->description = $request['description'];
-        $editDetail->total = $request['amount'] * $request['price'];
+        $editDetail->total = $request['hour'] * $request['rate'];
         $editDetail->save();
 
         /**Update Invoice */

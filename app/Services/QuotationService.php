@@ -7,6 +7,7 @@ use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
 use App\Helpers\filterHelper;
 use App\Helpers\generateHelper;
+use App\Models\InvoiceDetail;
 use App\Models\QuotationDetail;
 use App\Models\QuotationRate;
 use App\Models\QuotationType;
@@ -37,29 +38,28 @@ class QuotationService
         }
 
         DB::beginTransaction();
-        /** add quotation */
-        $addQuotation = new Quotation();
-        $addQuotation->quotation_number = generateHelper::generateQuotationNumber('QT- ', 8);
-        $addQuotation->quotation_name = $request['quotation_name'];
-        $addQuotation->start_date = $request['start_date'];
-        $addQuotation->end_date = $request['end_date'];
-        $addQuotation->note = $request['note'];
-        $addQuotation->customer_id = $request['customer_id'];
-        $addQuotation->quotation_type_id = $getQuotationType['id'];
-        $addQuotation->currency_id = $getQuotationType['currency_id'];
-        $addQuotation->created_by = Auth::user('api')->id;
-        $addQuotation->discount = $request['discount'];
-        $addQuotation->save();
+            /** add quotation */
+            $addQuotation = new Quotation();
+            $addQuotation->quotation_number = generateHelper::generateQuotationNumber('QT- ', 8);
+            $addQuotation->quotation_name = $request['quotation_name'];
+            $addQuotation->start_date = $request['start_date'];
+            $addQuotation->end_date = $request['end_date'];
+            $addQuotation->note = $request['note'];
+            $addQuotation->customer_id = $request['customer_id'];
+            $addQuotation->quotation_type_id = $getQuotationType['id'];
+            $addQuotation->currency_id = $getQuotationType['currency_id'];
+            $addQuotation->created_by = Auth::user('api')->id;
+            $addQuotation->discount = $request['discount'];
+            $addQuotation->save();
 
-        /** create quotation_rate */
-        if(isset($addQuotation)){
+            /** create quotation_rate */
             $addQuotationRate = new QuotationRate();
             $addQuotationRate->quotation_id = $addQuotation['id'];
             $addQuotationRate->rate_kip = $request['rate_kip'];
             $addQuotationRate->rate_dollar = $request['rate_dollar'];
             $addQuotationRate->rate_baht = $request['rate_baht'];
             $addQuotationRate->save();
-        }
+
 
             /** add detail */
             $sumSubTotal = 0;
@@ -98,7 +98,7 @@ class QuotationService
 
         $query = Quotation::select(
             'quotations.*',
-            DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details'),
+            DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details')
         )
         ->leftJoin('customers', 'quotations.customer_id', '=', 'customers.id')
         ->leftJoin('currencies', 'quotations.currency_id', '=', 'currencies.id')
@@ -117,7 +117,7 @@ class QuotationService
         }
 
         $quotation = $query->orderBy('quotations.id', 'asc')->get();
-        $totalQuotation = $quotation->count();
+        $totalDetail = $quotation->sum('count_details');
         $totalPrice = $quotation->sum('total');
 
         function filterQuotationStatus($query, $status) {
@@ -179,7 +179,7 @@ class QuotationService
 
         /** return data */
         $responseQuotationData = (new ReturnService())->QuotationData(
-            $totalQuotation, $totalPrice, $created, $createdTotal,
+            $totalDetail, $totalPrice, $created, $createdTotal,
             $approved, $approvedTotal,$inprogress, $inprogressTotal,
             $completed, $completedTotal, $cancelled,$cancelledTotal, $listQuotations
         );
@@ -187,27 +187,16 @@ class QuotationService
         return response()->json($responseQuotationData, 200);
     }
 
-    public function listQuotation()
+    public function listQuotation($id)
     {
-        $query = Quotation::select([
+        $quotation = Quotation::select([
             'quotations.*',
-            'companies.company_name as company_name',
-        ])
-        ->leftJoin('customers', 'quotations.customer_id', '=', 'customers.id')
-        ->leftJoin('currencies', 'quotations.currency_id', '=', 'currencies.id')
-        ->leftJoin('users', 'quotations.created_by', '=', 'users.id')
-        ->leftJoin('company_users', 'company_users.user_id', '=', 'users.id')
-        ->leftJoin('companies', 'company_users.company_id', '=', 'companies.id');
+            DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details')
+        ])->where('id', $id)
+        ->orderBy('id', 'desc')
+        ->first();
 
-        $quotation = $query->orderBy('quotations.id', 'asc')->get();
-        $totalQuotation = $quotation->count();
-        $totalPrice = $quotation->sum('total');
-
-        return response()->json([
-            'totalQuotation' => $totalQuotation,
-            'totalPrice' => $totalPrice,
-            'listQuotations' => $quotation,
-        ], 200);
+        return $quotation->format();
     }
 
     /** add quotation detail */

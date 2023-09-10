@@ -11,19 +11,14 @@ use Illuminate\Support\Facades\File;
 
 class ExportPDFController extends Controller
 {
-    public function exportPDFQuotation()
+    public function exportPDFQuotation($id)
     {
-        // $invoice = resolve(InvoiceService::class)->listInvoiceDetail(1)->getData();
-        $quotation = resolve(QuotationService::class)->listQuotation(1)->getData();
+        $quotation = resolve(QuotationService::class)->listQuotation($id);
+        // return $quotation;
 
-        // Create an array to hold the merged data
-        // $mergeData = [
-        //     'quotation' => $quotation,
-        // ];
-        
         $view = view('quotations.quotation')
-            ->with('data', $quotation)
-            ->render();
+        ->with('data', $quotation)
+        ->render();
 
         return $view;
 

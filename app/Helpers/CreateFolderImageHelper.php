@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Storage;
 
 class CreateFolderImageHelper
 {
-
     /***** save image *****/
     public static function saveImage($request)
     {
@@ -38,7 +37,6 @@ class CreateFolderImageHelper
         }
     }
 
-
     public static function saveLogoCompany($request)
     {
         if ($request->hasFile('logo')) {
@@ -56,7 +54,6 @@ class CreateFolderImageHelper
         }
     }
 
-
     public static function deleteLogoCompany($deleteCompany)
     {
         //Delete File in folder
@@ -67,7 +64,6 @@ class CreateFolderImageHelper
             }
         }
     }
-
 
     public static function saveUserProfile($request)
     {
@@ -96,5 +92,4 @@ class CreateFolderImageHelper
             }
         }
     }
-
 }

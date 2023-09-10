@@ -50,7 +50,7 @@ Route::group([
 
 });
 
-Route::get('export-pdf-quotation', [ExportPDFController::class, 'exportPDFQuotation']);
+Route::get('export-pdf-quotation/{id}', [ExportPDFController::class, 'exportPDFQuotation']);
 Route::get('list-quotation', [QuotationController::class, 'listQuotation']);
 
 
