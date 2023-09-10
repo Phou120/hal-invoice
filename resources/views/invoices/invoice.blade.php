@@ -186,47 +186,53 @@
         <div class="invoice">
           <div class="invoice-header">
             <div class="columns">
-              <div class="column is-8">
+            {{-- ຂໍ້ມູນບໍລິສັດເຮົາ --}}
+            <div class="column is-8">
                 <div class="header columns">
                     <div class="logo column is-4">
                     <img src="https://admin.haltech.la/generated/admin/img/logo.74a3eec9.png" alt="logo" width="152">
                     </div>
                     <div class="bill-from column is-8">
-                      <h1 class="title">HOUNG AH LOUN TECHNOLOGY CO.,LTD</h1>
-                      <p><strong>Business Number </strong>020 99999564</p>
-                      <p class="label">info@haltech.la</p>
-                      <p class="label">Don koi Village, Sisattanak District, Vientiane Capital, Laos</p>
+                      <h1 class="title">{{ $data['company']['company_name'] }}</h1>
+                      <p><strong>Business Number </strong>{{ $data['company']['phone'] }}</p>
+                      <p class="label">{{ $data['company']['email'] }}</p>
+                      <p class="label">{{ $data['company']['address'] }}</p>
                     </div>
                 </div>
-              </div>
-              <div class="column is-4">
+            </div>
+            {{-- end Company --}}
+
+            {{-- ຂໍ້ມູນ invoice --}}
+            <div class="column is-4">
                 <div class="field is-horizontal">
                     <div class="field-label is-normal">
-                      <p class="sub-title">ໃບສະເໜີລາຄາ ລະບົບຂົນສົ່ງດ່ວນ</p>
-                      <p class="label">IV00B883EV9</p>
-                      <p class="sub-title">Created Date</p>
-                      <p class="label">2023-08-20</p>
-                      <p class="sub-title">DUE DATE</p>
-                      <p class="label">2023-12-20</p>
-                      <p class="sub-title">BALANCE DUE</p>
-                      <p>$ 50,000</p>
+                        <p class="sub-title">{{ $data['invoice_name'] }}</p>
+                        <p class="label">{{ $data['invoice_number'] }}</p>
+                        <p class="sub-title">Created Date</p>
+                        <p class="label">{{ \Carbon\Carbon::parse($data['start_date'])->format('Y-m-d') }}</p>
+                        <p class="sub-title">DUE DATE</p>
+                        <p class="label">{{ \Carbon\Carbon::parse($data['end_date'])->format('Y-m-d') }}</p>
+                        <p class="sub-title">BALANCE DUE</p>
+                        <p>{{ $data['currency']['short_name'] }} {{ number_format($data['total'], 2) }}</p>
                     </div>
                 </div>
               </div>
             </div>
             <hr class="border">
+            {{-- End invoice--}}
+
             {{-- ຂໍ້ມູນ ລູກຄ້າ --}}
             <div class="columns">
               <div class="column">
-                  <div class="field is-horizontal">
-                      <label class="label-title">INVOICE TO</label>
-                  </div>
-                  <div>
-                      <label class="title">HAL Logistics</label>
-                      <p><strong>Business Number </strong> 020 99999938</p>
-                      <p>hallogistics@gmail.com</p>
-                      <p>Hongkha Rd, Vientiane Capital</p>
-                  </div>
+                    <div class="field is-horizontal">
+                        <label class="label-title">INVOICE TO</label>
+                    </div>
+                    <div>
+                        <label class="title">{{ $data['customer']['company_name'] }}</label>
+                        <p><strong>Business Number: </strong>{{ $data['customer']['phone'] }}</p>
+                        <p>{{ $data['customer']['email'] }}</p>
+                        <p>{{ $data['customer']['address'] }}</p>
+                    </div>
 
               </div>
             </div>
@@ -236,7 +242,9 @@
             <div class="invoice-content">
               <div class="card-layout">
                 <div class="bill">
-                  <table class="table">
+
+                 {{-- Invoice Detail --}}
+                <table class="table">
                     <thead>
                         <tr style="border-bottom: 2px solid #222;border-top:2px solid #222;background-color:#eee">
                             <th style="width:50%;">DESCRIPTION</th>
@@ -246,70 +254,21 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{-- @foreach($invoiceDetails as $invoiceDetail) --}}
-                        <tr class="h-table">
-                          <td class="width:50%;">
-                          <div class="desc-title">ໃບສະເໜີລາຄາພັດທະນາເສີມລະບົບຕີກັບ</div>
-                          <div class="desc">
-                              {{-- {!!$invoiceDetail->description!!} --}}
-                              1 . ເພີ່ມແຈ້ງເຕືອນຫາລູກຄ້າເວລາກົດຕີກັບ ຂໍ້ຄວາມ "ພັດສະດຸຖືກຕີກັບ
-                              ສາຂາຕົ້ນທາງແລ້ວ - ສາຂາ........" (ໃຫ້ແຈ້ງທັງຜູ້ຝາກ ແລະ ຜູ້ຮັບ)
-                              2 . ປ່ຽນຂໍ້ຄວາມແຈ້ງເຕືອນເວລາເຄື່ອງຮອດປາຍທາງ
-                              - ເງື່ອນໄຂຂອງວັນທີບວກໄປ 10 ມື້ຫຼັງຈາກຮອດປາຍທາງ
-                              ຕົວຢ່າງ: ເຄື່ອງຮອດວັນທີ1/7 ຂໍ້ຄວາມ "ພັດສະດຸຮອດປາຍທາງແລ້ວ
-                              ທ່ານສາມາດເຂົ້າຮັບພັດສະດຸໄດ້ທີ່ສາຂາປາຍທາງ ກ່ອນວັນທີ
-                              11/07/2023 ຫາກເກີນກໍານົດພັດສະດຸຈະຖືກຕີກັບສາຂາຕົ້ນທາງ"
-                              3 . ປ່ຽນຂໍ້ຄວາມແຈ້ງເຕືອນລູກຄ້າກໍລະນີຕີກັບຮອດຕົ້ນທາງແລ້ວ
-                              - ເງື່ອນໄຂຂອງວັນທີບວກໄປ 30 ມື້ຫຼັງຈາກຕີກັບຮອດຕົ້ນທາງ
-                              ຕົວຢ່າງ: "ພັດສະດຸຕີກັບຮອດສາຂາ..........ແລ້ວ ທ່ານສາມາດເຂົ້າຮັບ
-                              ພັດສະດຸໄດ້ທີ່ສາຂາ.......... ກ່ອນວັນທີ30/07/2023 ຫາກເກີນກໍານົດຖືວ່າ
-                              ລູກຄ້າສະລະສິດໃນການຮັບເຄື່ອງ"
-                              4 . ເພີ່ມ ບິນຕີກັບດໍາເນີນການ ກັບ ຕີກັບສໍາເລັດ ພາກສ່ວນຂອງບິນຕີກັບ
-                              ໄວ້ຕ່າງຫາກໃນແອັບລູກຄ້າ
-                              5 . ເພີ່ມ tab ບິນຕີກັບດໍາເນີນການ ກັບ ຕີກັບສໍາເລັດ ໄວ້ຕ່າງຫາກໃນແອັບ
-                              ລູກຄ້າ
-                              6 . ເຄື່ອງຕີກັບຮອດສາຂາປາຍທາງໃຫມ່ໃຫ້ປ່ຽນຂໍ້ຄວາມ tracking ໃຫມ່
-                              ເປັນ ສໍາລັບ ເຄື່ອງຄ້າງສາງເກີນ 30 ວັນຈະຫມົດສິດຮັບ
-                              7 . ເຄື່ອງຕີກັບໃຫ້ສ້າງ tracking ໃຫມ່ສໍາລັບການຕີກັບ
-                          </div>
-                          </td>
-                          <td>$ 250</td>
-                          <td>2</td>
-                          <td>$ 500</td>
-                        </tr>
-                        <tr class="h-table">
-                          <td class="width:50%;">
-                          <div class="desc-title">ໃບສະເໜີລາຄາພັດທະນາເສີມລະບົບຕີກັບ</div>
-                          <div class="desc">
-                              {{-- {!!$invoiceDetail->description!!} --}}
-                              1 . ເພີ່ມແຈ້ງເຕືອນຫາລູກຄ້າເວລາກົດຕີກັບ ຂໍ້ຄວາມ "ພັດສະດຸຖືກຕີກັບ
-                              ສາຂາຕົ້ນທາງແລ້ວ - ສາຂາ........" (ໃຫ້ແຈ້ງທັງຜູ້ຝາກ ແລະ ຜູ້ຮັບ)
-                              2 . ປ່ຽນຂໍ້ຄວາມແຈ້ງເຕືອນເວລາເຄື່ອງຮອດປາຍທາງ
-                              - ເງື່ອນໄຂຂອງວັນທີບວກໄປ 10 ມື້ຫຼັງຈາກຮອດປາຍທາງ
-                              ຕົວຢ່າງ: ເຄື່ອງຮອດວັນທີ1/7 ຂໍ້ຄວາມ "ພັດສະດຸຮອດປາຍທາງແລ້ວ
-                              ທ່ານສາມາດເຂົ້າຮັບພັດສະດຸໄດ້ທີ່ສາຂາປາຍທາງ ກ່ອນວັນທີ
-                              11/07/2023 ຫາກເກີນກໍານົດພັດສະດຸຈະຖືກຕີກັບສາຂາຕົ້ນທາງ"
-                              3 . ປ່ຽນຂໍ້ຄວາມແຈ້ງເຕືອນລູກຄ້າກໍລະນີຕີກັບຮອດຕົ້ນທາງແລ້ວ
-                              - ເງື່ອນໄຂຂອງວັນທີບວກໄປ 30 ມື້ຫຼັງຈາກຕີກັບຮອດຕົ້ນທາງ
-                              ຕົວຢ່າງ: "ພັດສະດຸຕີກັບຮອດສາຂາ..........ແລ້ວ ທ່ານສາມາດເຂົ້າຮັບ
-                              ພັດສະດຸໄດ້ທີ່ສາຂາ.......... ກ່ອນວັນທີ30/07/2023 ຫາກເກີນກໍານົດຖືວ່າ
-                              ລູກຄ້າສະລະສິດໃນການຮັບເຄື່ອງ"
-                              4 . ເພີ່ມ ບິນຕີກັບດໍາເນີນການ ກັບ ຕີກັບສໍາເລັດ ພາກສ່ວນຂອງບິນຕີກັບ
-                              ໄວ້ຕ່າງຫາກໃນແອັບລູກຄ້າ
-                              5 . ເພີ່ມ tab ບິນຕີກັບດໍາເນີນການ ກັບ ຕີກັບສໍາເລັດ ໄວ້ຕ່າງຫາກໃນແອັບ
-                              ລູກຄ້າ
-                              6 . ເຄື່ອງຕີກັບຮອດສາຂາປາຍທາງໃຫມ່ໃຫ້ປ່ຽນຂໍ້ຄວາມ tracking ໃຫມ່
-                              ເປັນ ສໍາລັບ ເຄື່ອງຄ້າງສາງເກີນ 30 ວັນຈະຫມົດສິດຮັບ
-                              7 . ເຄື່ອງຕີກັບໃຫ້ສ້າງ tracking ໃຫມ່ສໍາລັບການຕີກັບ
-                          </div>
-                          </td>
-                          <td>$ 250</td>
-                          <td>2</td>
-                          <td>$ 500</td>
-                        </tr>
-                        {{-- @endforeach --}}
+                        @foreach($data['details'] as $detail)
+                            <tr class="h-table">
+                                <td class="width:50%;">
+                                <div class="desc-title"> {{ $detail['name'] }}</div>
+                                <div class="desc"> {!!$detail->description!!}</div>
+                                </td>
+                                <td>{{ $data['currency']['short_name'] }} {{ number_format($detail['rate'], 2) }}</td>
+                                <td>{{ $detail['hour'] }}</td>
+                                <td>{{ $data['currency']['short_name'] }} {{ number_format($detail['total'], 2) }}</td>
+                            </tr>
+                        @endforeach
                     </tbody>
-                  </table>
+                </table>
+                {{-- End Invoice Detail --}}
+
                   <div class="columns">
                     <div class="column">
                         <div class="signature">
@@ -317,37 +276,42 @@
                         </div>
                         {{-- <div class="sing"></div> --}}
                     </div>
+                    @php
+                    $sumTax = $data['currency']['short_name'] . ' '. $data['sub_total'] * $data['tax'] / 100;
+                    $sumDiscount = $data['currency']['short_name'] . ' ' . $data['sub_total'] * $data['discount'] / 100;
+
+                    @endphp
                     <div class="column is-4">
                         <ul style="list-style:none;">
                             <div class="list-total">
                             <li>
                             SUB-TOTAL
-                                <span class="sub">$ 500</span>
+                            <span class="sub">{{ $data['currency']['short_name'] }} {{ number_format($data['sub_total'], 2) }}</span>
                             </li>
                             <li>
-                                TAX (7%)
-                                <span class="sub">$ 35</span>
+                                TAX ({{ $data['tax'] }}%)
+                                <span class="sub">{{$sumTax}}</span>
                             </li>
                             <li>
-                                DISCOUNT (5%)
-                                <span class="sub">$ 25</span>
+                                DISCOUNT ({{ $data['discount'] }}%)
+                                <span class="sub">{{ $sumDiscount }}</span>
                             </li>
                             <hr class="border-total">
                             <li class="total-m">
-                                TOTAL<span>$ 510</span>
+                                TOTAL<span>{{ $data['currency']['short_name'] }} {{ number_format($data['total'], 2) }}</span>
                             </li>
                             </div>
                         </ul>
                     </div>
                   </div>
-                  {{-- @if(isset($invoice->note)) --}}
-                    {{-- <hr class="small-border">
+                  @if(isset($data['note']))
+                    <hr class="small-border">
                     <div class="invoice-footer">
                         <p class="note">
-                          ຖ້າເຮັດສຳເລັດເເລ້ວເຮົາຈະອະທິບາຍຕື່ມເດີ.
+                            {{ $data['note'] }}.
                         </p>
-                    </div> --}}
-                  {{-- @endif --}}
+                    </div>
+                  @endif
                 </div>
               </div>
             </div>

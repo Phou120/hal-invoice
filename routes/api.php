@@ -51,7 +51,9 @@ Route::group([
 });
 
 Route::get('export-pdf-quotation/{id}', [ExportPDFController::class, 'exportPDFQuotation']);
+Route::get('export-pdf-invoice/{id}', [ExportPDFController::class, 'exportPDFInvoice']);
 Route::get('list-quotation', [QuotationController::class, 'listQuotation']);
+Route::get('list-invoice', [QuotationController::class, 'listQuotation']);
 
 
 Route::group([
@@ -175,7 +177,7 @@ Route::group([
 
     /** CRUD CompanyUser */
     Route::get('list-company-users', [CompanyUserController::class, 'listCompanyUser'])->middleware('role:company-admin|company-user');
-    Route::post('create-company-user', [CompanyUserController::class, 'createCompanyUser'])->name('create.company.user')->middleware('role:superadmin|admin');
+    Route::post('create-company-user', [CompanyUserController::class, 'createCompanyUser'])->name('create.company.user')->middleware('role:company-admin|company-user');
     Route::put('update-company-user/{id}', [CompanyUserController::class, 'updateCompanyUser'])->name('update.company.user')->middleware('role:company-admin|company-user');
     Route::delete('delete-company-user/{id}', [CompanyUserController::class, 'deleteCompanyUser'])->name('delete.company.user')->middleware('role:company-admin|company-user');
 
@@ -201,7 +203,7 @@ Route::group([
     /** update status */
     Route::put('update-status-bank-account/{id}', [CompanyBankAccountController::class, 'updateStatusBankAccount'])->name('update.status.bank.account')->middleware('role:superadmin|admin');
 
-    
+
     /** CRUD module categories */
     Route::get('list-module-categories', [ModuleCategoryController::class, 'listModuleCategory'])->middleware('role:superadmin|admin');
     Route::post('create-module-category', [ModuleCategoryController::class, 'createModuleCategory'])->name('create.module.category')->middleware('role:superadmin|admin');

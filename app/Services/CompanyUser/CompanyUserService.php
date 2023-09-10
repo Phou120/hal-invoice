@@ -28,7 +28,7 @@ class CompanyUserService
             $addUser->save();
 
             // where column name of JobSeeker
-            $role = Role::where('name', '=', 'company-admin')->first();
+            $role = Role::where('name', '=', 'company-user')->first();
             $addUser->attachRoles([$role]);
 
             $createCompanyUser = new CompanyUser();

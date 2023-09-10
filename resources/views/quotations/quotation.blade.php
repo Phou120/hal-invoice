@@ -193,7 +193,6 @@
                         <img src="https://admin.haltech.la/generated/admin/img/logo.74a3eec9.png" alt="logo" width="152">
                         </div>
                         <div class="bill-from column is-8">
-                        {{-- <h1 class="title">HOUNG AH LOUN TECHNOLOGY CO.,LTD</h1> --}}
                         <h1 class="title">{{ $data['company']['company_name'] }}</h1>
                         <p><strong>Business Number:</strong> {{ $data['company']['phone'] }}</p>
                         <p class="label">{{ $data['company']['email'] }}</p>
@@ -210,9 +209,9 @@
                             <p class="sub-title">{{ $data['quotation_name'] }}</p>
                             <p class="label">{{ $data['quotation_number'] }}</p>
                             <p class="sub-title">Created Date</p>
-                            <p class="label">{{ $data['start_date'] }}</p>
+                            <p class="label">{{ \Carbon\Carbon::parse($data['start_date'])->format('Y-m-d') }}</p>
                             <p class="sub-title">DUE DATE</p>
-                            <p class="label">{{ $data['end_date'] }}</p>
+                            <p class="label">{{ \Carbon\Carbon::parse($data['end_date'])->format('Y-m-d') }}</p>
                             <p class="sub-title">BALANCE DUE</p>
                             <p>{{ $data['currency']['short_name'] }} {{ number_format($data['total'], 2) }}</p>
                         </div>
@@ -229,10 +228,10 @@
                       <label class="label-title">QUOTATION TO</label>
                   </div>
                   <div>
-                      <label class="title">HAL Logistics</label>
-                      <p><strong>Business Number </strong> 020 99999938</p>
-                      <p>hallogistics@gmail.com</p>
-                      <p>Hongkha Rd, Vientiane Capital</p>
+                      <label class="title">{{ $data['customer']['company_name'] }}</label>
+                      <p><strong>Business Number: </strong>{{ $data['customer']['phone'] }}</p>
+                      <p>{{ $data['customer']['email'] }}</p>
+                      <p>{{ $data['customer']['address'] }}</p>
                   </div>
               </div>
             </div>

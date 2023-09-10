@@ -283,6 +283,19 @@ class InvoiceService
         return response()->json($responseData, 200);
     }
 
+    /** list invoice to export PDF */
+    public function listInvoice($id)
+    {
+        $invoice = Invoice::select([
+            'invoices.*',
+            DB::raw('(SELECT COUNT(*) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as count_details')
+        ])->where('id', $id)
+        ->orderBy('id', 'desc')
+        ->first();
+
+        return $invoice->format();
+    }
+
     /** ບັນທຶກລາຍລະອຽດໃບບິນ */
     public function addInvoiceDetail($request)
     {

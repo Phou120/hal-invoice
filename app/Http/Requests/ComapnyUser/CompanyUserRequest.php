@@ -17,7 +17,7 @@ class CompanyUserRequest extends FormRequest
      */
     public function authorize()
     {
-        return auth('api')->user()->hasRole('superadmin|admin');
+        return auth('api')->user()->hasRole('company-admin|company-user');
     }
 
     public function prepareForValidation()
