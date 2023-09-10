@@ -26,7 +26,6 @@ class InvoiceService
         $this->calculateService = $calculateService;
     }
 
-
     /** ບັນທຶກໃບບິນເກັບເງິນ */
     public function addInvoice($request)
     {
@@ -41,9 +40,8 @@ class InvoiceService
                 ->where('quotation_detail.id', $quotationDetailId)
                 ->first(); // Use first() instead of get()
 
-                // dd($getQuotation);
             if (count($quotationDetail) > 0) {
-                // try {
+
                 DB::beginTransaction();
 
                     $addInvoice = new Invoice();
@@ -163,7 +161,8 @@ class InvoiceService
 
         if ($user->hasRole(['superadmin', 'admin'])) {
             $query->orderBy('invoices.id', 'asc');
-        } elseif ($user->hasRole(['company-admin', 'company-user'])) {
+        }
+        if ($user->hasRole(['company-admin', 'company-user'])) {
             $query->where('invoices.created_by', $user->id);
         }
 
@@ -379,7 +378,9 @@ class InvoiceService
 
         if ($user->hasRole(['superadmin', 'admin'])) {
             $query->orderBy('invoices.id', 'asc');
-        } elseif ($user->hasRole(['company-admin', 'company-user'])) {
+        }
+
+        if ($user->hasRole(['company-admin', 'company-user'])) {
             $query->where('invoices.created_by', $user->id)
                 ->orderBy('invoices.id', 'asc');
         }
@@ -392,7 +393,9 @@ class InvoiceService
 
         if ($user->hasRole(['superadmin', 'admin'])) {
             $detailsQuery->orderBy('invoices.id', 'asc');
-        } elseif ($user->hasRole(['company-admin', 'company-user'])) {
+        }
+
+        if ($user->hasRole(['company-admin', 'company-user'])) {
             $detailsQuery->where('invoices.created_by', $user->id)
                 ->orderBy('invoices.id', 'asc');
         }

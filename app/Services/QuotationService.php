@@ -97,7 +97,7 @@ class QuotationService
 
         $query = Quotation::select(
             'quotations.*',
-            DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details'),
+            DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details')
         )
         ->leftJoin('customers', 'quotations.customer_id', '=', 'customers.id')
         ->leftJoin('currencies', 'quotations.currency_id', '=', 'currencies.id')
@@ -116,7 +116,7 @@ class QuotationService
         }
 
         $quotation = $query->orderBy('quotations.id', 'asc')->get();
-        $totalQuotation = $quotation->count();
+        $totalDetail = $quotation->sum('count_details');
         $totalPrice = $quotation->sum('total');
 
         function filterQuotationStatus($query, $status) {
@@ -178,7 +178,7 @@ class QuotationService
 
         /** return data */
         $responseQuotationData = (new ReturnService())->QuotationData(
-            $totalQuotation, $totalPrice, $created, $createdTotal,
+            $totalDetail, $totalPrice, $created, $createdTotal,
             $approved, $approvedTotal,$inprogress, $inprogressTotal,
             $completed, $completedTotal, $cancelled,$cancelledTotal, $listQuotations
         );
@@ -188,22 +188,25 @@ class QuotationService
 
     public function listQuotation()
     {
-        $query = Quotation::select([
+        $quotation = DB::table('quotations')
+        ->select([
             'quotations.*',
             'companies.company_name as company_name',
+            DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details')
         ])
         ->leftJoin('customers', 'quotations.customer_id', '=', 'customers.id')
         ->leftJoin('currencies', 'quotations.currency_id', '=', 'currencies.id')
         ->leftJoin('users', 'quotations.created_by', '=', 'users.id')
         ->leftJoin('company_users', 'company_users.user_id', '=', 'users.id')
-        ->leftJoin('companies', 'company_users.company_id', '=', 'companies.id');
+        ->leftJoin('companies', 'company_users.company_id', '=', 'companies.id')
+        ->orderBy('quotations.id', 'asc')
+        ->get();
 
-        $quotation = $query->orderBy('quotations.id', 'asc')->get();
-        $totalQuotation = $quotation->count();
+        $totalDetail = $quotation->sum('count_details');
         $totalPrice = $quotation->sum('total');
 
         return response()->json([
-            'totalQuotation' => $totalQuotation,
+            'totalDetail' => $totalDetail,
             'totalPrice' => $totalPrice,
             'listQuotations' => $quotation,
         ], 200);
