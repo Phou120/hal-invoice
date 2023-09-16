@@ -7,8 +7,9 @@ use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\filterHelper;
 use App\Models\InvoiceDetail;
-use App\Models\PurchaseOrder;;
+use App\Models\QuotationRate;
 use App\Models\PurchaseDetail;
+use App\Models\PurchaseOrder;;
 use App\Models\QuotationDetail;
 
 class CalculateService
@@ -128,9 +129,8 @@ class CalculateService
         $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
 
         /** Update Total Quotation */
-        $addQuotation = Quotation::find($id);
+        $addQuotation = QuotationRate::find($id);
         $addQuotation->tax = filterHelper::TAX;
-        $addQuotation->sub_total = $sumSubTotal;
         $addQuotation->total = $sumTotal;
         $addQuotation->save();
     }

@@ -106,7 +106,7 @@ class SeedDataSeeder extends Seeder
         Currency::create([
             'name' => 'ໂດລາ',
             'short_name' => '$',
-            'rate' => 22000,
+            'rate' => 260,
             'created_at' => '2023-08-30',
             'updated_at' => '2023-06-25'
         ]);
@@ -114,7 +114,7 @@ class SeedDataSeeder extends Seeder
         Currency::create([
             'name' => 'ບາດ',
             'short_name' => '฿',
-            'rate' => 600,
+            'rate' => 500,
             'created_at' => '2023-03-31',
             'updated_at' => '2023-10-15'
         ]);

@@ -32,8 +32,6 @@ class QuotationService
     /** add quotation */
     public function addQuotation($request)
     {
-        $getCurrency = Currency::find($request['currency_id']);
-
         DB::beginTransaction();
             /** add quotation */
             $addQuotation = new Quotation();
@@ -44,41 +42,44 @@ class QuotationService
             $addQuotation->note = $request['note'];
             $addQuotation->customer_id = $request['customer_id'];
             $addQuotation->quotation_type_id = $request['quotation_type_id'];
-            $addQuotation->currency_id = $request['currency_id'];
             $addQuotation->created_by = Auth::user('api')->id;
-            $addQuotation->discount = $request['discount'];
             $addQuotation->save();
 
-            /** create quotation_rate */
-            // $addQuotationRate = new QuotationRate();
-            // $addQuotationRate->quotation_id = $addQuotation['id'];
-            // $addQuotationRate->rate_kip = $request['rate_kip'];
-            // $addQuotationRate->rate_dollar = $request['rate_dollar'];
-            // $addQuotationRate->rate_baht = $request['rate_baht'];
-            // $addQuotationRate->save();
-
-
             /** add detail */
-            $sumSubTotal = 0;
+            $totalHours = 0;
+
             if(!empty($request['quotation_details'])){
                 foreach($request['quotation_details'] as $item){
-                    $total = $item['hour'] * $getCurrency['rate'];
-
                     $addDetail = new QuotationDetail();
                     $addDetail->order = $item['order'];
                     $addDetail->quotation_id = $addQuotation['id'];
                     $addDetail->name = $item['name'];
                     $addDetail->hour = $item['hour'];
-                    $addDetail->rate = $getCurrency['rate'];
-                    $addDetail->description = $item['description'];
-                    $addDetail->total = $total;
                     $addDetail->save();
 
-                    $sumSubTotal += $total;
+                    $totalHours += $item['hour'];
                 }
             }
+
+            /** create quotation_rate */
+            $getCurrencies = Currency::orderBy('id', 'desc')->get();
+            if(count($getCurrencies) > 0) {
+                foreach($getCurrencies as $item) {
+                    $addQuotationRate = new QuotationRate();
+                    $addQuotationRate->quotation_id = $addQuotation['id'];
+                    $addQuotationRate->currency_id = $item['id'];
+                    $addQuotationRate->rate = $item['rate'];
+                    $addQuotationRate->sub_total = $totalHours * $item['rate'];
+                    $addQuotationRate->discount = $request['discount'];
+                    $addQuotationRate->save();
+
+                    $this->calculateService->calculateTotal($request, $addQuotationRate['sub_total'], $addQuotationRate['id']);
+                }
+            }
+
+
             /**Calculate */
-            $this->calculateService->calculateTotal($request, $sumSubTotal, $addQuotation['id']);
+            // $this->calculateService->calculateTotal($request, $sumSubTotal, $addQuotation['id']);
 
         DB::commit();
 

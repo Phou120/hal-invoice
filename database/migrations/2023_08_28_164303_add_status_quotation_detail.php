@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('quotation_details', function (Blueprint $table) {
-            $table->boolean('status_create_invoice')->default(0)->after('total');
+            $table->boolean('status_create_invoice')->default(0)->after('hour');
         });
     }
 

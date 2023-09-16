@@ -239,12 +239,6 @@ class QuotationRequest extends FormRequest
                             Rule::exists('customers', 'id')
                                 ->whereNull('deleted_at')
                 ],
-                'currency_id' => [
-                    'required',
-                        'numeric',
-                            Rule::exists('currencies', 'id')
-                                ->whereNull('deleted_at')
-                ],
                 'discount' => [
                     'required',
                         'numeric'

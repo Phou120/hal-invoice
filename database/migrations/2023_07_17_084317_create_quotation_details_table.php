@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->integer('hour')->default(0);
-            $table->double('rate')->default(0);
-            $table->double('total')->default(0);
+            // $table->double('rate')->default(0);
+            // $table->double('total')->default(0);
             $table->timestamps();
             $table->softDeletes();
 

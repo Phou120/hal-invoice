@@ -18,6 +18,10 @@ return new class extends Migration
             $table->unsignedBigInteger('quotation_id');
             $table->unsignedBigInteger('currency_id');
             $table->double('rate')->default(0);
+            $table->double('sub_total')->default(0);
+            $table->double('discount')->default(0);
+            $table->double('tax')->default(0);
+            $table->double('total')->default(0);
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('currency_id')->references('id')->on('currencies')->onUpdate('cascade')->onDelete('cascade');
