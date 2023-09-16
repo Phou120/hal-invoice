@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('module_category_id');
             $table->string('name');
+            $table->text('description');
             $table->double('hour')->default(0);
             $table->timestamps();
             $table->softDeletes();

@@ -2,15 +2,16 @@
 
 namespace App\Services;
 
+use App\Models\Currency;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
 use App\Helpers\filterHelper;
-use App\Helpers\generateHelper;
 use App\Models\InvoiceDetail;
-use App\Models\QuotationDetail;
 use App\Models\QuotationRate;
 use App\Models\QuotationType;
+use App\Helpers\generateHelper;
+use App\Models\QuotationDetail;
 use App\Services\CalculateService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -31,11 +32,7 @@ class QuotationService
     /** add quotation */
     public function addQuotation($request)
     {
-        $getQuotationType = QuotationType::find($request['quotation_type_id']);
-        if(isset($getQuotationType)){
-            $getQuotationType->select('quotation_types.*')
-            ->where('quotation_types', 'rate');
-        }
+        $getCurrency = Currency::find($request['currency_id']);
 
         DB::beginTransaction();
             /** add quotation */
@@ -46,33 +43,33 @@ class QuotationService
             $addQuotation->end_date = $request['end_date'];
             $addQuotation->note = $request['note'];
             $addQuotation->customer_id = $request['customer_id'];
-            $addQuotation->quotation_type_id = $getQuotationType['id'];
-            $addQuotation->currency_id = $getQuotationType['currency_id'];
+            $addQuotation->quotation_type_id = $request['quotation_type_id'];
+            $addQuotation->currency_id = $request['currency_id'];
             $addQuotation->created_by = Auth::user('api')->id;
             $addQuotation->discount = $request['discount'];
             $addQuotation->save();
 
             /** create quotation_rate */
-            $addQuotationRate = new QuotationRate();
-            $addQuotationRate->quotation_id = $addQuotation['id'];
-            $addQuotationRate->rate_kip = $request['rate_kip'];
-            $addQuotationRate->rate_dollar = $request['rate_dollar'];
-            $addQuotationRate->rate_baht = $request['rate_baht'];
-            $addQuotationRate->save();
+            // $addQuotationRate = new QuotationRate();
+            // $addQuotationRate->quotation_id = $addQuotation['id'];
+            // $addQuotationRate->rate_kip = $request['rate_kip'];
+            // $addQuotationRate->rate_dollar = $request['rate_dollar'];
+            // $addQuotationRate->rate_baht = $request['rate_baht'];
+            // $addQuotationRate->save();
 
 
             /** add detail */
             $sumSubTotal = 0;
             if(!empty($request['quotation_details'])){
                 foreach($request['quotation_details'] as $item){
-                    $total = $item['hour'] * $getQuotationType['rate'];
+                    $total = $item['hour'] * $getCurrency['rate'];
 
                     $addDetail = new QuotationDetail();
                     $addDetail->order = $item['order'];
                     $addDetail->quotation_id = $addQuotation['id'];
                     $addDetail->name = $item['name'];
                     $addDetail->hour = $item['hour'];
-                    $addDetail->rate = $getQuotationType['rate'];
+                    $addDetail->rate = $getCurrency['rate'];
                     $addDetail->description = $item['description'];
                     $addDetail->total = $total;
                     $addDetail->save();

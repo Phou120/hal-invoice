@@ -66,7 +66,8 @@ class CurrencyRequest extends FormRequest
                     'required',
                     'regex:/^(\$|₭|฿|¥)$/',
                     Rule::unique('currencies', 'short_name')->ignore($this->id)
-                ]
+                ],
+                'rate' => 'required'
             ];
         }
 
@@ -82,7 +83,8 @@ class CurrencyRequest extends FormRequest
                     'required',
                     'regex:/^(\$|₭|฿|¥)$/',
                     Rule::unique('currencies', 'short_name')
-                ]
+                ],
+                'rate' => 'required'
             ];
         }
 
@@ -101,7 +103,8 @@ class CurrencyRequest extends FormRequest
 
             'id.required' => 'ກະລຸນາປ້ອນ ID ກ່ອນ...',
             'id.numeric' => 'ID ຄວນເປັນໂຕເລກ...',
-            'id.exists' => 'ID ບໍ່ມີໃນລະບົບ...'
+            'id.exists' => 'ID ບໍ່ມີໃນລະບົບ...',
+            'rate.required' => 'ກະລຸນາປ້ອນກ່ອນ.'
         ];
     }
 }

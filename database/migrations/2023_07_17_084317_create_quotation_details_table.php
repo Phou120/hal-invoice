@@ -19,8 +19,8 @@ return new class extends Migration
             $table->unsignedBigInteger('quotation_id');
             $table->string('name');
             $table->text('description')->nullable();
-            $table->integer('amount')->default(0);
-            $table->double('price')->default(0);
+            $table->integer('hour')->default(0);
+            $table->double('rate')->default(0);
             $table->double('total')->default(0);
             $table->timestamps();
             $table->softDeletes();

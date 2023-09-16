@@ -58,16 +58,7 @@ class QuotationTypeRequest extends FormRequest
                 'name' =>[
                     'required',
                         'max:255'
-                ],
-                'rate' =>[
-                    'required'
-                ],
-                'currency_id' => [
-                    'required',
-                        'numeric',
-                            Rule::exists('currencies', 'id')
-                                ->whereNull('deleted_at')
-                ],
+                ]
             ];
         }
 
@@ -77,16 +68,7 @@ class QuotationTypeRequest extends FormRequest
                 'name' =>[
                     'required',
                         'max:255'
-                ],
-                'rate' =>[
-                    'required'
-                ],
-                'currency_id' => [
-                    'required',
-                        'numeric',
-                            Rule::exists('currencies', 'id')
-                                ->whereNull('deleted_at')
-                ],
+                ]
             ];
         }
     }
@@ -96,16 +78,6 @@ class QuotationTypeRequest extends FormRequest
         return [
             'name.required' => 'ກະລຸນາປ້ອນຊື່ກ່ອນ...',
             'name.max' => 'ຊື່ບໍ່ຄວນເກີນ 255 ຕົວອັກສອນ...',
-
-            'rate.required' => 'ກະລຸນາປ້ອນອັດຕາກ່ອນ',
-
-            'id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
-            'id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
-            'id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
-
-            'currency_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
-            'currency_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
-            'currency_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
         ];
     }
 }

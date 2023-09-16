@@ -12,6 +12,7 @@ use App\Models\QuotationType;
 use App\Models\ModuleCategory;
 use Illuminate\Database\Seeder;
 use App\Models\CompanyBankAccount;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
@@ -24,14 +25,16 @@ class SeedDataSeeder extends Seeder
      */
     public function run()
     {
-        $this->createCustomers();
-        $this->createCompanies();
-        $this->createCurrencies();
-        $this->createCompanyUsers();
-        $this->createQuotationTypes();
-        $this->createModuleCategories();
-        $this->createModuleTitles();
-        $this->createCompanyBankAccounts();
+        DB::beginTransaction();
+            $this->createCustomers();
+            $this->createCompanies();
+            $this->createCurrencies();
+            $this->createCompanyUsers();
+            $this->createQuotationTypes();
+            $this->createModuleCategories();
+            $this->createModuleTitles();
+            $this->createCompanyBankAccounts();
+        DB::commit();
     }
 
 
@@ -103,6 +106,7 @@ class SeedDataSeeder extends Seeder
         Currency::create([
             'name' => 'ໂດລາ',
             'short_name' => '$',
+            'rate' => 22000,
             'created_at' => '2023-08-30',
             'updated_at' => '2023-06-25'
         ]);
@@ -110,6 +114,7 @@ class SeedDataSeeder extends Seeder
         Currency::create([
             'name' => 'ບາດ',
             'short_name' => '฿',
+            'rate' => 600,
             'created_at' => '2023-03-31',
             'updated_at' => '2023-10-15'
         ]);
@@ -117,6 +122,7 @@ class SeedDataSeeder extends Seeder
         Currency::create([
             'name' => 'ກີບ',
             'short_name' => '₭',
+            'rate' => 250000,
             'created_at' => '2023-04-10',
             'updated_at' => '2023-10-25'
         ]);
@@ -232,21 +238,7 @@ class SeedDataSeeder extends Seeder
     {
         CompanyUser::create([
             'company_id' => 1,
-            'user_id' => 2,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        CompanyUser::create([
-            'company_id' => 2,
-            'user_id' => 2,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        CompanyUser::create([
-            'company_id' => 3,
-            'user_id' => 2,
+            'user_id' => 3,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -273,6 +265,7 @@ class SeedDataSeeder extends Seeder
             'module_category_id' => 1,
             'name' => 'for',
             'hour' => 3,
+            'description' => 'description 3',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -281,6 +274,7 @@ class SeedDataSeeder extends Seeder
             'module_category_id' => 2,
             'name' => 'forget',
             'hour' => 5,
+            'description' => 'description 5',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -289,25 +283,13 @@ class SeedDataSeeder extends Seeder
     public function createQuotationTypes()
     {
         QuotationType::create([
-            'currency_id' => 1,
-            'name' => 'big',
-            'rate' => 200,
+            'name' => 'Monolic',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         QuotationType::create([
-            'currency_id' => 2,
-            'name' => 'big',
-            'rate' => 300,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        QuotationType::create([
-            'currency_id' => 3,
-            'name' => 'big',
-            'rate' => 210,
+            'name' => 'Micro-service',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
