@@ -16,12 +16,15 @@ return new class extends Migration
         Schema::create('quotation_rates', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('quotation_id');
-            $table->double('rate_kip')->default(0);
-            $table->double('rate_dollar')->default(0);
-            $table->double('rate_baht')->default(0);
+            $table->unsignedBigInteger('currency_id');
+            $table->double('rate')->default(0);
+            $table->double('sub_total')->default(0);
+            $table->double('discount')->default(0);
+            $table->double('tax')->default(0);
+            $table->double('total')->default(0);
             $table->timestamps();
             $table->softDeletes();
-
+            $table->foreign('currency_id')->references('id')->on('currencies')->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('quotation_id')->references('id')->on('quotations')->onUpdate('cascade')->onDelete('cascade');
         });
     }

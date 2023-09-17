@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\File;
 
 class ExportPDFController extends Controller
 {
+<<<<<<< HEAD
     /** exportPDF for invoice */
     public function exportPDFInvoice($id){
         $invoice = resolve(InvoiceService::class)->listInvoice($id);
@@ -26,6 +27,20 @@ class ExportPDFController extends Controller
         $file_url = public_path('images/invoice/pdf/' . $file_name);
         if (!File::isDirectory(public_path('images/invoice/pdf/'))) {
             File::makeDirectory(public_path('images/invoice/pdf/'), 0777, true, true);
+=======
+    public function exportPDFQuotation($id)
+    {
+        $quotation = resolve(QuotationService::class)->listQuotation($id);
+        
+        $view = view('quotations.quotation')
+        ->with('data', $quotation)
+        ->render();
+
+        $file_name = 'quotation' . '.pdf';
+        $file_url = public_path('images/quotation/pdf/' . $file_name);
+        if (!File::isDirectory(public_path('images/quotation/pdf/'))) {
+            File::makeDirectory(public_path('images/quotation/pdf/'), 0777, true, true);
+>>>>>>> f4c34a9ea331bb438ac9c1c23324c46a3f51e904
         }
 
         $footerHtml ='<br><br>

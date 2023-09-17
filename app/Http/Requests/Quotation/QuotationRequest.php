@@ -239,25 +239,7 @@ class QuotationRequest extends FormRequest
                             Rule::exists('customers', 'id')
                                 ->whereNull('deleted_at')
                 ],
-                // 'currency_id' => [
-                //     'required',
-                //         'numeric',
-                //             Rule::exists('currencies', 'id')
-                //                 ->whereNull('deleted_at')
-                // ],
                 'discount' => [
-                    'required',
-                        'numeric'
-                ],
-                'rate_kip' =>[
-                    'required',
-                        'numeric'
-                ],
-                'rate_dollar' =>[
-                    'required',
-                        'numeric'
-                ],
-                'rate_baht' =>[
                     'required',
                         'numeric'
                 ],
@@ -277,10 +259,6 @@ class QuotationRequest extends FormRequest
                     'required',
                         'numeric'
                 ],
-                // 'quotation_details.*.price' => [
-                //     'nullable',
-                //         'numeric'
-                // ],
                 'quotation_details.*.description' => [
                     'nullable'
                 ]

@@ -18,6 +18,7 @@ class CurrencyService
             $addCurrency = new Currency();
             $addCurrency->name = $request['name'];
             $addCurrency->short_name = $request['short_name'];
+            $addCurrency->rate = $request['rate'];
             $addCurrency->save();
 
             return response()->json([
@@ -52,6 +53,7 @@ class CurrencyService
         $editCurrency = Currency::find($request['id']);
         $editCurrency->name = $request['name'];
         $editCurrency->short_name = $request['short_name'];
+        $editCurrency->rate = $request['rate'];
         $editCurrency->save();
 
         return response()->json([
@@ -67,6 +69,8 @@ class CurrencyService
         $deleteCurrency->name = $deleteCurrency->name . '_deleted_' . Str::random(3);
         $deleteCurrency->short_name = $deleteCurrency->short_name . '_deleted_' . Str::random(3);
         $deleteCurrency->save();
+
+        /** Delete */
         $deleteCurrency->delete();
 
         return response()->json([
