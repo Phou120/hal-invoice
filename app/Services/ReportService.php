@@ -17,7 +17,7 @@ class ReportService
 
     public function reportInvoice($request)
     {
-        $invoiceQuery = Invoice::query();
+        $invoiceQuery = Invoice::select('invoices.*');
 
         // filters date
         $invoiceQuery = FilterHelper::filterDate($invoiceQuery, $request);
@@ -42,7 +42,8 @@ class ReportService
 
     public function reportQuotation($request)
     {
-        $quotationQuery = Quotation::query();
+        // $quotationQuery = Quotation::query();
+        $quotationQuery = Quotation::select('quotations.*');
 
         // filters date
         $quotationQuery = FilterHelper::quotationFilter($quotationQuery, $request);
@@ -94,7 +95,7 @@ class ReportService
     {
         $perPage = $request->per_page;
 
-        $query = Receipt::query();
+        $query = Receipt::select('receipts.*');
 
         // count all invoices
         $totalReceipt = (clone $query)->count();
@@ -117,12 +118,10 @@ class ReportService
 
     public function reportCompanyCustomer($request)
     {
-        $quotation = DB::table('quotations')
-        ->select(
+        $quotation = DB::table('quotations')->select(
             DB::raw('(SELECT COUNT(id) FROM companies) as company_count'),
             DB::raw('(SELECT COUNT(id) FROM customers) as customer_count')
-        )
-        ->first();
+        )->first();
 
         return response()->json($quotation, 200);
     }
