@@ -135,23 +135,81 @@ class CalculateService
         $addQuotation->save();
     }
 
-    /** edit calculate quotation */
-    public function calculateTotal_ByEdit($quotation)
+    public function UpdateQuotationRates($getQuotationRate, $request)
     {
-        /** Calculate */
-        $sumSubTotalPrice = QuotationDetail::where('quotation_id', $quotation['id'])->get()->sum('total');
-        $sumTotalTax = $sumSubTotalPrice * filterHelper::TAX / 100;
-        $sumTotalDiscount = $sumSubTotalPrice * $quotation['discount'] / 100;
-        $sumTotal = ($sumSubTotalPrice - $sumTotalDiscount) + $sumTotalTax;
-        // dd($sumSubTotalPrice);
+        foreach($getQuotationRate as $rate) {
+            // Update the discount in the associated QuotationRate record
+            $discount = $request['discount'];
 
-        /** Update Total Quotation */
-        $editQuotation = Quotation::find($quotation['id']);
-        $editQuotation->tax = filterHelper::TAX;
-        $editQuotation->sub_total = $sumSubTotalPrice;
-        $editQuotation->total = $sumTotal;
-        $editQuotation->save();
+            /** get subTotal in quotationRate */
+            $subTotal = $rate->sub_total;
+
+            $sumTotalTax = $subTotal * FilterHelper::TAX / 100;
+            $sumTotalDiscount = $subTotal * $discount / 100;
+            $sumTotal = $subTotal - $sumTotalDiscount + $sumTotalTax;
+
+            /** update quotationRate */
+            $rate->sub_total = $subTotal;
+            $rate->discount = $discount;
+            $rate->total = $sumTotal;
+            $rate->save();
+        }
     }
+
+    /** edit calculate quotation */
+    public function calculateAndUpdateQuotationRates($quotationRates, $hour)
+    {
+        foreach ($quotationRates as $rate) {
+
+            $rateDiscount = $rate->discount;
+            /** calculate */
+            $newRate = $rate->rate * $hour;
+            $subTotal = $rate->sub_total + $newRate;
+
+            $sumTotalTax = $subTotal * FilterHelper::TAX / 100;
+            $sumTotalDiscount = $subTotal * $rateDiscount / 100;
+            $sumTotal = $subTotal - $sumTotalDiscount + $sumTotalTax;
+
+            /** update quotationRate */
+            $rate->sub_total = $subTotal;
+            $rate->total = $sumTotal;
+            $rate->save();
+        }
+    }
+
+    public function updateQuotationDetailAndQuotationRate($quotationRates, $quotationID)
+    {
+        foreach ($quotationRates as $quotationRate) {
+            $rateDiscount = $quotationRate->discount;
+            $total = $quotationRate->rate * $quotationID;
+
+            $subTotal = $total;
+            $sumTotalTax = $subTotal * FilterHelper::TAX / 100;
+            $sumTotalDiscount = $subTotal * $rateDiscount / 100;
+            $sumTotal = $subTotal - $sumTotalDiscount + $sumTotalTax;
+
+            $quotationRate->sub_total = $subTotal;
+            $quotationRate->total = $sumTotal;
+            $quotationRate->save();
+        }
+    }
+
+    // public function calculateTotal_ByEdits($quotation)
+    // {
+    //     /** Calculate */
+    //     $sumSubTotalPrice = QuotationDetail::where('quotation_id', $quotation['id'])->get()->sum('total');
+    //     $sumTotalTax = $sumSubTotalPrice * filterHelper::TAX / 100;
+    //     $sumTotalDiscount = $sumSubTotalPrice * $quotation['discount'] / 100;
+    //     $sumTotal = ($sumSubTotalPrice - $sumTotalDiscount) + $sumTotalTax;
+    //     // dd($sumSubTotalPrice);
+
+    //     /** Update Total Quotation */
+    //     $editQuotation = Quotation::find($quotation['id']);
+    //     $editQuotation->tax = filterHelper::TAX;
+    //     $editQuotation->sub_total = $sumSubTotalPrice;
+    //     $editQuotation->total = $sumTotal;
+    //     $editQuotation->save();
+    // }
 
     /** calculate invoice */
     public function calculateTotalInvoice_ByEdit($editInvoice)

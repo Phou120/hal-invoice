@@ -5,6 +5,7 @@ namespace App\Http\Requests\Invoice;
 use App\Models\Invoice;
 use App\Models\QuotationDetail;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Http\FormRequest;
 
 class InvoiceRequest extends FormRequest
@@ -227,7 +228,41 @@ class InvoiceRequest extends FormRequest
                                 if ($quotationIds->count() > 1) {
                                     $fail("ກະລຸນາເລືອກໃຫ້ຖືກຕ້ອງ...");
                                 }
+                            },
+                            function ($attribute, $value, $fail) {
+                                foreach ($value as $quotation_detail_id) {
+                                    // Get the `quotation_id` from the QuotationDetail model
+                                    $quotationId = QuotationDetail::where('id', $quotation_detail_id)->value('quotation_id');
+
+                                    // Retrieve the invoice_id from the URL parameter
+                                    $invoiceID = request()->route('id');
+
+                                    // Check if the provided invoice_id matches the invoice with the corresponding quotation_id
+                                    $invoice = Invoice::where('id', $invoiceID)->first();
+                                    $whereQuotationID = $invoice->where('quotation_id', $quotationId)->first();
+                                    $check = $invoice == $whereQuotationID;
+
+                                    if (!$check) {
+                                        $fail('ກະລຸນາເລືອກ ' . $quotation_detail_id . ' ໃຫ້ຖືກຕ້ອງ...');
+                                    }
+                                }
                             }
+
+                            // }
+                            // function ($attribute, $value, $fail) {
+                            //     $quotationDetailIds = $value;
+
+                            //     $invoiceID = request()->route('id');
+
+                            //     $quotationIds = QuotationDetail::whereIn('id', $quotationDetailIds)->pluck('quotation_id');
+                            //     // dd($quotationDetailIds);
+
+                            //     $invoices = Invoice::where('id', $invoiceID)->whereIn('quotation_id', $quotationIds)->get();
+
+                            //     if ($invoices->count() !== count($quotationDetailIds)) {
+                            //         $fail('ກະລຸນາເລືອກລາຍລະອຽດທັງໝົດໃຫ້ຖືກຕ້ອງ...');
+                            //     }
+                            // }
                 ],
                 // 'order' => [
                 //     'required',

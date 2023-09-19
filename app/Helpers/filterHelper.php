@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\InvoiceDetail;
 use App\Models\ReceiptDetail;
 use App\Models\QuotationDetail;
+use App\Models\QuotationRate;
 use App\Services\CalculateService;
 use Illuminate\Support\Facades\DB;
 
@@ -46,18 +47,8 @@ class filterHelper
     /** filter name */
     public static function filterQuotationName($query, $request)
     {
-        if ($request->quotation_name !== null) {
-            $query->where('quotations.quotation_name', 'LIKE', '%' . $request->quotation_name . '%');
-        }
-
-        return $query;
-    }
-
-    public static function filterTotal($query, $request)
-    {
-        if($request->total !== null)
-        {
-            $query->where('quotations.total', $request->total);
+        if ($request->name !== null) {
+            $query->where('quotations.quotation_name', 'LIKE', '%' . $request->name . '%');
         }
 
         return $query;

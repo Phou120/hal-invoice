@@ -130,39 +130,40 @@ class QuotationRequest extends FormRequest
             return [
                 'id' =>[
                     'required',
-                        'numeric',
-                            Rule::exists('quotations', 'id')
-                                ->whereNull('deleted_at')
+                    'numeric',
+                    Rule::exists('quotations', 'id')
+                    ->whereNull('deleted_at')
                 ],
                 'quotation_name' =>[
                     'required',
-                        'max:255'
+                    'max:255'
                 ],
                 'start_date' => [
                     'required',
-                        'date'
+                    'date'
                 ],
                 'start_date' => [
                     'required',
-                        'date',
-                            'after_or_equal:today',
+                    'date',
+                    'after_or_equal:today',
                 ],
                 'end_date' => [
                     'required',
-                        'date',
-                            'after_or_equal:start_date'
+                    'date',
+                    'after_or_equal:start_date'
                 ],
                 'quotation_type_id' =>[
                     'required',
-                        'numeric',
-                            Rule::exists('quotation_types', 'id')
+                    'numeric',
+                    Rule::exists('quotation_types', 'id')
                 ],
-                // 'customer_id' => [
-                //     'required',
-                //         'numeric',
-                //             Rule::exists('customers', 'id')
-                //                 ->whereNull('deleted_at')
-                // ],
+                'customer_id' => [
+                    'required',
+                    'numeric',
+                    Rule::exists('customers', 'id')
+                    ->whereNull('deleted_at')
+                ],
+                // dd('dd'),
                 // 'currency_id' => [
                 //     'required',
                 //         'numeric',
@@ -197,10 +198,6 @@ class QuotationRequest extends FormRequest
                     'required',
                         'numeric'
                 ],
-                // 'price' => [
-                //     'required',
-                //         'numeric'
-                // ],
                 'description' => [
                     'nullable',
                         'max:255'

@@ -12,7 +12,6 @@ class TableHelper
     public static function loopDataInQuotation($item)
     {
         $item->customer = DB::table('customers')->where('id', $item->customer_id)->first();
-        $item->currency = DB::table('currencies')->where('id', $item->currency_id)->first();
         $item->user = DB::table('users')->where('id', $item->created_by)->first();
     }
 

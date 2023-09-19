@@ -71,6 +71,19 @@ class ReturnService
         return $quotation;
     }
 
+    /** select quotationRate */
+    public function selectQuotationRate($quotationDetailId)
+    {
+        $getQuotationRate = DB::table('quotation_rates')
+            ->select('quotation_rates.*')
+            ->join('quotations', 'quotation_rates.quotation_id', '=', 'quotations.id')
+            ->join('quotation_details', 'quotation_details.quotation_id', '=', 'quotations.id')
+            ->where('quotation_details.id', $quotationDetailId) // Use $getQuotation->id
+            ->first();
+
+        return $getQuotationRate;
+    }
+
     public function invoiceDetail($quotation, $invoiceId)
     {
         $invoiceDetails = [
@@ -173,15 +186,15 @@ class ReturnService
     }
 
     /** join data in quotation_type to get quotation_types.rate */
-    public function getQuotationType($request)
+    public function getQuotationRate($request)
     {
-        $getQuotationType = DB::table('quotation_types')
-            ->select('quotation_types.rate')
-            ->join('quotations as quotation', 'quotation.quotation_type_id', '=', 'quotation_types.id')
+        $getQuotationType = DB::table('quotation_rates')
+            ->select('quotation_rates.rate')
+            ->join('quotations as quotation', 'quotation_rates.quotation_id', '=', 'quotation.id')
             ->join('quotation_details as quotationDetail', 'quotationDetail.quotation_id', '=', 'quotation.id')
             ->where('quotationDetail.quotation_id', '=', $request['id'])
-            ->whereNotNull('quotation.quotation_type_id')
-            ->whereNotNull('quotation_types.rate')
+            // ->whereNotNull('quotation.quotation_type_id')
+            ->whereNotNull('quotation_rates.rate')
             ->first();
 
         return $getQuotationType;

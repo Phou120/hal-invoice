@@ -16,16 +16,22 @@ use App\Services\CalculateService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Services\returnData\ReturnService;
+use App\Services\GetData\GetDataOfQuotationService;
 
 class QuotationService
 {
     use ResponseAPI;
 
     public $calculateService;
+    public $getDataOfQuotationService;
 
-    public function __construct(CalculateService $calculateService)
+    public function __construct(
+        CalculateService  $calculateService,
+        GetDataOfQuotationService $getDataOfQuotationService
+    )
     {
         $this->calculateService = $calculateService;
+        $this->getDataOfQuotationService = $getDataOfQuotationService;
     }
 
 
@@ -73,6 +79,7 @@ class QuotationService
                     $addQuotationRate->discount = $request['discount'];
                     $addQuotationRate->save();
 
+                    /**Calculate */
                     $this->calculateService->calculateTotal($request, $addQuotationRate['sub_total'], $addQuotationRate['id']);
                 }
             }
@@ -96,13 +103,13 @@ class QuotationService
 
         $query = Quotation::select(
             'quotations.*',
-            DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details')
+            DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details'),
+            DB::raw('(SELECT SUM(total) FROM quotation_rates WHERE quotation_rates.quotation_id = quotations.id) as total_price'),
         )
         ->leftJoin('customers', 'quotations.customer_id', '=', 'customers.id')
-        ->leftJoin('currencies', 'quotations.currency_id', '=', 'currencies.id')
         ->leftJoin('users', 'quotations.created_by', '=', 'users.id')
-        ->leftJoin('company_users', 'company_users.user_id', 'users.id')
-        ->leftJoin('companies', 'company_users.company_id', 'companies.id');
+        ->leftJoin('company_users', 'company_users.user_id', '=', 'users.id')
+        ->leftJoin('companies', 'company_users.company_id', '=', 'companies.id');
 
         /** filter start_date and end_date */
         $query = filterHelper::quotationFilter($query, $request);
@@ -114,33 +121,34 @@ class QuotationService
             $query->where('quotations.created_by', $user->id);
         }
 
-        $quotation = $query->orderBy('quotations.id', 'asc')->get();
+        $quotation = $query->groupBy('quotations.id')->orderBy('quotations.id', 'asc')->get();
         $totalDetail = $quotation->sum('count_details');
-        $totalPrice = $quotation->sum('total');
+        $totalPrice = $quotation->sum('total_price');
+
 
         function filterQuotationStatus($query, $status) {
             return $query->where('status', filterHelper::INVOICE_STATUS[$status]);
         }
 
-        $quotationStatusCreated = filterQuotationStatus(clone $query, 'CREATED');
+        $quotationStatusCreated = filterQuotationStatus(clone $quotation, 'CREATED');
         $created = $quotationStatusCreated->count();
-        $createdTotal = $quotationStatusCreated->sum('total');
+        $createdTotal = $quotationStatusCreated->sum('total_price');
 
-        $quotationStatusApproved = filterQuotationStatus(clone $query, 'APPROVED');
+        $quotationStatusApproved = filterQuotationStatus(clone $quotation, 'APPROVED');
         $approved = $quotationStatusApproved->count();
-        $approvedTotal = $quotationStatusApproved->sum('total');
+        $approvedTotal = $quotationStatusApproved->sum('total_price');
 
-        $quotationStatusInprogress = filterQuotationStatus(clone $query, 'INPROGRESS');
+        $quotationStatusInprogress = filterQuotationStatus(clone $quotation, 'INPROGRESS');
         $inprogress = $quotationStatusInprogress->count();
-        $inprogressTotal = $quotationStatusInprogress->sum('total');
+        $inprogressTotal = $quotationStatusInprogress->sum('total_price');
 
-        $quotationStatusCompleted = filterQuotationStatus(clone $query, 'COMPLETED');
+        $quotationStatusCompleted = filterQuotationStatus(clone $quotation, 'COMPLETED');
         $completed = $quotationStatusCompleted->count();
-        $completedTotal = $quotationStatusCompleted->sum('total');
+        $completedTotal = $quotationStatusCompleted->sum('total_price');
 
-        $quotationStatusCancelled = filterQuotationStatus(clone $query, 'CANCELLED');
+        $quotationStatusCancelled = filterQuotationStatus(clone $quotation, 'CANCELLED');
         $cancelled = $quotationStatusCancelled->count();
-        $cancelledTotal = $quotationStatusCancelled->sum('total');
+        $cancelledTotal = $quotationStatusCancelled->sum('total_price');
 
         /** query: status */
         $query = filterHelper::filterStatus($query, $request);
@@ -150,8 +158,6 @@ class QuotationService
 
         /** filter Name */
         $query = filterHelper::filterQuotationName($query, $request);
-        /** filter total */
-        $query = filterHelper::filterTotal($query, $request);
 
         if ($user->hasRole(['superadmin', 'admin'])) {
             $listQuotations = $query->orderBy('quotations.id', 'asc');
@@ -200,23 +206,25 @@ class QuotationService
     /** add quotation detail */
     public function addQuotationDetail($request)
     {
-        $detailData = (new ReturnService())->detailData($request);
+        $hour = $request['hour'];
 
-        $queryQuotationType = (new ReturnService())->getQuotationType($request);
+        DB::beginTransaction();
 
-        if ($queryQuotationType) {
-            $rate = $queryQuotationType->rate;
-            $detailData['price'] = $rate;
-            $detailData['total'] = $request['hour'] * $rate;
+            $quotationDetail = new QuotationDetail();
+            $quotationDetail->quotation_id = $request['id'];
+            $quotationDetail->order = $request['order'];
+            $quotationDetail->name = $request['name'];
+            $quotationDetail->hour = $hour;
+            $quotationDetail->description = $request['description'];
+            $quotationDetail->save();
 
-            DB::table('quotation_details')->insert($detailData);
-        }
+            // Find the QuotationRate records with the matching quotation_id
+            $quotationRates = QuotationRate::where('quotation_id', $request['id'])->get();
 
-        /** Update Quotation */
-        $quotation = Quotation::find($request['id']);
+            /** calculate */
+            $this->calculateService->calculateAndUpdateQuotationRates($quotationRates, $hour);
 
-        /** Update Calculate quotation */
-        $this->calculateService->calculateTotal_ByEdit($quotation);
+        DB::commit();
 
         return response()->json([
             'error' => false,
@@ -231,37 +239,34 @@ class QuotationService
         $itemQuery = DB::table('quotations')
             ->select('quotations.*', DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_id = quotations.id) AS count_detail'))
             ->leftJoin('customers', 'quotations.customer_id', 'customers.id')
-            ->leftJoin('currencies', 'quotations.currency_id', 'currencies.id')
-            ->leftJoin('users', 'quotations.created_by', 'users.id');
-
-            if ($user->hasRole(['superadmin', 'admin'])) {
-                $itemQuery->where('quotations.id', $request->id)
-                    ->orderBy('quotations.id', 'asc');
-            }
-
-            if ($user->hasRole(['company-admin', 'company-user'])) {
-                $itemQuery->where('quotations.id', $request->id)
-                    ->where('quotations.created_by', $user->id)
-                    ->orderBy('quotations.id', 'asc');
-            }
-
-            $item = $itemQuery->first();
-
-        /**Detail */
-        $details = QuotationDetail::select('quotation_details.*')
-        ->join('quotations', 'quotation_details.quotation_id', 'quotations.id')
-        ->where('quotation_id', $request->id);
+            ->leftJoin('users', 'quotations.created_by', 'users.id')
+            ->where('quotations.id', $request->id);
 
         // Check user roles and apply appropriate conditions
         if ($user->hasRole(['superadmin', 'admin'])) {
-            $details->orderBy('quotations.id', 'asc');
+            $itemQuery->orderBy('quotations.id', 'asc');
         } elseif ($user->hasRole(['company-admin', 'company-user'])) {
-            $details->where('quotations.created_by', $user->id)
+            $itemQuery->where('quotations.created_by', $user->id)
+                ->orderBy('quotations.id', 'asc');
+        }
+
+        $item = $itemQuery->first();
+
+        // Detail query
+        $detailsQuery = QuotationDetail::select('quotation_details.*')
+            ->join('quotations', 'quotation_details.quotation_id', 'quotations.id')
+            ->where('quotation_id', $request->id);
+
+        // Check user roles and apply appropriate conditions
+        if ($user->hasRole(['superadmin', 'admin'])) {
+            $detailsQuery->orderBy('quotations.id', 'asc');
+        } elseif ($user->hasRole(['company-admin', 'company-user'])) {
+            $detailsQuery->where('quotations.created_by', $user->id)
                 ->orderBy('quotations.id', 'asc');
         }
 
         // Get the results
-        $details = $details->get();
+        $details = $detailsQuery->get();
 
         return response()->json([
             'quotation' => $item,
@@ -269,23 +274,26 @@ class QuotationService
         ], 200);
     }
 
+
     /** edit quotation */
     public function editQuotation($request)
     {
-        $editQuotation = Quotation::find($request['id']);
-        $editQuotation->quotation_name = $request['quotation_name'];
-        $editQuotation->start_date = $request['start_date'];
-        $editQuotation->end_date = $request['end_date'];
-        $editQuotation->note = $request['note'];
-        $editQuotation->quotation_type_id = $request['quotation_type_id'];
-        // $editQuotation->customer_id = $request['customer_id'];
-        // $editQuotation->currency_id = $request['currency_id'];
-        $editQuotation->discount = $request['discount'];
-        $editQuotation->updated_by = Auth::user('api')->id;
-        $editQuotation->save();
+        DB::beginTransaction();
 
-        /**Update Calculate */
-        $this->calculateService->calculateTotal_ByEdit($editQuotation);
+            $editQuotation = Quotation::find($request['id']);
+
+            if ($editQuotation) {
+                /** get request to front-end */
+                $editQuotations = (new GetDataOfQuotationService())->getData($editQuotation, $request);
+
+                // Assuming you have a relationship like 'quotationRate' defined in your Quotation model
+                $getQuotationRate = QuotationRate::where('quotation_id', $editQuotations->id)->get();
+
+                /** calculate */
+                $this->calculateService->UpdateQuotationRates($getQuotationRate, $request);
+            }
+
+        DB::commit();
 
         return response()->json([
             'error' => false,
@@ -296,39 +304,65 @@ class QuotationService
     /** edit detail */
     public function editQuotationDetail($request)
     {
-        /** join data */
-        $editDetail = (new ReturnService())->joinData($request);
+        DB::beginTransaction();
 
-        /** update data in quotation_details */
-        $updateData = (new ReturnService())->updateData($editDetail, $request);
+        try {
+            $hour = $request['hour'];
+            // Update QuotationDetail
+            $quotationDetail = QuotationDetail::find($request['id']);
+            $quotationDetail->order = $request['order'];
+            $quotationDetail->name = $request['name'];
+            $quotationDetail->hour = $hour;
+            $quotationDetail->description = $request['description'];
+            $quotationDetail->save();
 
-        // Update the record
-        DB::table('quotation_details')->where('id', $editDetail->id)->update($updateData);
+            /** update quotation column updated_by */
+            $this->getDataOfQuotationService->getDataQuotation($quotationDetail);
 
-        // Fetch the Quotation using the quotation_id from the joined data
-        $editQuotation = Quotation::find($editDetail->quotation_id);
+            // Calculate and update QuotationRates
+            $quotationID = QuotationDetail::where('quotation_id', $quotationDetail->quotation_id)->sum('hour');
+            $quotationRates = QuotationRate::where('quotation_id', $quotationDetail->quotation_id)->get();
 
-        // Update Calculate quotation
-        $this->calculateService->calculateTotal_ByEdit($editQuotation);
+            /** calculate */
+            $this->calculateService->updateQuotationDetailAndQuotationRate($quotationRates, $quotationID);
 
-        return response()->json([
-            'error' => false,
-            'msg' => 'ສຳເລັດແລ້ວ'
-        ], 200);
+            DB::commit();
+
+            return response()->json([
+                'error' => false,
+                'msg' => 'Success'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => true,
+                'msg' => 'not found...'
+            ], 500);
+        }
     }
 
     /** delete detail */
     public function deleteQuotationDetail($request)
     {
-        $deleteDetail = QuotationDetail::find($request['id']);
-        $deleteDetail->delete();
+        DB::beginTransaction();
+            $deleteDetail = QuotationDetail::find($request['id']);
+            $quotation = $deleteDetail->quotation_id;
 
-         /**Update Quotation */
-        $editQuotation = Quotation::find($deleteDetail['quotation_id']);
+            // Delete the QuotationDetail
+            $deleteDetail->delete();
 
-         /**Update Calculate */
-         $this->calculateService->calculateTotal_ByEdit($editQuotation);
+            /** update quotation column updated_by */
+            $this->getDataOfQuotationService->getDataQuotation($deleteDetail);
 
+            // Update the sum of hours for the Quotation
+            $quotationID = QuotationDetail::where('quotation_id', $quotation)->sum('hour');
+            // Get the QuotationRates related to this quotation
+            $quotationRates = QuotationRate::where('quotation_id', $quotation)->get();
+
+            /** calculate */
+            $this->calculateService->updateQuotationDetailAndQuotationRate($quotationRates, $quotationID);
+
+        DB::commit();
          return response()->json([
             'error' => false,
             'msg' => 'ສຳເລັດແລ້ວ'

@@ -3,9 +3,7 @@
 namespace App\Services;
 ;
 use App\Models\Invoice;
-use App\Models\Quotation;
 use App\Traits\ResponseAPI;
-use App\Helpers\TableHelper;
 use App\Helpers\filterHelper;
 use App\Models\InvoiceDetail;
 use App\Helpers\generateHelper;
@@ -13,17 +11,22 @@ use App\Models\QuotationDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Services\returnData\ReturnService;
-use PHPUnit\Framework\MockObject\Stub\ReturnSelf;
+
 
 class InvoiceService
 {
     use ResponseAPI;
 
     public $calculateService;
+    public $returnService;
 
-    public function __construct(CalculateService $calculateService)
+    public function __construct(
+        CalculateService $calculateService,
+        ReturnService $returnService
+    )
     {
         $this->calculateService = $calculateService;
+        $this->returnService = $returnService;
     }
 
     /** ບັນທຶກໃບບິນເກັບເງິນ */
@@ -31,13 +34,20 @@ class InvoiceService
     {
         $quotationDetailId = $request['quotation_detail_id'];
         $quotationDetail = QuotationDetail::find($quotationDetailId);
-        // dd($quotationDetail);
+
+        // $quotationId = $quotationDetail->where('quotation_id');
 
         if(isset($quotationDetail)) {
             $getQuotation = DB::table('quotations')
                 ->select('quotations.*')
                 ->join('quotation_details as quotation_detail', 'quotation_detail.quotation_id', '=', 'quotations.id')
                 ->where('quotation_detail.id', $quotationDetailId)
+                ->first();
+
+            $getQuotationRate = DB::table('quotation_rates')
+                ->select('quotation_rates.*')
+                ->join('quotations', 'quotation_rates.quotation_id', '=', 'quotations.id')
+                ->where('quotations.id', $getQuotation->id) // Use $getQuotation->id
                 ->first(); // Use first() instead of get()
 
             if (count($quotationDetail) > 0) {
@@ -47,11 +57,11 @@ class InvoiceService
                     $addInvoice = new Invoice();
                     $addInvoice->invoice_number = generateHelper::generateInvoiceNumber('IV-', 8);
                     $addInvoice->invoice_name = $request['invoice_name'];
-                    $addInvoice->currency_id = $getQuotation->currency_id; // Use object syntax
                     $addInvoice->quotation_id = $getQuotation->id; // Use object syntax
                     $addInvoice->customer_id = $getQuotation->customer_id; // Use object syntax
+                    $addInvoice->currency_id = $getQuotationRate->currency_id; // Use object syntax
                     $addInvoice->start_date = $request['start_date'];
-                    $addInvoice->discount = $getQuotation->discount; // Use object syntax
+                    $addInvoice->discount = $getQuotationRate->discount; // Use object syntax
                     $addInvoice->end_date = $request['end_date'];
                     $addInvoice->note = $request['note'];
                     $addInvoice->created_by = Auth::user('api')->id;
@@ -59,17 +69,17 @@ class InvoiceService
                     $addInvoice->save();
 
                     $taxRate = filterHelper::TAX;
-                    $discountRate = $getQuotation->discount;
+                    $discountRate = $getQuotationRate->discount;
                     $sumSubTotal = 0;
                     foreach ($quotationDetail as $item) {
-                            $total = $item['hour'] * $item['rate'];
+                            $total = $item['hour'] * $getQuotationRate->rate;
 
                             $addDetail = new InvoiceDetail();
                             $addDetail->order = $item['order'];
                             $addDetail->invoice_id = $addInvoice->id; // Use object syntax
                             $addDetail->name = $item['name'];
                             $addDetail->hour = $item['hour'];
-                            $addDetail->rate = $item['rate'];
+                            $addDetail->rate = $getQuotationRate->rate;
                             $addDetail->description = $item['description'];
                             $addDetail->total = $total;
                             $addDetail->save();
@@ -200,60 +210,6 @@ class InvoiceService
         $canceled = $invoiceStatusCanceled->count();
         $canceledTotal = $invoiceStatusCanceled->sum('total');
 
-        //$totalBill = (clone $query)->count(); // count all invoices
-
-        // $invoice = (clone $query)->orderBy('invoices.id', 'asc')
-        // ->where('invoices.created_by', auth()->user()->id)->get();
-
-        // $invoice = filterHelper::getTotal($invoice);
-
-        // $totalPrice = $invoice->sum('total'); // sum total of invoices all
-
-        /** where status = created */
-        // $invoiceStatus = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CREATED'])->orderBy('invoices.id', 'asc')
-        // ->where('invoices.created_by', auth()->user()->id)->get();
-
-        // $invoiceStatus = filterHelper::getTotal($invoiceStatus); // Apply transformation
-
-        // $created = (clone $invoiceStatus)->count(); // count status
-        // $createdTotal = (clone $invoiceStatus)->sum('total'); // sum total of invoices all
-
-        /** where status = approved */
-        // $invoiceStatusApproved = (clone $query)->where('status', filterHelper::INVOICE_STATUS['APPROVED'])->orderBy('invoices.id', 'asc')
-        // ->where('invoices.created_by', auth()->user()->id)->get();
-
-        // $invoiceStatusApproved = filterHelper::getTotal($invoiceStatusApproved); // Apply transformation
-
-        // $approved = (clone $invoiceStatusApproved)->count(); // count status
-        // $approvedTotal = (clone $invoiceStatusApproved)->sum('total'); // sum total of invoices all
-
-        /** where status = inprogress */
-        // $invoiceStatusInprogress = (clone $query)->where('status', filterHelper::INVOICE_STATUS['INPROGRESS'])->orderBy('invoices.id', 'asc')
-        // ->where('invoices.created_by', auth()->user()->id)->get();
-
-        // $invoiceStatusInprogress = filterHelper::getTotal($invoiceStatusInprogress); // Apply transformation
-
-        // $inprogress = (clone $invoiceStatusInprogress)->count(); // count status
-        // $inprogressTotal = (clone $invoiceStatusInprogress)->sum('total'); // sum total of invoices all
-
-        /** where status = completed */
-        // $invoiceStatusCompleted = (clone $query)->where('status', filterHelper::INVOICE_STATUS['COMPLETED'])->orderBy('invoices.id', 'asc')
-        // ->where('invoices.created_by', auth()->user()->id)->get();
-
-        // $invoiceStatusCompleted = filterHelper::getTotal($invoiceStatusCompleted); // Apply transformation
-
-        // $completed = (clone $invoiceStatusCompleted)->count(); // count status
-        // $completedTotal = (clone $invoiceStatusCompleted)->sum('total'); // sum total of invoices all
-
-        /** where status = canceled */
-        // $invoiceStatusCanceled = (clone $query)->where('status', filterHelper::INVOICE_STATUS['CANCELLED'])->orderBy('invoices.id', 'asc')
-        // ->where('invoices.created_by', auth()->user()->id)->get();
-
-        // $invoiceStatusCanceled = filterHelper::getTotal($invoiceStatusCanceled); // Apply transformation
-
-        // $canceled = (clone $invoiceStatusCanceled)->count(); // count status
-        // $canceledTotal = (clone $invoiceStatusCanceled)->sum('total'); // sum total of invoices all
-
         /** filter status */
         $query = filterHelper::filterStatus($query, $request);
 
@@ -315,6 +271,8 @@ class InvoiceService
         if ($quotation) {
             $invoiceId = $request->input('id');
 
+            /** query quotationRate */
+            $getQuotationRate = (new ReturnService())->selectQuotationRate($quotationDetailId);
             /** data in invoice_details */
             // $invoiceDetails = (new ReturnService())->invoiceDetail($quotation, $invoiceId);
 
@@ -322,10 +280,10 @@ class InvoiceService
                 'description' => $quotation->description,
                 'invoice_id' => $invoiceId,
                 'hour' => $quotation->hour,
-                'rate' => $quotation->rate,
+                'rate' => $getQuotationRate->rate,
                 'order' => $quotation->order,
                 'name' => $quotation->name,
-                'total' => $quotation->hour * $quotation->rate,
+                'total' => $quotation->hour * $getQuotationRate->rate,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
