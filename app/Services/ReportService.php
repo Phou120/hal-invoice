@@ -34,6 +34,10 @@ class ReportService
         /** count user and company */
         $countUserCompany = (new ReturnService())->countUserCompany($invoiceQuery);
 
+        if(!$countUserCompany){
+            return response()->json(['msg' => 'ວັນທີບໍ່ມີໃນລະບົບ...'], 500);
+        }
+
         /** output data  */
         $outputData = (new ReturnService())->outputData($foreach, $countUserCompany);
 
@@ -43,53 +47,89 @@ class ReportService
     public function reportQuotation($request)
     {
         // $quotationQuery = Quotation::query();
-        $quotationQuery = Quotation::select('quotations.*');
+        $quotationQuery = DB::table('quotations')
+        ->select(
+            'quotations.*',
+            DB::raw('(SELECT COUNT(id) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details'),
+            DB::raw(
+                '(SELECT SUM(quotationRate.total) FROM quotation_rates as quotationRate
+                    JOIN currencies as currency ON quotationRate.currency_id = currency.id
+                    WHERE quotationRate.quotation_id = quotations.id AND currency.name = "ກີບ") as total_sum_currency_1'
+                ),
+            DB::raw(
+                '(SELECT SUM(quotationRate.total) FROM quotation_rates as quotationRate
+                JOIN currencies as currency ON quotationRate.currency_id = currency.id
+                WHERE quotationRate.quotation_id = quotations.id AND currency.name = "ບາດ") as total_sum_currency_2'
+            ),
+            DB::raw(
+                '(SELECT SUM(quotationRate.total) FROM quotation_rates as quotationRate
+                JOIN currencies as currency ON quotationRate.currency_id = currency.id
+                WHERE quotationRate.quotation_id = quotations.id AND currency.name = "ໂດລາ") as total_sum_currency_3')
+        )
+        ->groupBy('quotations.id');
 
-        // filters date
+        // Apply filters to the query
         $quotationQuery = FilterHelper::quotationFilter($quotationQuery, $request);
 
-        $totalBill = $quotationQuery->count(); // count all Quotations
+        // Get the results as a collection
+        $quotationCollection = $quotationQuery->get();
 
-        //$quotation = $quotationQuery->orderBy('quotations.id', 'asc')->get();
+        // Count the total number of records
+        $totalBill = $quotationCollection->sum('count_details'); // count all Quotations
 
-        $totalPrice = $quotationQuery->sum('total'); // sum all Quotations
+        // Calculate the total price
+        $totalPriceCurrencyKip = $quotationCollection->sum('total_sum_currency_1');
+        $totalPriceCurrencyBaht = $quotationCollection->sum('total_sum_currency_2');
+        $totalPriceCurrencyDollar = $quotationCollection->sum('total_sum_currency_3');
 
-        $statuses = [
-            'CREATED' => 'quotationStatusCreated',
-            'APPROVED' => 'quotationStatusApproved',
-            'INPROGRESS' => 'quotationStatusInprogress',
-            'COMPLETED' => 'quotationStatusCompleted',
-            'CANCELLED' => 'quotationStatusCancelled',
-        ];
+        $statuses = filterHelper::INVOICE_STATUS;
 
         $responseData = [];
 
         /** foreach  */
-        $foreach = (new ReturnService())->foreach($statuses, $quotationQuery, $responseData);
+        // $foreach = (new ReturnService())->foreach($statuses, $quotationQuery, $responseData);
+        foreach ($statuses as $status => $statusVariable) {
+            $statusQuery = (clone $quotationQuery)
+                ->where('status', FilterHelper::INVOICE_STATUS[$status])
+                ->orderBy('quotations.id', 'asc')
+                ->get();
 
+            $statusCount = $statusQuery->count();
+            $statusTotalCurrencyKip = $statusQuery->sum('total_sum_currency_1');
+            $statusTotalCurrencyBaht = $statusQuery->sum('total_sum_currency_2');
+            $statusTotalCurrencyDollar = $statusQuery->sum('total_sum_currency_3');
+
+            $responseData[$statusVariable] = [
+                'amount' => $statusCount,
+                'totalCurrencyKip' => $statusTotalCurrencyKip,
+                'totalCurrencyBaht' => $statusTotalCurrencyBaht,
+                'totalCurrencyDollar' => $statusTotalCurrencyDollar,
+            ];
+        }
+        // dd($foreach);
         /** count user and company */
         $countUserCompany = (new ReturnService())->countUserCompany($quotationQuery);
 
-        $response = (new ReturnService())->response(
-            $totalBill, $totalPrice,
-            $foreach['quotationStatusCreated']['count'],
-            $foreach['quotationStatusCreated']['total'],
-            $foreach['quotationStatusApproved']['count'],
-            $foreach['quotationStatusApproved']['total'],
-            $foreach['quotationStatusInprogress']['count'],
-            $foreach['quotationStatusInprogress']['total'],
-            $foreach['quotationStatusCompleted']['count'],
-            $foreach['quotationStatusCompleted']['total'],
-            $foreach['quotationStatusCancelled']['count'],
-            $foreach['quotationStatusCancelled']['total']
-        );
-
+        if(!$countUserCompany){
+            return response()->json(['msg' => 'ວັນທີບໍ່ມີໃນລະບົບ...'], 500);
+        }
         /** output data */
-        $outputData = (new ReturnService())->outputData($response, $countUserCompany);
+        // $outputData = (new ReturnService())->outputData($response, $countUserCompany);
 
-        return response()->json($outputData, 200);
+        return response()->json([
+            'company_count' => $countUserCompany->company_count,
+            'customer_count' => $countUserCompany->customer_count,
+            'totalBill' => $totalBill,
+            'totalPriceCurrencyKip' => $totalPriceCurrencyKip,
+            'totalPriceCurrencyBaht' => $totalPriceCurrencyBaht,
+            'totalPriceCurrencyDollar' => $totalPriceCurrencyDollar,
+            'created' => $responseData['created'],
+            'approved' => $responseData['approved'],
+            'inprogress' => $responseData['inprogress'],
+            'completed' => $responseData['completed'],
+            'cancelled' => $responseData['cancelled'],
+        ], 200);
     }
-
 
     public function reportReceipt($request)
     {

@@ -7,10 +7,12 @@ use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Helpers\filterHelper;
 use App\Models\InvoiceDetail;
+use App\Models\InvoiceRate;
 use App\Models\QuotationRate;
 use App\Models\PurchaseDetail;
 use App\Models\PurchaseOrder;;
 use App\Models\QuotationDetail;
+use Illuminate\Support\Facades\Auth;
 
 class CalculateService
 {
@@ -103,6 +105,21 @@ class CalculateService
         $sumTotal = ($invoiceDetail - $calculateDiscount) + $calculateTax;
 
         return $sumTotal;
+    }
+
+    /** calculate InvoiceRate */
+    public function calculateInvoice($discount, $sumSubTotal, $id)
+    {
+        $sumTotalTax = $sumSubTotal * filterHelper::TAX / 100;
+        $sumTotalDiscount = $sumSubTotal * $discount / 100;
+        $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
+
+        /** Update Total invoice */
+        $addInvoice = InvoiceRate::find($id);
+        $addInvoice->tax = filterHelper::TAX;
+        $addInvoice->sub_total = $sumSubTotal;
+        $addInvoice->total = $sumTotal;
+        $addInvoice->save();
     }
 
     /** Calculate invoice noQuotation */
@@ -222,6 +239,7 @@ class CalculateService
 
         /** Update Total invoice */
         $editInvoice = Invoice::find($editInvoice['id']);
+        $editInvoice->updated_by = Auth::user('api')->id;
         $editInvoice->tax = filterHelper::TAX;
         $editInvoice->sub_total = $sumSubTotalPrice;
         $editInvoice->total = $sumTotal;

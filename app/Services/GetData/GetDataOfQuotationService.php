@@ -4,6 +4,8 @@ namespace App\Services\GetData;
 
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
+use App\Models\InvoiceDetail;
+use App\Models\QuotationDetail;
 use Illuminate\Support\Facades\Auth;
 
 class GetDataOfQuotationService
@@ -31,4 +33,5 @@ class GetDataOfQuotationService
         $quotation->updated_by = Auth::user('api')->id;
         $quotation->save();
     }
+
 }

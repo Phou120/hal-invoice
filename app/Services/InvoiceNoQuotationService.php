@@ -107,8 +107,10 @@ class InvoiceNoQuotationService
         $editInvoice->discount = $request['discount'];
         $editInvoice->customer_id = $request['customer_id'];
         $editInvoice->currency_id = $request['currency_id'];
-        $editInvoice->updated_by = Auth::user('api')->id;
         $editInvoice->save();
+
+        /**Update Calculate */
+        $this->calculateService->calculateTotalInvoice_ByEdit($request);
 
         return response()->json([
             'error' => false,

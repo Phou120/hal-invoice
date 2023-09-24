@@ -5,12 +5,15 @@ namespace App\Helpers;
 use App\Models\User;
 use App\Models\Company;
 use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\Quotation;
 use App\Models\InvoiceDetail;
+use App\Models\QuotationRate;
 use App\Models\ReceiptDetail;
 use App\Models\QuotationDetail;
-use App\Models\QuotationRate;
 use App\Services\CalculateService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class filterHelper
 {
@@ -24,6 +27,7 @@ class filterHelper
     ];
 
 
+
     /** filter of quotation */
     public static function filterStatus($query, $request)
     {
@@ -34,7 +38,17 @@ class filterHelper
         return $query;
     }
 
-    /** filter id */
+    /** filter invoice id */
+    public static function filterIDInvoice($query, $request)
+    {
+        if ($request->id !== null) {
+            $query->where('invoices.id', $request->id);
+        }
+
+        return $query;
+    }
+
+    /** filter quotation id  */
     public static function filterID($query, $request)
     {
         if ($request->id !== null) {
@@ -44,7 +58,17 @@ class filterHelper
         return $query;
     }
 
-    /** filter name */
+     /** filter invoice name */
+     public static function filterInvoiceName($query, $request)
+     {
+         if ($request->name !== null) {
+             $query->where('invoices.invoice_name', 'LIKE', '%' . $request->name . '%');
+         }
+
+         return $query;
+     }
+
+    /** filter quotation name */
     public static function filterQuotationName($query, $request)
     {
         if ($request->name !== null) {
@@ -57,9 +81,7 @@ class filterHelper
     /** filter start_date and end_date */
     public static function quotationFilter($query, $request)
     {
-        if(!isset($request->start_date) && !isset($request->end_date)) {
-            $query->whereRaw("DATE(quotations.start_date)");
-        } elseif ($request->start_date && $request->end_date) {
+        if($request->start_date && $request->end_date) {
             $query->whereRaw("DATE(quotations.start_date) BETWEEN ? AND ?", [$request->start_date, $request->end_date]);
         }
 
@@ -111,28 +133,28 @@ class filterHelper
     }
 
     /** map data in invoice */
-    public static function mapDataInvoice($listInvoice)
-    {
-        $listInvoice->transform(function($item) {
-            $invoiceDetail = InvoiceDetail::where('invoice_id', $item['id'])
-                ->select(DB::raw("IFNULL(sum(total), 0) as total"))->first()->total;
+    // public static function mapDataInvoice($listInvoice)
+    // {
+    //     $listInvoice->transform(function($item) {
+    //         $invoiceDetail = InvoiceDetail::where('invoice_id', $item['id'])
+    //             ->select(DB::raw("IFNULL(sum(total), 0) as total"))->first()->total;
 
-            $tax = $item['tax'];
-            $discount = $item['discount'];
+    //         $tax = $item['tax'];
+    //         $discount = $item['discount'];
 
-            $sumTotal = (new CalculateService())->calculateTotalInvoice($invoiceDetail, $tax, $discount);
+    //         $sumTotal = (new CalculateService())->calculateTotalInvoice($invoiceDetail, $tax, $discount);
 
-            // Update the item with the calculated total
-            $item['total'] = $sumTotal;
+    //         // Update the item with the calculated total
+    //         $item['total'] = $sumTotal;
 
-             /** loop data */
-            TableHelper::formatDataInvoice($item);
+    //          /** loop data */
+    //         TableHelper::formatDataInvoice($item);
 
-            return $item;
-        });
+    //         return $item;
+    //     });
 
-        return $listInvoice;
-    }
+    //     return $listInvoice;
+    // }
 
 
     // public static function mapDataReceipt($listReceipt)
@@ -240,5 +262,34 @@ class filterHelper
         $editUser->save();
 
         return $editUser;
+    }
+
+    /** update created_by in quotation */
+    public static function updateCreatedByInQuotation($quotationDetail)
+    {
+        $quotation = Quotation::find($quotationDetail['quotation_id']);
+        $quotation->updated_by = Auth::user('api')->id;
+        $quotation->save();
+
+        return $quotation;
+    }
+
+    /** update created_by in invoice */
+    public static function updateCreatedByInInvoice($addDetail)
+    {
+        $invoice = Invoice::find($addDetail['invoice_id']);
+        $invoice->updated_by = Auth::user('api')->id;
+        $invoice->save();
+    }
+
+    public static function updateQuotationDetailStatusCreatedInvoice($deleteDetail)
+    {
+        $quotationDetail = QuotationDetail::find($deleteDetail->quotation_detail_id);
+        
+        if ($quotationDetail) {
+            // Set the status_create_invoice to 0
+            $quotationDetail->status_create_invoice = 0;
+            $quotationDetail->save();
+        }
     }
 }

@@ -233,13 +233,16 @@ class InvoiceRequest extends FormRequest
                                 foreach ($value as $quotation_detail_id) {
                                     // Get the `quotation_id` from the QuotationDetail model
                                     $quotationId = QuotationDetail::where('id', $quotation_detail_id)->value('quotation_id');
-
                                     // Retrieve the invoice_id from the URL parameter
                                     $invoiceID = request()->route('id');
 
                                     // Check if the provided invoice_id matches the invoice with the corresponding quotation_id
                                     $invoice = Invoice::where('id', $invoiceID)->first();
                                     $whereQuotationID = $invoice->where('quotation_id', $quotationId)->first();
+
+                                    if(!$whereQuotationID){
+                                        $fail('id ບໍ່ມີໃນລະບົບ...');
+                                    }
                                     $check = $invoice == $whereQuotationID;
 
                                     if (!$check) {
@@ -247,7 +250,6 @@ class InvoiceRequest extends FormRequest
                                     }
                                 }
                             }
-
                             // }
                             // function ($attribute, $value, $fail) {
                             //     $quotationDetailIds = $value;

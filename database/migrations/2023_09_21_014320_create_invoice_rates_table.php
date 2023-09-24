@@ -13,20 +13,19 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('invoice_details', function (Blueprint $table) {
+        Schema::create('invoice_rates', function (Blueprint $table) {
             $table->id();
-            $table->integer('order');
             $table->unsignedBigInteger('invoice_id');
-            $table->unsignedBigInteger('quotation_detail_id')->nullable();
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->integer('hour')->default(0);
-            // $table->double('rate')->default(0);
-            // $table->double('total')->default(0);
+            $table->unsignedBigInteger('currency_id');
+            $table->double('rate')->default(0);
+            $table->double('sub_total')->default(0);
+            $table->double('discount')->default(0);
+            $table->double('tax')->default(0);
+            $table->double('total')->default(0);
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('invoice_id')->references('id')->on('invoices')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreign('quotation_detail_id')->references('id')->on('quotation_details')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign('currency_id')->references('id')->on('currencies')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 
@@ -37,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('invoice_details');
+        Schema::dropIfExists('invoice_rates');
     }
 };
