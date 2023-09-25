@@ -13,8 +13,6 @@ use App\Models\QuotationDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Services\returnData\ReturnService;
-use App\Services\GetData\GetDataOfQuotationService;
-
 
 class InvoiceService
 {
@@ -130,7 +128,7 @@ class InvoiceService
         $perPage = $request->per_page;
         $user = Auth::user();
 
-        $query = Invoice::select('invoices.*',);
+        $query = Invoice::select('invoices.*');
 
         /** filter start_date and end_date */
         $query = filterHelper::filterDate($query, $request);
@@ -176,8 +174,6 @@ class InvoiceService
 
         // Sort the currencyTotals by rate in descending order and limit to the top three
         $rateCurrencies = collect($currencyTotals)->values()->all();
-
-        // return ['rate' => $rateCurrencies];
 
          // $statuses = ["created", "approved", "inprogress", "completed", "cancelled"];
          $statuses = filterHelper::INVOICE_STATUS;
@@ -245,28 +241,44 @@ class InvoiceService
         //  /** filter Name */
          $query = filterHelper::filterInvoiceName($query, $request);
 
-         if ($user->hasRole(['superadmin', 'admin'])) {
-             $listInvoice = $query->orderBy('invoices.id', 'asc');
-            }
+        if ($user->hasRole(['superadmin', 'admin'])) {
+            $listInvoice = $query->orderBy('invoices.id', 'asc');
 
-            if ($user->hasRole(['company-admin', 'company-user'])) {
-                $listInvoice = $query
-                ->where(function ($query) use ($user) {
-                    $query->where('invoices.created_by', $user->id);
-                })
-                ->orderBy('invoices.id', 'asc');
-            }
-         $getInvoice = $listInvoice->paginate($perPage);
+            // return $countUserCompany;
+            $countUserCompany = $this->returnService->countUserCompany($query);
 
-        /** map data */
-        $mapInvoice = $this->returnService->mapDataInQuotation($getInvoice);
+            $getInvoice = $listInvoice->paginate($perPage);
 
-         /** return data */
-        $responseData = $this->returnService->invoiceData(
-            $totalDetail, $statusTotals, $rateCurrencies, $mapInvoice
-        );
+            /** map data */
+            $mapInvoice = $this->returnService->mapDataInQuotation($getInvoice);
 
-        return response()->json($responseData, 200);
+            /** return data */
+            $responseData = $this->returnService->invoiceDataRole(
+                $totalDetail, $statusTotals, $rateCurrencies, $mapInvoice, $countUserCompany
+            );
+
+            return response()->json($responseData, 200);
+        }
+
+        if ($user->hasRole(['company-admin', 'company-user'])) {
+            $listInvoice = $query
+            ->where(function ($query) use ($user) {
+                $query->where('invoices.created_by', $user->id);
+            })
+            ->orderBy('invoices.id', 'asc');
+
+            $getInvoice = $listInvoice->paginate($perPage);
+
+            /** map data */
+            $mapInvoice = $this->returnService->mapDataInQuotation($getInvoice);
+
+            /** return data */
+            $responseData = $this->returnService->invoiceData(
+                $totalDetail, $statusTotals, $rateCurrencies, $mapInvoice
+            );
+
+            return response()->json($responseData, 200);
+        }
     }
 
     /** list invoice to export PDF */

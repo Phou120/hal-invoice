@@ -81,10 +81,10 @@ class InvoiceNoQuotationRequest extends FormRequest
                     'required',
                         'numeric'
                 ],
-                'rate' => [
-                    'required',
-                        'numeric'
-                ]
+                // 'rate' => [
+                //     'required',
+                //         'numeric'
+                // ]
             ];
         }
 
@@ -117,10 +117,10 @@ class InvoiceNoQuotationRequest extends FormRequest
                     'required',
                         'numeric'
                 ],
-                'rate' => [
-                    'required',
-                        'numeric'
-                ]
+                // 'rate' => [
+                //     'required',
+                //         'numeric'
+                // ]
             ];
         }
 
@@ -167,12 +167,12 @@ class InvoiceNoQuotationRequest extends FormRequest
                             Rule::exists('customers', 'id')
                                 ->whereNull('deleted_at')
                 ],
-                'currency_id' => [
-                    'required',
-                        'numeric',
-                            Rule::exists('currencies', 'id')
-                                ->whereNull('deleted_at')
-                ],
+                // 'currency_id' => [
+                //     'required',
+                //         'numeric',
+                //             Rule::exists('currencies', 'id')
+                //                 ->whereNull('deleted_at')
+                // ],
                 'discount' => [
                     'required',
                         'numeric'
@@ -203,18 +203,18 @@ class InvoiceNoQuotationRequest extends FormRequest
                             Rule::exists('customers', 'id')
                                 ->whereNull('deleted_at')
                 ],
-                'quotation_id' => [
-                    'nullable',
-                        'numeric',
-                            Rule::exists('quotations', 'id')
-                                ->whereNull('deleted_at')
-                ],
-                'currency_id' => [
-                    'required',
-                        'numeric',
-                            Rule::exists('currencies', 'id')
-                                ->whereNull('deleted_at')
-                ],
+                // 'quotation_id' => [
+                //     'nullable',
+                //         'numeric',
+                //             Rule::exists('quotations', 'id')
+                //                 ->whereNull('deleted_at')
+                // ],
+                // 'currency_id' => [
+                //     'required',
+                //         'numeric',
+                //             Rule::exists('currencies', 'id')
+                //                 ->whereNull('deleted_at')
+                // ],
                 'discount' => [
                     'required',
                         'numeric'
@@ -235,10 +235,6 @@ class InvoiceNoQuotationRequest extends FormRequest
                     'required',
                         'numeric'
                 ],
-                'invoice_details.*.rate' => [
-                    'required',
-                        'numeric'
-                ]
             ];
         }
 

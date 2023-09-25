@@ -2,6 +2,7 @@
 
 namespace App\Services\GetData;
 
+use App\Models\Invoice;
 use App\Models\Quotation;
 use App\Traits\ResponseAPI;
 use App\Models\InvoiceDetail;
@@ -27,11 +28,20 @@ class GetDataOfQuotationService
         return $editQuotation;
     }
 
+    /** update updated_by in quotation */
     public function getDataQuotation($quotationDetail)
     {
         $quotation = Quotation::find($quotationDetail->quotation_id);
         $quotation->updated_by = Auth::user('api')->id;
         $quotation->save();
+    }
+
+    /** update updated_by invoice */
+    public function getDataInvoice($invoiceDetail)
+    {
+        $invoice = Invoice::find($invoiceDetail->invoice_id);
+        $invoice->updated_by = Auth::user('api')->id;
+        $invoice->save();
     }
 
 }

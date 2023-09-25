@@ -21,7 +21,7 @@ class ReportService
 
         // filters date
         $invoiceQuery = FilterHelper::filterDate($invoiceQuery, $request);
-
+        
         // Define invoice statuses
         $statuses = (new ReturnService())->status($invoiceQuery);
 

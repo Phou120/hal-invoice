@@ -123,19 +123,19 @@ class CalculateService
     }
 
     /** Calculate invoice noQuotation */
-    public function calculateInvoiceNoQuotation($request, $sumSubTotal, $id) {
+    public function calculateTotalOnQuotationID($request, $sumSubTotal, $id)
+    {
         /** Calculate **/
         $sumTotalTax = $sumSubTotal * filterHelper::TAX / 100;
         $sumTotalDiscount = $sumSubTotal * $request['discount'] / 100;
-        $sumTotal = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
+        $total = ($sumSubTotal - $sumTotalDiscount) + $sumTotalTax;
 
-        /** Update Total invoice */
-        $addInvoice = Invoice::find($id);
-        $addInvoice->tax = filterHelper::TAX;
-        $addInvoice->sub_total = $sumSubTotal;
-        $addInvoice->total = $sumTotal;
-        $addInvoice->save();
-     }
+        /** Update Total Quotation */
+        $addInvoiceRate = InvoiceRate::find($id);
+        $addInvoiceRate->tax = filterHelper::TAX;
+        $addInvoiceRate->total = $total;
+        $addInvoiceRate->save();
+    }
 
     /** calculate quotation */
     public function calculateTotal($request, $sumSubTotal, $id)
@@ -152,9 +152,32 @@ class CalculateService
         $addQuotation->save();
     }
 
+    /** update quotation */
     public function UpdateQuotationRates($getQuotationRate, $request)
     {
         foreach($getQuotationRate as $rate) {
+            // Update the discount in the associated QuotationRate record
+            $discount = $request['discount'];
+
+            /** get subTotal in quotationRate */
+            $subTotal = $rate->sub_total;
+
+            $sumTotalTax = $subTotal * FilterHelper::TAX / 100;
+            $sumTotalDiscount = $subTotal * $discount / 100;
+            $sumTotal = $subTotal - $sumTotalDiscount + $sumTotalTax;
+
+            /** update quotationRate */
+            $rate->sub_total = $subTotal;
+            $rate->discount = $discount;
+            $rate->total = $sumTotal;
+            $rate->save();
+        }
+    }
+
+    /** update invoice no quotation */
+    public function UpdateInvoiceRates($invoiceRate, $request)
+    {
+        foreach($invoiceRate as $rate) {
             // Update the discount in the associated QuotationRate record
             $discount = $request['discount'];
 
@@ -194,6 +217,46 @@ class CalculateService
         }
     }
 
+    /** edit calculate invoice no quotation */
+    public function calculateInvoiceRate($invoiceRates, $hour)
+    {
+        foreach ($invoiceRates as $rate) {
+
+            $rateDiscount = $rate->discount;
+            /** calculate */
+            $newRate = $rate->rate * $hour;
+            $subTotal = $rate->sub_total + $newRate;
+
+            $sumTotalTax = $subTotal * FilterHelper::TAX / 100;
+            $sumTotalDiscount = $subTotal * $rateDiscount / 100;
+            $sumTotal = $subTotal - $sumTotalDiscount + $sumTotalTax;
+
+            /** update quotationRate */
+            $rate->sub_total = $subTotal;
+            $rate->total = $sumTotal;
+            $rate->save();
+        }
+    }
+
+    /** update invoiceDetail no quotation */
+    public function updateInvoiceDetailNoQuotationID($invoiceRates, $sumHour)
+    {
+        foreach ($invoiceRates as $Rate) {
+            $rateDiscount = $Rate->discount;
+            $total = $Rate->rate * $sumHour;
+
+            $subTotal = $total;
+            $sumTotalTax = $subTotal * FilterHelper::TAX / 100;
+            $sumTotalDiscount = $subTotal * $rateDiscount / 100;
+            $sumTotal = $subTotal - $sumTotalDiscount + $sumTotalTax;
+
+            $Rate->sub_total = $subTotal;
+            $Rate->total = $sumTotal;
+            $Rate->save();
+        }
+    }
+
+    /** update quotationDetail */
     public function updateQuotationDetailAndQuotationRate($quotationRates, $quotationID)
     {
         foreach ($quotationRates as $quotationRate) {

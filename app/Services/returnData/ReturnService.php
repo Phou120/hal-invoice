@@ -515,7 +515,7 @@ class ReturnService
         return $invoiceRates;
     }
 
-    /** return quotation data */
+    /** return quotation data to company-admin and company-user */
     public function quotationData(
         $totalDetail, $statusTotals, $rateCurrencies, $listQuotations
     )
@@ -532,6 +532,25 @@ class ReturnService
         ];
     }
 
+    /** return quotation data to role admin and superAdmin */
+    public function quotationDataRole(
+        $totalDetail, $statusTotals, $rateCurrencies, $mapData, $countUserCompany
+    )
+    {
+        return [
+            "company_count" => $countUserCompany->company_count,
+            "customer_count" => $countUserCompany->customer_count,
+            'totalDetail' => $totalDetail,
+            'rate' => $rateCurrencies->values()->all(),
+            'created' => $statusTotals['created'],
+            'approved' => $statusTotals['approved'],
+            'inprogress' => $statusTotals['inprogress'],
+            'completed' => $statusTotals['completed'],
+            'cancelled' => $statusTotals['cancelled'],
+            'listQuotations' => $mapData
+        ];
+    }
+
     public function outputInvoiceData($countDetail,$rateCurrencies, $mapInvoice , $details)
     {
         return [
@@ -542,7 +561,25 @@ class ReturnService
         ];
     }
 
-    /** return invoice data */
+    /** return invoice data to role superadmin and admin */
+    public function invoiceDataRole(
+        $totalDetail, $statusTotals, $rateCurrencies, $mapInvoice, $countUserCompany
+    )
+    {
+        return [
+            "company_count" => $countUserCompany->company_count,
+            "customer_count" => $countUserCompany->customer_count,
+            'totalDetail' => $totalDetail,
+            'rate' => $rateCurrencies,
+            'created' => $statusTotals['created'],
+            'approved' => $statusTotals['approved'],
+            'inprogress' => $statusTotals['inprogress'],
+            'completed' => $statusTotals['completed'],
+            'cancelled' => $statusTotals['cancelled'],
+            'listQuotations' => $mapInvoice
+        ];
+    }
+
     public function invoiceData(
         $totalDetail, $statusTotals, $rateCurrencies, $mapInvoice
     )

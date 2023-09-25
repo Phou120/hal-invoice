@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\User;
 use App\Models\Currency;
 use App\Models\Quotation;
+use App\Models\CompanyUser;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
 use App\Helpers\filterHelper;
@@ -122,8 +124,13 @@ class QuotationService
 
         $quotation->map(function ($item) use (&$currencyTotals, &$totalDetail) {
             // Calculate the count of details associated with the quotation
-            $item->countDetail = QuotationDetail::where('quotation_id', $item->id)->count();
+            $item->countDetail = QuotationDetail::where('quotation_id', $item->id)->get()->count();
+            // dd($totalDetail);
             $totalDetail += $item->countDetail;
+
+            // $countCompany = User::where('id', $item->created_by)->count();
+            // dd($countCompany);
+
             // Retrieve the rates associated with the quotation
             $quotationRates = QuotationRate::where('quotation_id', $item->id)->get();
 
@@ -219,24 +226,44 @@ class QuotationService
         /** filter Name */
         $query = filterHelper::filterQuotationName($query, $request);
 
-         /** check role */
-        $listQuotations = $this->returnService->checkRoleToUsePaginate($query, $user);
+        /** check role superadmin and admin */
+        if ($user->hasRole(['superadmin', 'admin'])) {
+            $getToRole = $query->orderBy('quotations.id', 'asc');
 
-        if (!isset($request->per_page)) {
-            $listQuotations = $listQuotations->get();
-        } else {
-            $listQuotations = $listQuotations->paginate($request->per_page);
+            // return $countUserCompany;
+            $countUserCompany = $this->returnService->countUserCompany($query);
+
+            /** get to paginate */
+            $role = $getToRole->paginate($request->per_page);
+
+            /** loop data */
+            $mapData = $this->returnService->mapDataInQuotation($role);
+
+            /** format data */
+            $responseData = $this->returnService->quotationDataRole(
+                $totalDetail, $statusTotals, $rateCurrencies, $mapData, $countUserCompany
+            );
+
+            return response()->json($responseData, 200);
         }
 
-        /** map data */
-        $listQuotations = $this->returnService->mapDataInQuotation($listQuotations);
+        /** check role company-admin and company-user */
+        if ($user->hasRole(['company-admin', 'company-user'])) {
+            $getToRole = $query
+                ->where(function ($query) use ($user) {
+                    $query->where('quotations.created_by', $user->id);
+                })
+                ->orderBy('quotations.id', 'asc');
 
-        /** return data */
-        $responseData = $this->returnService->quotationData(
-            $totalDetail, $statusTotals, $rateCurrencies, $listQuotations
-        );
+                /** get to paginate */
+            $role = $getToRole->paginate($request->per_page);
 
-        return response()->json($responseData, 200);
+            $responseData = $this->returnService->quotationData(
+                $totalDetail, $statusTotals, $rateCurrencies, $getToRole
+            );
+
+            return response()->json($responseData, 200);
+        }
     }
 
     public function listQuotation($id)
