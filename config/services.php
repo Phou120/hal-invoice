@@ -43,5 +43,8 @@ return [
     'master_path' => [
         'user_profile' => "$public_url/images/User/Profile/",
     ],
+    'node_path' => [
+        'path' => env('NODE_PATH'),
+    ],
 
 ];

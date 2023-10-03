@@ -90,10 +90,6 @@ class QuotationService
                 }
             }
 
-
-            /**Calculate */
-            // $this->calculateService->calculateTotal($request, $sumSubTotal, $addQuotation['id']);
-
         DB::commit();
 
         return response()->json([
@@ -105,177 +101,204 @@ class QuotationService
     /** list quotation */
     public function listQuotations($request)
     {
+        $perPage = $request->per_page;
         $user = Auth::user();
 
-        $query = Quotation::select('quotations.*');
-
-        /** filter start_date and end_date */
-        $query = filterHelper::quotationFilter($query, $request);
-
-        /** check role */
-        $this->returnService->checkRole($query, $user);
-
-        $quotation = $query->groupBy('quotations.id')->orderBy('quotations.id', 'asc')->get();
-
+        // Define an array to store currency totals
         $currencyTotals = [];
 
-        // Calculate the total count of details (if needed)
-        $totalDetail = 0;
+        // Define invoice statuses
+        $statuses = filterHelper::INVOICE_STATUS;
 
-        $quotation->map(function ($item) use (&$currencyTotals, &$totalDetail) {
-            // Calculate the count of details associated with the quotation
-            $item->countDetail = QuotationDetail::where('quotation_id', $item->id)->get()->count();
-            // dd($totalDetail);
-            $totalDetail += $item->countDetail;
+        // Initialize status data
+        $statusData = array_fill_keys($statuses, [
+            'totalDetail' => 0,
+            'rates' => [],
+        ]);
 
-            // $countCompany = User::where('id', $item->created_by)->count();
-            // dd($countCompany);
+        // Get all invoices with date filtering
+        $query = DB::table('quotations')
+            ->select('quotations.*',
+                DB::raw('(SELECT COUNT(id) FROM companies) as company_count'),
+                DB::raw('(SELECT COUNT(id) FROM customers) as customer_count')
+            );
 
-            // Retrieve the rates associated with the quotation
-            $quotationRates = QuotationRate::where('quotation_id', $item->id)->get();
+        /** filter date */
+        FilterHelper::quotationFilter($query, $request);
 
-            // Iterate over the rates and accumulate currency totals
-            $quotationRates->map(function ($rate) use (&$currencyTotals) {
+        $quotations = $query->orderBy('quotations.id', 'asc')->get();
+
+        foreach ($quotations as $quotation) {
+            // Count details for each invoice
+            $quotation->countDetail = DB::table('quotation_details')
+                ->where('quotation_id', $quotation->id)
+                ->whereNull('deleted_at')
+                ->count();
+
+            // Calculate currency totals for the invoice
+            $quotationRates = DB::table('quotation_rates')
+                ->where('quotation_id', $quotation->id)
+                ->get();
+
+                if ($quotation->countDetail === 0) {
+                    continue;
+                }
+
+            foreach ($quotationRates as $rate) {
                 $currencyId = $rate->currency_id;
-                $currency = Currency::find($currencyId);
+                $currency = DB::table('currencies')->find($currencyId);
 
                 if ($currency) {
                     $currencyName = $currency->short_name;
 
-                    if (!isset($currencyTotals[$currencyId])) {
-                        $currencyTotals[$currencyId] = [
+                    // Initialize currency totals if not exists
+                    if (!isset($currencyTotals[$currencyName])) {
+                        $currencyTotals[$currencyName] = [
                             'currency' => $currencyName,
                             'rate' => 0,
                             'total' => 0,
                         ];
                     }
 
-                    $currencyTotals[$currencyId]['rate'] += $rate->rate;
-                    $currencyTotals[$currencyId]['total'] += $rate->total;
-                }
-            });
-        });
-
-        // Sort the currencyTotals by rate in descending order and limit to the top three
-        $rateCurrencies = collect($currencyTotals)->sortByDesc('rate');
-
-        // $statuses = ["created", "approved", "inprogress", "completed", "cancelled"];
-        $statuses = filterHelper::INVOICE_STATUS;
-
-        // Initialize an empty array to store the results
-        $statusTotals = [];
-
-        // Loop through each status
-        foreach ($statuses as $status) {
-            // Filter quotations by status
-            $filteredQuotations = Quotation::where('status', $status);
-
-            /** check role */
-            $this->returnService->checkRole($filteredQuotations, $user);
-
-            $quotationStat = $filteredQuotations->get();
-            // Initialize an array for the rates for the current status
-            $statusRates = [];
-            $countDetail = 0;
-
-            // Loop through each quotation for the current status
-            foreach ($quotationStat as $quotation) {
-                $detailCounts = QuotationDetail::where('quotation_id', $quotation->id)->count();
-                $countDetail += $detailCounts;
-
-                // Retrieve quotation rates for the current quotation
-                $quotationRates = QuotationRate::where('quotation_id', $quotation->id)->get();
-
-                foreach ($quotationRates as $rate) {
-                    $currencyId = $rate->currency_id;
-
-                    // Check if the currency exists
-                    $currency = Currency::find($currencyId);
-                    if ($currency) {
-                        $currencyName = $currency->short_name;
-
-                        // Initialize the currency entry if it doesn't exist
-                        if (!isset($statusRates[$currencyName])) {
-                            $statusRates[$currencyName] = [
-                                'currency' => $currencyName,
-                                'rate' => 0,
-                                'total' => 0,
-                            ];
-                        }
-
-                        // Update the currency entry with rate and total values
-                        $statusRates[$currencyName]['rate'] += $rate->rate;
-                        $statusRates[$currencyName]['total'] += $rate->total;
-                    }
+                    /** sum rate and total in QuotationRate */
+                    $currencyTotals[$currencyName]['rate'] += $rate->rate;
+                    $currencyTotals[$currencyName]['total'] += $rate->total;
                 }
             }
 
-            // Create an array for the current status with totalDetail and rates
-            $statusTotals[$status] = [
-                'totalDetail' => $countDetail,
-                'rates' => array_values($statusRates), // Convert associative array to indexed array
-            ];
+            // Update status totals
+            $invoiceStatus = in_array($quotation->status, $statuses) ? $quotation->status : 'unknown';
+
+            $statusData[$invoiceStatus]['totalDetail'] += $quotation->countDetail;
+
+            // Calculate rates for the current status
+            foreach ($quotationRates as $rate) {
+                $currencyId = $rate->currency_id;
+                $currency = DB::table('currencies')->find($currencyId);
+
+                if ($currency) {
+                    $currencyName = $currency->short_name;
+
+                    // Initialize status totals if not exists
+                    if (!isset($statusData[$invoiceStatus]['rates'][$currencyName])) {
+                        $statusData[$invoiceStatus]['rates'][$currencyName] = [
+                            'currency' => $currencyName,
+                            'rate' => 0,
+                            'total' => 0,
+                        ];
+                    }
+
+                    // Update status totals
+                    $statusData[$invoiceStatus]['rates'][$currencyName]['rate'] += $rate->rate;
+                    $statusData[$invoiceStatus]['rates'][$currencyName]['total'] += $rate->total;
+                }
+            }
         }
 
-        /** query: status */
-        $query = filterHelper::filterStatus($query, $request);
+        foreach ($statuses as $status) {
+            if ($statusData[$status]['totalDetail'] === 0) {
+                $statusData[$status]['rates'] = [];
+            }
+        }
+
+        // Filter out currencies with zero rates for each status
+        foreach ($statusData as &$status) {
+            if (is_array($status) && isset($status['rates'])) {
+                $status['rates'] = array_values(array_filter($status['rates'], function ($currency) {
+                    return is_array($currency) && isset($currency['rate']);
+                }));
+            }
+        }
+
+        // Sort currencyTotals by rate in descending order and limit to the top three
+        $rateCurrencies = collect($currencyTotals)->values()->all();
+
+        // /** filter status */
+        filterHelper::filterStatus($query, $request);
 
         /** filter DI */
-        $query = filterHelper::filterID($query, $request);
+        filterHelper::filterID($query, $request);
 
-        /** filter Name */
-        $query = filterHelper::filterQuotationName($query, $request);
+        //  /** filter Name */
+        filterHelper::filterQuotationName($query, $request);
 
-        /** check role superadmin and admin */
         if ($user->hasRole(['superadmin', 'admin'])) {
-            $getToRole = $query->orderBy('quotations.id', 'asc');
+            // Allow superadmin and admin to see all data
+            $listQuotation = $query->orderBy('quotations.id', 'desc');
 
-            // return $countUserCompany;
-            $countUserCompany = $this->returnService->countUserCompany($query);
+            $getQuotation = $listQuotation->paginate($perPage);
 
-            /** get to paginate */
-            $role = $getToRole->paginate($request->per_page);
+            // Map data
+            $mapQuotation = $this->returnService->mapDataInQuotation($getQuotation);
 
-            /** loop data */
-            $mapData = $this->returnService->mapDataInQuotation($role);
-
-            /** format data */
-            $responseData = $this->returnService->quotationDataRole(
-                $totalDetail, $statusTotals, $rateCurrencies, $mapData, $countUserCompany
-            );
+            /** Merge quotation data of super-admin and admin */
+            $responseData = [
+                'company_count' => $quotations->isEmpty() ? 0 : $quotations[0]->company_count,
+                'customer_count' => $quotations->isEmpty() ? 0 : $quotations[0]->customer_count,
+                'totalDetail' => array_sum(array_column($statusData, 'totalDetail')),
+                'rate' => $rateCurrencies,
+            ] + $statusData + [
+                'listInvoice' => $mapQuotation,
+            ];
 
             return response()->json($responseData, 200);
         }
 
-        /** check role company-admin and company-user */
         if ($user->hasRole(['company-admin', 'company-user'])) {
-            $getToRole = $query
-                ->where(function ($query) use ($user) {
-                    $query->where('quotations.created_by', $user->id);
-                })
-                ->orderBy('quotations.id', 'asc');
+            // Filter invoices for company-admin and company-user based on user ID
+            $listQuotation = $query->where('created_by', $user->id)->orderBy('quotations.id', 'asc');
 
-                /** get to paginate */
-            $role = $getToRole->paginate($request->per_page);
+            $getQuotation = $listQuotation->paginate($perPage);
 
-            $responseData = $this->returnService->quotationData(
-                $totalDetail, $statusTotals, $rateCurrencies, $getToRole
-            );
+            // Map data
+            $mapQuotation = $this->returnService->mapDataInQuotation($getQuotation);
+
+            /** Merge quotation data of user */
+            $responseData = [
+                'totalDetail' => array_sum(array_column($statusData, 'totalDetail')),
+                'rate' => $rateCurrencies,
+            ] + $statusData + [
+                'listInvoice' => $mapQuotation,
+            ];
 
             return response()->json($responseData, 200);
         }
     }
 
-    public function listQuotation($id)
+    public function listQuotation($request)
     {
-        $quotation = Quotation::select([
+        $rateId = $request->id;
+        $currencyId = $request->currency_id;
+
+        $quotationRate = QuotationRate::find($rateId);
+
+        $currency = Currency::find($currencyId);
+
+        if ($currency === null) {
+            return response()->json('currency name not found...', 422); // or handle the error as needed
+        }
+
+        $name = $currency->name;
+
+        $invoice = Quotation::select([
             'quotations.*',
+            'currencies.name as currencyName',
+            'currencies.short_name as currencyShortName',
+            'quotation_rates.sub_total as rateSubTotal',
+            'quotation_rates.discount as rateDiscount',
+            'quotation_rates.tax as rateTax',
+            'quotation_rates.total as rateTotal',
+            'quotation_rates.rate as rate',
             DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_details.quotation_id = quotations.id) as count_details')
-        ])->where('id', $id)
+        ])
+        ->join('quotation_rates', 'quotation_rates.quotation_id', 'quotations.id')
+        ->join('currencies', 'quotation_rates.currency_id', 'currencies.id')
+        ->where('quotation_rates.quotation_id', $quotationRate->quotation_id)
+        ->where('currencies.name', $name)
         ->orderBy('id', 'desc')
         ->first();
 
-        return $quotation->format();
+        return $invoice->format();
     }
 
     /** add quotation detail */
@@ -315,31 +338,25 @@ class QuotationService
         $user = Auth::user();
 
         $itemQuery = DB::table('quotations')->select('quotations.*')->where('quotations.id', $request->id);
-            // ->select('quotations.*', DB::raw('(SELECT COUNT(*) FROM quotation_details WHERE quotation_id = quotations.id) AS count_detail'))
-            // ->leftJoin('customers', 'quotations.customer_id', 'customers.id')
-            // ->leftJoin('users', 'quotations.created_by', 'users.id')
-            // ->where('quotations.id', $request->id);
 
         // Check user roles and apply appropriate conditions
         $this->returnService->checkRole($itemQuery, $user);
-
-        // if ($user->hasRole(['superadmin', 'admin'])) {
-        //     $itemQuery->orderBy('quotations.id', 'asc');
-        // } elseif ($user->hasRole(['company-admin', 'company-user'])) {
-        //     $itemQuery->where('quotations.created_by', $user->id)
-        //         ->orderBy('quotations.id', 'asc');
-        // }
 
         $item = $itemQuery->orderBy('quotations.id', 'asc')->get();
 
         // Get the count of quotation details
         $countDetail = $this->returnService->countDetail($request);
+
         // Get quotation rates for the given quotation
         $quotationRates = $this->returnService->quotationRate($request);
         // Use collections to group by currency and calculate sums
         $currencyTotals = $this->returnService->currencyTotals($quotationRates);
         // Sort the resulting collection by rate in descending order
         $rateCurrencies = $currencyTotals->sortByDesc('rate')->values()->toArray();
+
+        if ($countDetail === 0) {
+            $rateCurrencies = []; // Set rate to an empty array if countDetail is 0
+        }
 
         // Detail query
         $detailsQuery = $this->returnService->detailsQuery($request);
@@ -349,14 +366,16 @@ class QuotationService
         // Get the results
         $details = $detailsQuery->get();
 
-        return response()->json([
+        /** Merge data */
+        $responseData = [
             'countDetail' => $countDetail,
             'rate' => $rateCurrencies,
             'quotation' => $item,
-            'details' => $details,
-        ], 200);
-    }
+            'details' => $details
+        ];
 
+        return response()->json($responseData, 200);
+    }
 
     /** edit quotation */
     public function editQuotation($request)

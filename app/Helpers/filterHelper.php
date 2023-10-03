@@ -26,13 +26,21 @@ class filterHelper
         'CANCELLED' => 'cancelled'
     ];
 
-
-
     /** filter of quotation */
-    public static function filterStatus($query, $request)
+    public static function filterStatus($quotations, $request)
     {
         if ($request->status !== null) {
-            $query->where('status', $request->status);
+            $quotations->where('quotations.status', $request->status);
+        }
+
+        return $quotations;
+    }
+
+    /** filter of invoice */
+    public static function filterStatusOfInvoice($query, $request)
+    {
+        if ($request->status !== null) {
+            $query->where('invoices.status', $request->status);
         }
 
         return $query;
@@ -69,13 +77,13 @@ class filterHelper
      }
 
     /** filter quotation name */
-    public static function filterQuotationName($query, $request)
+    public static function filterQuotationName($listQuotation, $request)
     {
         if ($request->name !== null) {
-            $query->where('quotations.quotation_name', 'LIKE', '%' . $request->name . '%');
+            $listQuotation->where('quotations.quotation_name', 'LIKE', '%' . $request->name . '%');
         }
 
-        return $query;
+        return $listQuotation;
     }
 
     /** filter start_date and end_date */
@@ -285,7 +293,7 @@ class filterHelper
     public static function updateQuotationDetailStatusCreatedInvoice($deleteDetail)
     {
         $quotationDetail = QuotationDetail::find($deleteDetail->quotation_detail_id);
-        
+
         if ($quotationDetail) {
             // Set the status_create_invoice to 0
             $quotationDetail->status_create_invoice = 0;

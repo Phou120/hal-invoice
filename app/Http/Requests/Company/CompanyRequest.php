@@ -116,6 +116,11 @@ class CompanyRequest extends FormRequest
                     Rule::unique('companies', 'email')
                     ->whereNull('deleted_at')
                 ],
+                'password' =>[
+                    'required',
+                        'min:6',
+                            'max:15'
+                ]
                 // 'logo' =>[
                 //     'nullable',
                 //     'mimes:jpg,png,jpeg,gif',
@@ -148,6 +153,10 @@ class CompanyRequest extends FormRequest
             'id.required' => 'ກະລຸນາປ້ອນ ID ກ່ອນ...',
             'id.numeric' => 'ID ຄວນເປັນໂຕເລກ...',
             'id.exists' => 'ID ບໍ່ມີໃນລະບົບ...',
+
+            'password.required' => 'ກະລຸນາປ້ອນລະຫັດກ່ອນ',
+            'password.max' => 'ອີເມວບໍ່ຄວນເກີນ 15 ໂຕອັກສອນ...',
+            'password.min' => 'ອີເມວບໍ່ຄວນສັ້ນກວ່າ 6 ໂຕອັກສອນ...',
         ];
     }
 }

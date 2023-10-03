@@ -257,22 +257,40 @@ class CalculateService
     }
 
     /** update quotationDetail */
-    public function updateQuotationDetailAndQuotationRate($quotationRates, $quotationID)
+    public function updateQuotationDetailAndQuotationRate($invoiceRate, $sumHour)
     {
-        foreach ($quotationRates as $quotationRate) {
-            $rateDiscount = $quotationRate->discount;
-            $total = $quotationRate->rate * $quotationID;
+        foreach ($invoiceRate as $Rate) {
+            $rateDiscount = $Rate->discount;
+            $total = $Rate->rate * $sumHour;
 
             $subTotal = $total;
             $sumTotalTax = $subTotal * FilterHelper::TAX / 100;
             $sumTotalDiscount = $subTotal * $rateDiscount / 100;
             $sumTotal = $subTotal - $sumTotalDiscount + $sumTotalTax;
 
-            $quotationRate->sub_total = $subTotal;
-            $quotationRate->total = $sumTotal;
-            $quotationRate->save();
+            $Rate->sub_total = $subTotal;
+            $Rate->total = $sumTotal;
+            $Rate->save();
         }
     }
+
+     /** update quotationDetail */
+     public function updateInvoiceDetailAndInvoiceRate($quotationRates, $quotationID)
+     {
+         foreach ($quotationRates as $quotationRate) {
+             $rateDiscount = $quotationRate->discount;
+             $total = $quotationRate->rate * $quotationID;
+
+             $subTotal = $total;
+             $sumTotalTax = $subTotal * FilterHelper::TAX / 100;
+             $sumTotalDiscount = $subTotal * $rateDiscount / 100;
+             $sumTotal = $subTotal - $sumTotalDiscount + $sumTotalTax;
+
+             $quotationRate->sub_total = $subTotal;
+             $quotationRate->total = $sumTotal;
+             $quotationRate->save();
+         }
+     }
 
     // public function calculateTotal_ByEdits($quotation)
     // {

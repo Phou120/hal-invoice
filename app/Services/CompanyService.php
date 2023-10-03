@@ -2,9 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\Role;
+use App\Models\User;
 use App\Models\Company;
 use App\Traits\ResponseAPI;
 use App\Helpers\filterHelper;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Helpers\CreateFolderImageHelper;
 
@@ -15,14 +19,29 @@ class CompanyService
     /** add company */
     public function addCompany($request)
     {
-        $addCompany = new Company();
-        $addCompany->company_name = $request['company_name'];
-        $addCompany->phone = $request['phone'];
-        $addCompany->email = $request['email'];
-        $addCompany->address = $request['address'];
-        $addCompany->logo = CreateFolderImageHelper::saveLogoCompany($request);
+        DB::beginTransaction();
 
-        $addCompany->save();
+            $addCompany = new Company();
+            $addCompany->company_name = $request['company_name'];
+            $addCompany->phone = $request['phone'];
+            $addCompany->email = $request['email'];
+            $addCompany->address = $request['address'];
+            $addCompany->logo = CreateFolderImageHelper::saveLogoCompany($request);
+            $addCompany->save();
+
+            // Create a new User instance and populate its fields
+            $addUser = new User();
+            $addUser->name = $addCompany['company_name']; // Assuming you have 'name' in your request
+            $addUser->email = $addCompany['email'];
+            $addUser->tel = $addCompany['phone'];
+            $addUser->password = Hash::make($request['password']);
+            $addUser->save();
+
+            // where column name of JobSeeker
+            $role = Role::where('name', '=', 'company-admin')->first();
+            $addUser->attachRoles([$role]);
+
+        DB::commit();
 
         return response()->json([
             'error' => false,

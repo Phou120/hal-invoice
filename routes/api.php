@@ -219,7 +219,7 @@ Route::group([
 
     /** Filter Module Title */
     Route::get('filter-module-title/{id}', [ModuleTitleController::class, 'filterModuleTitle'])->name('filter.module.title');
-    
+
     /** CRUD quotation type */
     Route::get('list-quotation-types', [QuotationTypeController::class, 'listQuotationTypes'])->middleware('role:superadmin|admin');
     Route::post('create-quotation-type', [QuotationTypeController::class, 'createQuotationType'])->name('create.quotation.type')->middleware('role:superadmin|admin');

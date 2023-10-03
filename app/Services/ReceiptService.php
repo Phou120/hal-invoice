@@ -4,12 +4,14 @@ namespace App\Services;
 
 use App\Models\Invoice;
 use App\Models\Receipt;
+use App\Models\InvoiceRate;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
 use App\Helpers\filterHelper;
 use App\Models\InvoiceDetail;
 use App\Models\ReceiptDetail;
 use App\Helpers\generateHelper;
+use App\Models\Currency;
 use App\Services\CalculateService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -20,55 +22,43 @@ class ReceiptService
     use ResponseAPI;
 
     public $calculateService;
+    public $returnService;
 
-    public function __construct(CalculateService $calculateService)
+    public function __construct(
+        CalculateService $calculateService,
+        ReturnService $returnService
+    )
     {
         $this->calculateService = $calculateService;
+        $this->returnService = $returnService;
     }
 
     /** ບັນທຶກໃບຮັບເງິນ */
     public function addReceipt($request)
     {
-        $getInvoice = Invoice::find($request['invoice_id']);
-        if(isset($getInvoice)){
-            $getInvoiceDetail = InvoiceDetail::select(
-                'invoice_details.*'
-            )
-            ->join('invoices as invoice', 'invoice_details.invoice_id', 'invoice.id')
-            ->where('invoice_details.invoice_id', $getInvoice['id'])
-            ->where('status', filterHelper::INVOICE_STATUS['COMPLETED'])
-            ->get();
-
-            if(count($getInvoiceDetail) > 0) {
+        $getInvoiceRate = InvoiceRate::find($request['invoice_rate_id']);
+        if($getInvoiceRate){
+            $getInvoice = Invoice::where('id', $getInvoiceRate->invoice_id)->first();
+            $invoice = $getInvoice->where('status', filterHelper::INVOICE_STATUS['COMPLETED'])->first();
+            if(isset($invoice)){
 
                 DB::beginTransaction();
 
                     $addReceipt = new Receipt();
-                    $addReceipt->invoice_id = $getInvoice['id'];
+                    $addReceipt->invoice_rate_id = $getInvoiceRate['id'];
                     $addReceipt->receipt_number = generateHelper::generateReceiptNumber('RN-', 8);
-                    // $addReceipt->customer_id = $getInvoice['customer_id'];
-                    // $addReceipt->currency_id = $getInvoice['currency_id'];
                     $addReceipt->receipt_name = $request['receipt_name'];
                     $addReceipt->receipt_date = $request['receipt_date'];
                     $addReceipt->created_by = Auth::user('api')->id;
-                    $addReceipt->discount = $getInvoice['discount'];
-                    $addReceipt->tax = $getInvoice['tax'];
+                    $addReceipt->discount = $getInvoiceRate['discount'];
+                    $addReceipt->tax = $getInvoiceRate['tax'];
                     $addReceipt->note = $request['note'];
-                    $addReceipt->sub_total = $getInvoice['sub_total'];
-                    $addReceipt->total = $getInvoice['total'];
+                    $addReceipt->sub_total = $getInvoiceRate['sub_total'];
+                    $addReceipt->total = $getInvoiceRate['total'];
                     $addReceipt->save();
 
-                    // foreach($getInvoiceDetail as $item){
-                    //     $addDetail = new ReceiptDetail();
-                    //     $addDetail->receipt_id = $addReceipt['id'];
-                    //     $addDetail->order = $item['order'];
-                    //     $addDetail->name = $item['name'];
-                    //     $addDetail->description = $item['description'];
-                    //     $addDetail->amount = $item['amount'];
-                    //     $addDetail->price = $item['price'];
-                    //     $addDetail->total = $item['total'];
-                    //     $addDetail->save();
-                    // }
+                    $getInvoiceRate->status_create_receipt = 1;
+                    $getInvoiceRate->save();
 
                 DB::commit();
 
@@ -77,15 +67,14 @@ class ReceiptService
                     'msg' => 'ສຳເລັດແລ້ວ'
                 ], 200);
             }
-
             return response()->json([
-                'msg' => 'ສະຖານະຂອງໃບເກັບເງິນຄວນເປັນ completed ພວກເຮົາຈື່ງສາມາດອອກໃບຮັບເງິນໄດ້...'
+                    'msg' => 'ສະຖານະຂອງໃບເກັບເງິນຄວນເປັນ completed ພວກເຮົາຈື່ງສາມາດອອກໃບຮັບເງິນໄດ້...'
             ], 422);
         }
 
         return response()->json([
             'error' => true,
-            'msg' => 'ຜິດພາດ'
+            'msg' => 'Id not found...'
         ], 500);
     }
 
@@ -95,25 +84,84 @@ class ReceiptService
         $user = Auth::user();
         $perPage = $request->per_page;
 
-        $query = DB::table('receipts')->select('receipts.*')->whereNull('deleted_at');
+        $query = Receipt::select('receipts.*', 'currencies.name as currency_name')
+        ->join('invoice_rates', 'receipts.invoice_rate_id', 'invoice_rates.id')
+        ->join('currencies', 'invoice_rates.currency_id', 'currencies.id');
 
         /** filter date */
-        $query = filterHelper::receiptFilter($query, $request);
+        FilterHelper::receiptFilter($query, $request);
 
-        if ($user->hasRole(['superadmin', 'admin'])) {
-            $query->orderBy('receipts.id', 'asc');
-        } elseif ($user->hasRole(['company-admin', 'company-user'])) {
-            $query->where('receipts.created_by', $user->id)->orderBy('receipts.id', 'asc');
+        $receipts = $query->orderBy('receipts.id', 'asc')->get();
+
+        // Initialize currency totals array
+        $currencyTotals = [];
+
+        foreach ($receipts as $item) { // Use get() to fetch the results of the query
+            // Calculate currency totals for the invoice
+            $invoiceRates = InvoiceRate::where('id', $item->invoice_rate_id)->get();
+            // return $invoiceRates;
+
+            foreach ($invoiceRates as $rate) {
+                $currencyId = $rate->currency_id;
+                $currency = Currency::find($currencyId);
+                // return $currency;
+
+                if ($currency) {
+                    $currencyShortName = $currency->short_name;
+
+                    // Initialize currency totals if not exists
+                    if (!isset($currencyTotals[$currencyShortName])) {
+                        $currencyTotals[$currencyShortName] = [
+                            'currency' => $currencyShortName,
+                            'rate' => 0,
+                            'total' => 0,
+                        ];
+                    }
+
+                    // Use the currencyName variable to update the totals
+                    $currencyTotals[$currencyShortName]['rate'] += $rate->rate;
+                    $currencyTotals[$currencyShortName]['total'] += $rate->total;
+                }
+            }
         }
 
-        $listReceipt = $query->paginate($perPage);
+        // Convert currencyTotals array to a list
+        $rateCurrencies = array_values($currencyTotals);
 
-        $totalBill = $listReceipt->total(); // count all invoices
-        $totalPrice = $listReceipt->sum('total'); // sum total of invoices all
+        if ($user->hasRole(['superadmin', 'admin'])) {
+            // Superadmins and admins can see all receipts.
+            $query->orderBy('receipts.id', 'asc');
+            $countReceipt = $query->count();
 
-        $response = (new ReturnService())->returnDataReceipt($totalBill, $totalPrice, $listReceipt);
+            $listReceipt = $query->paginate($perPage);
 
-        return response()->json($response, 200);
+            /** Merge data */
+            $response = [
+                'totalReceipt' => $countReceipt,
+                'rate' => $rateCurrencies,
+                'listReceipt' => $listReceipt
+            ];
+
+            return response()->json($response, 200);
+        }
+
+        if ($user->hasRole(['company-admin', 'company-user'])) {
+            // Company-admin and company-user can only see their own receipts.
+            $query->where('receipts.created_by', $user->id)->orderBy('receipts.id', 'asc');
+
+            $countReceipt = $query->count();
+
+            $listReceipt = $query->paginate($perPage);
+
+            /** Merge data */
+            $response = [
+                'totalReceipt' => $countReceipt,
+                'rate' => $rateCurrencies,
+                'listReceipt' => $listReceipt
+            ];
+
+            return response()->json($response, 200);
+        }
     }
 
     /** ດຶງຂໍມູນລາຍລະອຽດໃບຮັບເງິນ */
@@ -160,12 +208,12 @@ class ReceiptService
                 'msg' => 'ສຳເລັດແລ້ວ'
             ], 200);
 
-        } else {
-            return response()->json([
-                'error' => true,
-                'msg' => 'Receipt not found'
-            ], 404);
         }
+
+        return response()->json([
+            'error' => true,
+            'msg' => 'Id not found...'
+        ], 404);
     }
 
     /** ລຶບໃບຮັບເງິນ */
@@ -179,10 +227,13 @@ class ReceiptService
                 $receipt = Receipt::findOrFail($request['id']);
                 $receipt->updated_by = Auth::user('api')->id;
                 $receipt->save();
+
                 $receipt->delete();
 
-                // Delete the ReceiptDetail
-                // ReceiptDetail::where('receipt_id', $request['id'])->delete();
+                /** update invoice_rate status_create_receipt */
+                $updateInvoiceRate = InvoiceRate::find($receipt->invoice_rate_id);
+                $updateInvoiceRate->status_create_receipt = 0;
+                $updateInvoiceRate->save();
 
             DB::commit();
 

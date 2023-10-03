@@ -22,6 +22,7 @@ return new class extends Migration
             $table->double('discount')->default(0);
             $table->double('tax')->default(0);
             $table->double('total')->default(0);
+            $table->boolean('status_create_receipt')->default(0);
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('invoice_id')->references('id')->on('invoices')->onUpdate('cascade')->onDelete('cascade');

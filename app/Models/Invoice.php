@@ -20,19 +20,24 @@ class Invoice extends Model
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'note' => $this->note,
-            'sub_total' => $this->sub_total,
-            'discount' => $this->discount,
-            'tax' => $this->tax,
-            'total' => $this->total,
+            'currencyName' => $this->currencyName,
+            'currencyShortName' => $this->currencyShortName,
+            'rate' => $this->rate,
+            'rateSubTotal' => $this->rateSubTotal,
+            'rateDiscount' => $this->rateDiscount,
+            'rateTax' => $this->rateTax,
+            'rateTotal' => $this->rateTotal,
             'count_details' => $this->count_details,
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'quotation' => $this->quotation,
             'customer' => $this->customer,
-            'currency' => $this->currency,
             'created_by' => $this->createdBy,
             'company' => $this->createdBy->company_user->company,
+            // 'invoice_rates' => $this->invoice_rates,
+            // // 'currency' => $this->invoice_rates->first()->currency,
+            // 'currency' => $this->invoice_rates->pluck('currency')->toArray(),
             'details' => $this->invoice_details
         ];
     }
@@ -46,9 +51,9 @@ class Invoice extends Model
         return $this->belongsTo(customer::class);
     }
 
-    public function currency() {
-        return $this->belongsTo(currency::class);
-    }
+    // public function currency() {
+    //     return $this->belongsTo(currency::class);
+    // }
 
     public function createdBy() {
         return $this->belongsTo(User::class, 'created_by');
@@ -58,5 +63,9 @@ class Invoice extends Model
     {
         return $this->hasMany(InvoiceDetail::class);
     }
+
+    // public function invoice_rates(){
+    //     return $this->hasMany(InvoiceRate::class);
+    // }
 
 }

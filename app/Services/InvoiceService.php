@@ -128,166 +128,198 @@ class InvoiceService
         $perPage = $request->per_page;
         $user = Auth::user();
 
-        $query = Invoice::select('invoices.*');
-
-        /** filter start_date and end_date */
-        $query = filterHelper::filterDate($query, $request);
-
-        /** check role in invoice */
-        $this->returnService->checkRoleInvoice($query, $user);
-
-        $invoice = $query->groupBy('invoices.id')->orderBy('invoices.id', 'asc')->get();
-
+        // Define an array to store currency totals
         $currencyTotals = [];
 
-        // Calculate the total count of details (if needed)
-        $totalDetail = 0;
+        // Define invoice statuses
+        $statuses = filterHelper::INVOICE_STATUS;
 
-        $invoice->map(function ($item) use (&$currencyTotals, &$totalDetail) {
-            // Calculate the count of details associated with the quotation
-            $item->countDetail = InvoiceDetail::where('invoice_id', $item->id)->count();
-            $totalDetail += $item->countDetail;
-            // Retrieve the rates associated with the quotation
-            $invoiceRates = InvoiceRate::where('invoice_id', $item->id)->get();
+        // Initialize status data
+        $statusData = array_fill_keys($statuses, [
+            'totalDetail' => 0,
+            'rates' => [],
+        ]);
 
-            // Iterate over the rates and accumulate currency totals
-            $invoiceRates->map(function ($rate) use (&$currencyTotals) {
+        // Get all invoices with date filtering
+        $query = DB::table('invoices')
+            ->select('invoices.*',
+                DB::raw('(SELECT COUNT(id) FROM companies) as company_count'),
+                DB::raw('(SELECT COUNT(id) FROM customers) as customer_count')
+            );
+
+        /** filter date */
+        FilterHelper::filterDate($query, $request);
+
+        $invoices = $query ->orderBy('invoices.id', 'asc')->get();
+
+        foreach ($invoices as $invoice) {
+            // Count details for each invoice
+            $invoice->countDetail = DB::table('invoice_details')
+                ->where('invoice_id', $invoice->id)
+                ->whereNull('deleted_at')
+                ->count();
+
+            // Calculate currency totals for the invoice
+            $invoiceRates = DB::table('invoice_rates')
+                ->where('invoice_id', $invoice->id)
+                ->get();
+
+                if ($invoice->countDetail === 0) {
+                    continue;
+                }
+
+            foreach ($invoiceRates as $rate) {
                 $currencyId = $rate->currency_id;
-                $currency = Currency::find($currencyId);
+                $currency = DB::table('currencies')->find($currencyId);
 
                 if ($currency) {
                     $currencyName = $currency->short_name;
 
-                    if (!isset($currencyTotals[$currencyId])) {
-                        $currencyTotals[$currencyId] = [
+                    // Initialize currency totals if not exists
+                    if (!isset($currencyTotals[$currencyName])) {
+                        $currencyTotals[$currencyName] = [
                             'currency' => $currencyName,
                             'rate' => 0,
                             'total' => 0,
                         ];
                     }
 
-                    $currencyTotals[$currencyId]['rate'] += $rate->rate;
-                    $currencyTotals[$currencyId]['total'] += $rate->total;
+                    $currencyTotals[$currencyName]['rate'] += $rate->rate;
+                    $currencyTotals[$currencyName]['total'] += $rate->total;
                 }
-            });
-        });
+            }
 
-        // Sort the currencyTotals by rate in descending order and limit to the top three
+            // Update status totals
+            $invoiceStatus = in_array($invoice->status, $statuses) ? $invoice->status : 'unknown';
+
+            $statusData[$invoiceStatus]['totalDetail'] += $invoice->countDetail;
+
+            // Calculate rates for the current status
+            foreach ($invoiceRates as $rate) {
+                $currencyId = $rate->currency_id;
+                $currency = DB::table('currencies')->find($currencyId);
+
+                if ($currency) {
+                    $currencyName = $currency->short_name;
+
+                    // Initialize status totals if not exists
+                    if (!isset($statusData[$invoiceStatus]['rates'][$currencyName])) {
+                        $statusData[$invoiceStatus]['rates'][$currencyName] = [
+                            'currency' => $currencyName,
+                            'rate' => 0,
+                            'total' => 0,
+                        ];
+                    }
+
+                    // Update status totals
+                    $statusData[$invoiceStatus]['rates'][$currencyName]['rate'] += $rate->rate;
+                    $statusData[$invoiceStatus]['rates'][$currencyName]['total'] += $rate->total;
+                }
+            }
+        }
+
+        foreach ($statuses as $status) {
+            if ($statusData[$status]['totalDetail'] === 0) {
+                $statusData[$status]['rates'] = [];
+            }
+        }
+
+        // Filter out currencies with zero rates for each status
+        foreach ($statusData as &$status) {
+            if (is_array($status) && isset($status['rates'])) {
+                $status['rates'] = array_values(array_filter($status['rates'], function ($currency) {
+                    return is_array($currency) && isset($currency['rate']);
+                }));
+            }
+        }
+
+        // Sort currencyTotals by rate in descending order and limit to the top three
         $rateCurrencies = collect($currencyTotals)->values()->all();
 
-         // $statuses = ["created", "approved", "inprogress", "completed", "cancelled"];
-         $statuses = filterHelper::INVOICE_STATUS;
+        /** filter status */
+        filterHelper::filterStatusOfInvoice($query, $request);
 
-         // Initialize an empty array to store the results
-         $statusTotals = [];
-
-         // Loop through each status
-         foreach ($statuses as $status) {
-             // Filter quotations by status
-             $invoiceStatus = Invoice::where('status', $status);
-
-             /** check role */
-             $this->returnService->checkRoleInvoice($invoiceStatus, $user);
-
-             $invoice = $invoiceStatus->get();
-             // Initialize an array for the rates for the current status
-             $statusRates = [];
-             $countDetail = 0;
-
-             // Loop through each quotation for the current status
-             foreach ($invoice as $item) {
-                 $detailCounts = InvoiceDetail::where('invoice_id', $item->id)->count();
-                 $countDetail += $detailCounts;
-
-                 // Retrieve quotation rates for the current quotation
-                 $invoiceRates = InvoiceRate::where('invoice_id', $item->id)->get();
-
-                 foreach ($invoiceRates as $rate) {
-                     $currencyId = $rate->currency_id;
-
-                     // Check if the currency exists
-                     $currency = Currency::find($currencyId);
-                     if ($currency) {
-                         $currencyName = $currency->short_name;
-
-                         // Initialize the currency entry if it doesn't exist
-                         if (!isset($statusRates[$currencyName])) {
-                             $statusRates[$currencyName] = [
-                                 'currency' => $currencyName,
-                                 'rate' => 0,
-                                 'total' => 0,
-                             ];
-                         }
-                         // Update the currency entry with rate and total values
-                         $statusRates[$currencyName]['rate'] += $rate->rate;
-                         $statusRates[$currencyName]['total'] += $rate->total;
-                     }
-                 }
-             }
-
-             // Create an array for the current status with totalDetail and rates
-             $statusTotals[$status] = [
-                 'totalDetail' => $countDetail,
-                 'rates' => array_values($statusRates), // Convert associative array to indexed array
-             ];
-         }
-
-         /** filter status */
-         $query = filterHelper::filterStatus($query, $request);
-
-         /** filter DI */
-         $query = filterHelper::filterIDInvoice($query, $request);
+        /** filter DI */
+        filterHelper::filterIDInvoice($query, $request);
 
         //  /** filter Name */
-         $query = filterHelper::filterInvoiceName($query, $request);
+        filterHelper::filterInvoiceName($query, $request);
 
         if ($user->hasRole(['superadmin', 'admin'])) {
-            $listInvoice = $query->orderBy('invoices.id', 'asc');
+            // Allow superadmin and admin to see all data
+            $listInvoice = $query->orderBy('invoices.id', 'desc');
 
-            // return $countUserCompany;
-            $countUserCompany = $this->returnService->countUserCompany($query);
-
+            /** do paginate */
             $getInvoice = $listInvoice->paginate($perPage);
 
-            /** map data */
+            // Map data
             $mapInvoice = $this->returnService->mapDataInQuotation($getInvoice);
 
-            /** return data */
-            $responseData = $this->returnService->invoiceDataRole(
-                $totalDetail, $statusTotals, $rateCurrencies, $mapInvoice, $countUserCompany
-            );
+            /** merge invoice data of super-admin and admin */
+            $responseData = [
+                'company_count' => $invoices->isEmpty() ? 0 : $invoices[0]->company_count,
+                'customer_count' => $invoices->isEmpty() ? 0 : $invoices[0]->customer_count,
+                'totalDetail' => array_sum(array_column($statusData, 'totalDetail')),
+                'rate' => $rateCurrencies,
+            ] + $statusData + [
+                'listInvoice' => $mapInvoice,
+            ];
 
             return response()->json($responseData, 200);
         }
 
         if ($user->hasRole(['company-admin', 'company-user'])) {
-            $listInvoice = $query
-            ->where(function ($query) use ($user) {
-                $query->where('invoices.created_by', $user->id);
-            })
-            ->orderBy('invoices.id', 'asc');
+            // Filter invoices for company-admin and company-user based on user ID
+            $listInvoice = $query->where('created_by', $user->id)->orderBy('invoices.id', 'asc');
 
             $getInvoice = $listInvoice->paginate($perPage);
 
-            /** map data */
+            // Map data
             $mapInvoice = $this->returnService->mapDataInQuotation($getInvoice);
 
-            /** return data */
-            $responseData = $this->returnService->invoiceData(
-                $totalDetail, $statusTotals, $rateCurrencies, $mapInvoice
-            );
+            /** merge invoice data of user */
+            $responseData = [
+                'totalDetail' => array_sum(array_column($statusData, 'totalDetail')),
+                'rate' => $rateCurrencies,
+            ] + $statusData + [
+                'listInvoice' => $mapInvoice,
+            ];
 
             return response()->json($responseData, 200);
         }
     }
 
     /** list invoice to export PDF */
-    public function listInvoice($id)
+    public function listInvoice($request)
     {
+        $rateId = $request->id;
+        $currencyId = $request->currency_id;
+
+        $invoiceRate = InvoiceRate::find($rateId);
+
+        $currency = Currency::find($currencyId);
+
+        if ($currency === null) {
+            return response()->json('currency name not found...', 422); // or handle the error as needed
+        }
+
+        $name = $currency->name;
+
         $invoice = Invoice::select([
             'invoices.*',
+            'currencies.name as currencyName',
+            'currencies.short_name as currencyShortName',
+            'invoice_rates.sub_total as rateSubTotal',
+            'invoice_rates.discount as rateDiscount',
+            'invoice_rates.tax as rateTax',
+            'invoice_rates.total as rateTotal',
+            'invoice_rates.rate as rate',
             DB::raw('(SELECT COUNT(*) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as count_details')
-        ])->where('id', $id)
+        ])
+        ->join('invoice_rates', 'invoice_rates.invoice_id', 'invoices.id')
+        ->join('currencies', 'invoice_rates.currency_id', 'currencies.id')
+        ->where('invoice_rates.invoice_id', $invoiceRate->invoice_id)
+        ->where('currencies.name', $name)
         ->orderBy('id', 'desc')
         ->first();
 
@@ -321,9 +353,6 @@ class InvoiceService
                 $addDetail->quotation_detail_id = $detailId; // Assign the current ID
 
                 $addDetail->save();
-                // return $addDetail;
-
-                // $totalHours += $quotationDetail->hour;
 
                 // Update quotation_detail status_create_invoice
                 $quotationDetail->status_create_invoice = 1;
@@ -406,8 +435,13 @@ class InvoiceService
         // Get the results
         $details = $detailsQuery->get();
 
-        /** sum data */
-       $response = $this->returnService->outputInvoiceData($countDetail,$rateCurrencies, $mapInvoice , $details);
+        // merge data
+        $response = [
+            'countDetail' => $countDetail,
+            'rate' => $rateCurrencies,
+            'invoice' => $mapInvoice,
+            'details' => $details,
+        ];
 
        return response()->json($response, 200);
     }
@@ -463,15 +497,27 @@ class InvoiceService
 
             // Find the InvoiceDetail by ID
             $deleteDetail = InvoiceDetail::findOrFail($request['id']);
+            $invoiceId = $deleteDetail->invoice_id;
 
-            // Update the createdBy in the InvoiceDetail
-            filterHelper::updateCreatedByInInvoice($deleteDetail);
+            // Find the Invoice by ID
+            $invoice = Invoice::find($invoiceId);
+            $invoice->updated_by = Auth::user('api')->id;
+            $invoice->save();
 
             // Delete the InvoiceDetail
             $deleteDetail->delete();
 
-            /** update quotation_detail status create invoice */
+            // Update the quotation_detail status to indicate that the invoice is created
             filterHelper::updateQuotationDetailStatusCreatedInvoice($deleteDetail);
+
+            // Calculate the sum of hours for the invoice
+            $sumHour = InvoiceDetail::where('invoice_id', $invoiceId)->sum('hour');
+
+            // Get the QuotationRates related to this invoice
+            $invoiceRate = InvoiceRate::where('invoice_id', $invoiceId)->get();
+
+            // Calculate and update quotation details and rates
+            $this->calculateService->updateQuotationDetailAndQuotationRate($invoiceRate, $sumHour);
 
             DB::commit();
 
@@ -496,19 +542,24 @@ class InvoiceService
 
             DB::beginTransaction();
 
+            /** delete invoice */
                 $invoice = Invoice::findOrFail($request['id']);
                 $invoice->updated_by = Auth::user('api')->id;
                 $invoice->save();
 
                 /** delete invoiceDetail */
-                $invoiceDetail = InvoiceDetail::where('invoice_id', $request['id'])->get();
-
+                $invoiceDetail = InvoiceDetail::where('invoice_id', $invoice['id'])->get();
                 foreach ($invoiceDetail as $detail) {
-                    /** update quotation_detail status create invoice */
-                    filterHelper::updateQuotationDetailStatusCreatedInvoice($detail);
-
-                    $detail->delete();
+                    if($detail){
+                        // dd('dd');
+                        /** update quotation_detail status create invoice */
+                        filterHelper::updateQuotationDetailStatusCreatedInvoice($detail);
+                        $detail->delete();
+                    }
                 }
+
+                /** delete invoice_rate */
+                InvoiceRate::where('invoice_id', $invoice['id'])->delete();
 
                 $invoice->delete();
 

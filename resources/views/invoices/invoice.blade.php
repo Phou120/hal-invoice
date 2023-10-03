@@ -213,7 +213,7 @@
                         <p class="sub-title">DUE DATE</p>
                         <p class="label">{{ \Carbon\Carbon::parse($data['end_date'])->format('Y-m-d') }}</p>
                         <p class="sub-title">BALANCE DUE</p>
-                        <p>{{ $data['currency']['short_name'] }} {{ number_format($data['total'], 2) }}</p>
+                        <p>{{ $data['currencyShortName'] }} {{ number_format($data['rateTotal'], 2) }}</p>
                     </div>
                 </div>
               </div>
@@ -260,9 +260,12 @@
                                 <div class="desc-title"> {{ $detail['name'] }}</div>
                                 <div class="desc"> {!!$detail->description!!}</div>
                                 </td>
-                                <td>{{ $data['currency']['short_name'] }} {{ number_format($detail['rate'], 2) }}</td>
+                                @php
+                                    $subTotal = $detail['hour'] * $data['rate'];
+                                @endphp
+                                <td>{{ $data['currencyShortName'] }} {{ number_format($data['rate'], 2) }}</td>
                                 <td>{{ $detail['hour'] }}</td>
-                                <td>{{ $data['currency']['short_name'] }} {{ number_format($detail['total'], 2) }}</td>
+                                <td>{{ $data['currencyShortName'] }} {{ number_format($subTotal, 2) }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -277,28 +280,27 @@
                         {{-- <div class="sing"></div> --}}
                     </div>
                     @php
-                    $sumTax = $data['currency']['short_name'] . ' '. $data['sub_total'] * $data['tax'] / 100;
-                    $sumDiscount = $data['currency']['short_name'] . ' ' . $data['sub_total'] * $data['discount'] / 100;
-
+                        $sumTax = $data['currencyShortName'] . ' '. $data['rateSubTotal'] * $data['rateTax'] / 100;
+                        $sumDiscount = $data['currencyShortName'] . ' ' . $data['rateSubTotal'] * $data['rateDiscount'] / 100;
                     @endphp
                     <div class="column is-4">
                         <ul style="list-style:none;">
                             <div class="list-total">
                             <li>
                             SUB-TOTAL
-                            <span class="sub">{{ $data['currency']['short_name'] }} {{ number_format($data['sub_total'], 2) }}</span>
+                            <span class="sub">{{ $data['currencyShortName'] }} {{ number_format($data['rateSubTotal'], 2) }}</span>
                             </li>
                             <li>
-                                TAX ({{ $data['tax'] }}%)
+                                TAX ({{ $data['rateTax'] }}%)
                                 <span class="sub">{{$sumTax}}</span>
                             </li>
                             <li>
-                                DISCOUNT ({{ $data['discount'] }}%)
+                                DISCOUNT ({{ $data['rateDiscount'] }}%)
                                 <span class="sub">{{ $sumDiscount }}</span>
                             </li>
                             <hr class="border-total">
                             <li class="total-m">
-                                TOTAL<span>{{ $data['currency']['short_name'] }} {{ number_format($data['total'], 2) }}</span>
+                                TOTAL<span>{{ $data['currencyShortName'] }} {{ number_format($data['rateTotal'], 2) }}</span>
                             </li>
                             </div>
                         </ul>

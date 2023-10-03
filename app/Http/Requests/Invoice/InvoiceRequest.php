@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Invoice;
 
 use App\Models\Invoice;
+use App\Models\InvoiceDetail;
 use App\Models\QuotationDetail;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,7 @@ class InvoiceRequest extends FormRequest
     {
         if($this->isMethod('put') && $this->routeIs('edit.invoice')
              ||$this->isMethod('delete') && $this->routeIs('delete.invoice')
-             ||$this->isMethod('put') && $this->routeIs('edit.invoice.detail')
+            //  ||$this->isMethod('put') && $this->routeIs('edit.invoice.detail')
              ||$this->isMethod('post') && $this->routeIs('add.invoice.detail')
              ||$this->isMethod('put') && $this->routeIs('update.invoice.status')
              ||$this->isMethod('delete') && $this->routeIs('delete.invoice.detail')
@@ -105,50 +106,57 @@ class InvoiceRequest extends FormRequest
                                     $query->whereNull('deleted_at');
                                 }),
                                 function($attribute, $value, $fail){
-                                    $checkItem = Invoice::where('id', $value)->where('status', 'completed')->exists();
-                                    if($checkItem){
-                                        $fail('ບໍ່ສາມາດລຶບລາຍລະອຽດໃບເກັບເງິນນີ້ໄດ້ ເພາະວ່າຖືກອອກໃບເກັບເງິນແລ້ວ...');
+                                    $detail = InvoiceDetail::where('id', $value)->first(); // Retrieve the InvoiceDetail
+
+                                    if ($detail) {
+                                        $checkItem = Invoice::where('id', $detail->invoice_id)
+                                            ->where('status', 'completed')
+                                            ->exists();
+
+                                        if ($checkItem) {
+                                            $fail('ບໍ່ສາມາດລຶບລາຍລະອຽດໃບເກັບເງິນນີ້ໄດ້ ເພາະວ່າຖືກອອກໃບເກັບເງິນແລ້ວ...');
+                                        }
                                     }
                                 }
                 ],
             ];
         }
 
-        if($this->isMethod('put') && $this->routeIs('edit.invoice.detail'))
-        {
-            return [
-                'id' =>[
-                    'required',
-                        'numeric',
-                            Rule::exists('invoice_details', 'id')
-                                ->where(function ($query) {
-                                    $query->whereNull('deleted_at');
-                                }),
-                                function($attribute, $value, $fail){
-                                    $checkItem = Invoice::where('id', $value)->where('status', 'completed')->exists();
-                                    if($checkItem){
-                                        $fail('ບໍ່ສາມາດແກ້ໄຂລາຍລະອຽດໃບເກັບເງິນນີ້ໄດ້ ເພາະວ່າຖືກອອກໃບເກັບເງິນແລ້ວ...');
-                                    }
-                                }
-                ],
-                'order' => [
-                    'required',
-                        'numeric'
-                ],
-                'name' => [
-                    'required',
-                        'max:255'
-                ],
-                'amount' => [
-                    'required',
-                        'numeric'
-                ],
-                'price' => [
-                    'required',
-                        'numeric'
-                ]
-            ];
-        }
+        // if($this->isMethod('put') && $this->routeIs('edit.invoice.detail'))
+        // {
+        //     return [
+        //         'id' =>[
+        //             'required',
+        //                 'numeric',
+        //                     Rule::exists('invoice_details', 'id')
+        //                         ->where(function ($query) {
+        //                             $query->whereNull('deleted_at');
+        //                         }),
+        //                         function($attribute, $value, $fail){
+        //                             $checkItem = Invoice::where('id', $value)->where('status', 'completed')->exists();
+        //                             if($checkItem){
+        //                                 $fail('ບໍ່ສາມາດແກ້ໄຂລາຍລະອຽດໃບເກັບເງິນນີ້ໄດ້ ເພາະວ່າຖືກອອກໃບເກັບເງິນແລ້ວ...');
+        //                             }
+        //                         }
+        //         ],
+        //         'order' => [
+        //             'required',
+        //                 'numeric'
+        //         ],
+        //         'name' => [
+        //             'required',
+        //                 'max:255'
+        //         ],
+        //         'amount' => [
+        //             'required',
+        //                 'numeric'
+        //         ],
+        //         'price' => [
+        //             'required',
+        //                 'numeric'
+        //         ]
+        //     ];
+        // }
 
         if($this->isMethod('put') && $this->routeIs('edit.invoice'))
         {

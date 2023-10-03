@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Receipt;
 
+use App\Models\InvoiceRate;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -92,11 +93,16 @@ class ReceiptRequest extends FormRequest
         if($this->isMethod('post') && $this->routeIs('add.receipt'))
         {
             return [
-                'invoice_id' =>[
+                'invoice_rate_id' =>[
                     'required',
                         'numeric',
-                            Rule::exists('invoices', 'id')
-                                ->whereNull('deleted_at')
+                            Rule::exists('invoice_rates', 'id')->whereNull('deleted_at'),
+                            function($attribute, $value, $fail){
+                                $checkItem = InvoiceRate::where('id', $value)->where('status_create_receipt', 1)->exists();
+                                if($checkItem){
+                                    $fail('ຖືກອອກໃບເກັບເງິນແລ້ວ...' . $checkItem);
+                                }
+                            }
                 ],
                 'receipt_name' =>[
                     'required',
@@ -118,9 +124,9 @@ class ReceiptRequest extends FormRequest
     public function messages()
     {
         return [
-            'invoice_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
-            'invoice_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
-            'invoice_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
+            'invoice_rate_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
+            'invoice_rate_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
+            'invoice_rate_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
 
             'receipt_name.required' => 'ກະລຸນາປ້ອນຊື່ກ່ອນ...',
             'receipt_name.max' => 'ຊື່ບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
