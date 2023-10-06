@@ -150,7 +150,7 @@ class UserService
         // Check if the entered password matches the stored hash
         if (Hash::check($oldPassword, $storedPasswordHash)){
             // Password is correct, allow the user to log in
-            $user->password = Hash::make($request->password);
+            $user->password = Hash::make($request->newPassword);
             $user->save();
 
             return response()->json([

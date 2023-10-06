@@ -13,7 +13,8 @@
       font-size: 16px;
       color: black;
       margin-bottom: 12px;
-      font-family: 'BoonBaan' !important;
+      /* font-family: 'BoonBaan' !important; */
+      font-family: 'Phetsarath OT';
     }
     .invoice-border-top{
         margin-top: 10px;

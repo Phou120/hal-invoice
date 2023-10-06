@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use App\Helpers\TableHelper;
 use App\Helpers\filterHelper;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class CompanyUserService
@@ -46,6 +47,7 @@ class CompanyUserService
 
     public function listCompanyUser($request)
     {
+        $user = Auth::user();
         $perPage = $request->per_page;
 
         $listCompanyUser = CompanyUser::select('company_users.*')
@@ -56,18 +58,37 @@ class CompanyUserService
                     $subQuery->where('users.name', 'like', '%' . $request->search . '%')
                             ->orWhere('companies.company_name', 'like', '%' . $request->search . '%');
                 });
-            })
-            ->orderBy('company_users.id', 'asc') // Specify the table alias for the id column
-            ->paginate($perPage);
+            });
 
-        $listCompanyUser->map(function ($item){
-            /** loop data */
-            TableHelper::loopDataInCompanyUser($item);
-        });
+        if($user->hasRole(['superadmin', 'admin'])) {
+            // Allow superadmin and admin to see all data
+            $companyUser = $listCompanyUser->orderBy('company_users.id', 'asc');
 
-        return response()->json([
-            'listCompanyUser' => $listCompanyUser
-        ], 200);
+            /** do paginate */
+            $paginate = $companyUser->paginate($perPage);
+
+            $paginate->map(function ($item){
+                /** loop data */
+                TableHelper::loopDataInCompanyUser($item);
+            });
+
+            return response()->json($paginate, 200);
+        }
+
+        if($user->hasRole(['company-admin', 'company-user'])) {
+            // Filter invoices for company-admin and company-user based on user ID
+            $companyUser = $listCompanyUser->where('user_id', $user->id)->orderBy('company_users.id', 'asc');
+
+            /** do paginate */
+            $paginate = $companyUser->paginate($perPage);
+
+            $paginate->map(function ($item){
+                /** loop data */
+                TableHelper::loopDataInCompanyUser($item);
+            });
+
+            return response()->json($paginate, 200);
+        }
     }
 
     public function updateCompanyUser($request)
@@ -82,7 +103,7 @@ class CompanyUserService
             $getUser->name = $request['name'];
             $getUser->email = $request['email'];
             $getUser->save();
-        }else{
+        }else {
             return response()->json(['msg' =>'ບໍ່ພົບ user...'], 422);
         }
 

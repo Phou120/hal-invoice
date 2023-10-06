@@ -48,7 +48,7 @@ class UserRequest extends FormRequest
                             Rule::exists('users', 'id')
                             ->whereNull('deleted_at')
                 ],
-                'password' =>[
+                'newPassword' =>[
                     'required',
                         'min:6',
                             'max:15'

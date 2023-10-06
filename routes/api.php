@@ -12,6 +12,7 @@ use App\Http\Controllers\Receipt\ReceiptController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Currency\CurrencyController;
 use App\Http\Controllers\Customer\CustomerController;
+use App\Http\Controllers\Invoice\InvoiceRateController;
 use App\Http\Controllers\Quotation\QuotationController;
 use App\Http\Controllers\Invoice\ReportInvoiceController;
 use App\Http\Controllers\CompanyUser\CompanyUserController;
@@ -136,6 +137,9 @@ Route::group([
     Route::put('edit-invoice-no-quotation-detail/{id}', [InvoiceNoQuotationIDController::class, 'editInvoiceDetailNoQuotationID'])->name('edit.invoice.no.quotation.detail')->middleware('role:company-admin|company-user');
 
 
+    /** Get Invoice rate */
+    Route::get('list-invoice-rate', [InvoiceRateController::class, 'invoiceRates']);
+
     /** CRUD Receipt */
     Route::post('add-receipt', [ReceiptController::class, 'addReceipt'])->name('add.receipt')->middleware('role:company-admin|company-user');
     Route::get('list-receipts', [ReceiptController::class, 'listReceipts']);
@@ -176,7 +180,7 @@ Route::group([
     Route::get('user-profile', [UserProfileController::class, 'ListUserProfile'])->middleware('role:superadmin|admin');
 
     /** CRUD CompanyUser */
-    Route::get('list-company-users', [CompanyUserController::class, 'listCompanyUser'])->middleware('role:company-admin|company-user');
+    Route::get('list-company-users', [CompanyUserController::class, 'listCompanyUser']);
     Route::post('create-company-user', [CompanyUserController::class, 'createCompanyUser'])->name('create.company.user')->middleware('role:company-admin|company-user');
     Route::put('update-company-user/{id}', [CompanyUserController::class, 'updateCompanyUser'])->name('update.company.user')->middleware('role:company-admin|company-user');
     Route::delete('delete-company-user/{id}', [CompanyUserController::class, 'deleteCompanyUser'])->name('delete.company.user')->middleware('role:company-admin|company-user');
@@ -218,7 +222,7 @@ Route::group([
     Route::delete('delete-module-title/{id}', [ModuleTitleController::class, 'deleteModuleTitle'])->name('delete.module.title')->middleware('role:superadmin|admin');
 
     /** Filter Module Title */
-    Route::get('filter-module-title/{id}', [ModuleTitleController::class, 'filterModuleTitle'])->name('filter.module.title');
+    Route::get('filter-module-title', [ModuleTitleController::class, 'filterModuleTitle'])->name('filter.module.title');
 
     /** CRUD quotation type */
     Route::get('list-quotation-types', [QuotationTypeController::class, 'listQuotationTypes'])->middleware('role:superadmin|admin');

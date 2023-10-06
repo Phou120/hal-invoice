@@ -2,8 +2,9 @@
 
 namespace App\Services\quotationType;
 
-use App\Models\QuotationRate;
 use App\Traits\ResponseAPI;
+use App\Models\QuotationRate;
+use Illuminate\Support\Facades\Auth;
 
 class QuotationRateService
 {
@@ -11,10 +12,30 @@ class QuotationRateService
 
     public function listQuotationRates($request)
     {
+        $user = Auth::user();
         $perPage = $request->per_page;
 
-        $query = QuotationRate::select('quotation_rates.*')->orderBy('id', 'desc')->paginate($perPage);
+        $query = QuotationRate::select('quotation_rates.*')
+        ->join('quotations', 'quotation_rates.quotation_id', 'quotations.id');
 
-        return response()->json(['listQuotationRates' => $query]);
+        if($user->hasRole(['superadmin', 'admin'])) {
+            // Allow superadmin and admin to see all data
+            $listQuotationRate = $query->orderBy('quotations.id', 'asc');
+
+            /** do paginate */
+            $getQuotationRate = $listQuotationRate->paginate($perPage);
+
+            return response()->json($getQuotationRate, 200);
+        }
+
+        // check role company-admin and company-user based on user ID
+        if($user->hasRole(['company-admin', 'company-user'])) {
+            $listQuotationRate = $query->where('created_by', $user->id)->orderBy('quotations.id', 'asc');
+
+            /** do paginate */
+            $getQuotationRate = $listQuotationRate->paginate($perPage);
+
+            return response()->json($getQuotationRate, 200);
+        }
     }
 }

@@ -15,6 +15,7 @@ class ModuleTitleService
         $createdTitle->module_category_id = $request['module_category_id'];
         $createdTitle->name = $request['name'];
         $createdTitle->hour = $request['hour'];
+        $createdTitle->description = $request['description'];
         $createdTitle->save();
 
         return response()->json([
@@ -40,6 +41,7 @@ class ModuleTitleService
         $updateTitle->module_category_id = $request['module_category_id'];
         $updateTitle->name = $request['name'];
         $updateTitle->hour = $request['hour'];
+        $updateTitle->description = $request['description'];
         $updateTitle->save();
 
         return response()->json([
@@ -60,9 +62,10 @@ class ModuleTitleService
     }
 
 
-    public function filterModuleTitleById($id)
+    public function filterModuleTitleById($request)
     {
-        $items = ModuleTitle::where('module_category_id', $id)->get();
+        $perPage = $request->per_page;
+        $items = ModuleTitle::where('module_category_id', $request->id)->paginate($perPage);
 
         return response()->json([
             'module_titles' => $items

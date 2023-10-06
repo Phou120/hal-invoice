@@ -62,6 +62,7 @@ class ExportPDFController extends Controller
         $view = view('quotations.quotation')
         ->with('data', $quotation)
         ->render();
+        // return $view;
 
         $file_name = 'quotation' . '.pdf';
         $file_url = public_path('images/quotation/pdf/' . $file_name);
