@@ -275,7 +275,7 @@ class QuotationService
         $currency = Currency::find($currencyId);
 
         if ($currency === null) {
-            return response()->json('currency name not found...', 422); // or handle the error as needed
+            return response()->json('currency name not found...', 404); // or handle the error as needed
         }
 
         $name = $currency->name;

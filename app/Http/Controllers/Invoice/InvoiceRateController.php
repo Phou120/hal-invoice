@@ -15,8 +15,8 @@ class InvoiceRateController extends Controller
         $this->invoiceRateService = $invoiceRateService;
     }
 
-    public function invoiceRates(Request $request)
-    {
-        return $this->invoiceRateService->invoiceRates($request);
-    }
+    // public function invoiceRates(Request $request)
+    // {
+    //     return $this->invoiceRateService->invoiceRates($request);
+    // }
 }

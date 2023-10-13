@@ -9,8 +9,18 @@ use Illuminate\Support\Facades\DB;
 
 class TableHelper
 {
+    /** loop data in invoice */
+    public static function loopDataInvoice($item)
+    {
+        $item->invoiceRate = DB::table('invoice_rates')->where('invoice_id', $item->id)->get();
+        $item->customer = DB::table('customers')->where('id', $item->customer_id)->first();
+        $item->user = DB::table('users')->where('id', $item->created_by)->first();
+    }
+
+    /** loop data in quotation */
     public static function loopDataInQuotation($item)
     {
+        $item->invoiceRate = DB::table('quotation_rates')->where('quotation_id', $item->id)->get();
         $item->customer = DB::table('customers')->where('id', $item->customer_id)->first();
         $item->user = DB::table('users')->where('id', $item->created_by)->first();
     }

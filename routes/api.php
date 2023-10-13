@@ -98,11 +98,9 @@ Route::group([
     Route::put('edit-quotation/{id}', [QuotationController::class, 'editQuotation'])->name('edit.quotation')->middleware('role:company-admin|company-user');
     Route::delete('delete-quotation/{id}', [QuotationController::class, 'deleteQuotation'])->name('delete.quotation')->middleware('role:company-admin|company-user');
 
-    /** list-quotation-detail/{id} = {id} = ແມ່ນ id quotation  *** And ***  add-quotation-detail/{id} = {id} = ແມ່ນ id quotation */
     Route::post('add-quotation-detail/{id}', [QuotationController::class, 'addQuotationDetail'])->name('add.quotation.detail')->middleware('role:company-admin|company-user');
     Route::get('list-quotation-details/{id}', [QuotationController::class, 'listQuotationDetail'])->name('list.quotation.detail');
 
-    /** edit-quotation-detail/{id} = {id} = ແມ່ນແກ້ໄຂ id detail  *** And ***  delete-quotation-detail/{id} = {id} = ແມ່ນລຶບ id detail */
     Route::put('edit-quotation-detail/{id}', [QuotationController::class, 'editQuotationDetail'])->name('edit.quotation.detail')->middleware('role:company-admin|company-user');
     Route::delete('delete-quotation-detail/{id}', [QuotationController::class, 'deleteQuotationDetail'])->name('delete.quotation.detail')->middleware('role:company-admin|company-user');
 
@@ -118,11 +116,9 @@ Route::group([
     Route::put('edit-invoice/{id}', [InvoiceController::class, 'editInvoice'])->name('edit.invoice')->middleware('role:company-admin|company-user');
     Route::delete('delete-invoice/{id}', [InvoiceController::class, 'deleteInvoice'])->name('delete.invoice')->middleware('role:company-admin|company-user');
 
-    /** list-invoice-detail/{id} = {id} = ແມ່ນ id invoice  *** And ***  add-invoice-detail/{id} = {id} = ແມ່ນ id invoice */
     Route::post('add-invoice-detail/{id}', [InvoiceController::class, 'addInvoiceDetail'])->name('add.invoice.detail')->middleware('role:company-admin|company-user');
     Route::get('list-invoice-detail/{id}', [InvoiceController::class, 'listInvoiceDetail'])->name('list.invoice.detail');
 
-    /** edit-invoice-detail/{id} = {id} = ແມ່ນແກ້ໄຂ id detail  *** And ***  delete-invoice-detail/{id} = {id} = ແມ່ນລຶບ id detail */
     //Route::put('edit-invoice-detail/{id}', [InvoiceController::class, 'editInvoiceDetail'])->name('edit.invoice.detail');
     Route::delete('delete-invoice-detail/{id}', [InvoiceController::class, 'deleteInvoiceDetail'])->name('delete.invoice.detail')->middleware('role:company-admin|company-user');
 
@@ -138,7 +134,7 @@ Route::group([
 
 
     /** Get Invoice rate */
-    Route::get('list-invoice-rate', [InvoiceRateController::class, 'invoiceRates']);
+    // Route::get('list-invoice-rate', [InvoiceRateController::class, 'invoiceRates']);
 
     /** CRUD Receipt */
     Route::post('add-receipt', [ReceiptController::class, 'addReceipt'])->name('add.receipt')->middleware('role:company-admin|company-user');
@@ -232,7 +228,7 @@ Route::group([
 
 
     /** get quotation_rate */
-    Route::get('list-quotation-rates', [QuotationRateController::class, 'listQuotationRates']);
+    // Route::get('list-quotation-rates', [QuotationRateController::class, 'listQuotationRates']);
 });
 
 

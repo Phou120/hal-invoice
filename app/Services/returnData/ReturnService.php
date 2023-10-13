@@ -135,7 +135,7 @@ class ReturnService
     public function mapDataInQuotation($listQuotations)
     {
         $listQuotations->map(function ($item) {
-            TableHelper::loopDataInQuotation($item);
+            TableHelper::loopDataInvoice($item);
         });
 
         return $listQuotations;

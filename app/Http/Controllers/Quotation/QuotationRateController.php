@@ -15,8 +15,8 @@ class QuotationRateController extends Controller
         $this->quotationRateService = $quotationRateService;
     }
 
-    public function listQuotationRates(Request $request)
-    {
-        return $this->quotationRateService->listQuotationRates($request);
-    }
+    // public function listQuotationRates(Request $request)
+    // {
+    //     return $this->quotationRateService->listQuotationRates($request);
+    // }
 }
