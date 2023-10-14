@@ -26,7 +26,7 @@ class CompanyBankAccountService
         ], 200);
     }
 
-    public function listCompanyBankAccount($request)
+    public function listCompanyBankAccounts($request)
     {
         $perPate = $request->per_page;
 

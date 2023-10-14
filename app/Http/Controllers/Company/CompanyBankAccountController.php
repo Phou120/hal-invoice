@@ -21,9 +21,9 @@ class CompanyBankAccountController extends Controller
         return $this->companyBankAccountService->createCompanyBankAccount($request);
     }
 
-    public function listCompanyBankAccount(Request $request)
+    public function listCompanyBankAccounts(Request $request)
     {
-        return $this->companyBankAccountService->listCompanyBankAccount($request);
+        return $this->companyBankAccountService->listCompanyBankAccounts($request);
     }
 
     public function updateCompanyBankAccount(CompanyBankAccountRequest $request)

@@ -354,6 +354,9 @@ class QuotationService
         // Sort the resulting collection by rate in descending order
         $rateCurrencies = $currencyTotals->sortByDesc('rate')->values()->toArray();
 
+         /** map data */
+         $quotation = $this->returnService->mapDataInQuotation($item);
+
         if ($countDetail === 0) {
             $rateCurrencies = []; // Set rate to an empty array if countDetail is 0
         }
@@ -370,7 +373,7 @@ class QuotationService
         $responseData = [
             'countDetail' => $countDetail,
             'rate' => $rateCurrencies,
-            'quotation' => $item,
+            'quotation' => $quotation,
             'details' => $details
         ];
 

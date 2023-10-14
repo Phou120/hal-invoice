@@ -10,8 +10,10 @@ use App\Helpers\filterHelper;
 use App\Models\InvoiceDetail;
 use App\Helpers\generateHelper;
 use App\Models\QuotationDetail;
+use App\Models\CompanyBankAccount;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\CompanyInvoiceBankAccount;
 use App\Services\returnData\ReturnService;
 
 class InvoiceService
@@ -33,6 +35,7 @@ class InvoiceService
     /** ບັນທຶກໃບບິນເກັບເງິນ */
     public function addInvoice($request)
     {
+        $user = Auth::user();
         $quotationDetailId = $request['quotation_detail_id'];
         $quotationDetail = QuotationDetail::find($quotationDetailId);
 
@@ -72,12 +75,29 @@ class InvoiceService
             /** update type_quotation in invoice */
             $this->returnService->updateTypeQuotationInInvoice($getQuotation, $addInvoice);
 
+            ################ { Create Invoice From Company Band Account }################
+            $companyBankAccount = CompanyBankAccount::select('company_bank_accounts.*')->join('companies', 'company_bank_accounts.company_id', 'companies.id')
+            ->join('company_users', 'company_users.company_id', 'companies.id')
+            ->where('company_users.user_id', $user->id)
+            ->orderBy('id', 'asc')->get();
+
+            if(count($companyBankAccount) > 0) {
+                foreach($companyBankAccount as $items){
+                    $create = new CompanyInvoiceBankAccount();
+                    $create->invoice_id = $addInvoice->id;
+                    $create->company_band_account_id = $items->id;
+                    $create->save();
+
+                        ### { save to array } ###
+                    $accountArray[] = $create->toArray();
+                }
+            }
+
             $totalHours = 0;
 
             foreach ($quotationDetailId as $detailId) {
                 // Find the corresponding QuotationDetail
                 $quotationDetail = QuotationDetail::find($detailId);
-                // dd($quotationDetail);
 
                 if (!$quotationDetail) {
                     return response()->json(['error' =>true, 'message' => 'quotation_detail_id not found in quotation_detail']);
@@ -275,7 +295,7 @@ class InvoiceService
             $getInvoice = $listInvoice->paginate($perPage);
 
             // Map data
-            $mapInvoice = $this->returnService->mapDataInQuotation($getInvoice);
+            $mapInvoice = $this->returnService->mapDataInvoice($getInvoice);
 
             /** merge invoice data of user */
             $responseData = [
@@ -424,7 +444,7 @@ class InvoiceService
         $rateCurrencies = $currencyTotals->sortByDesc('rate')->values()->toArray();
 
         /** map data */
-        $mapInvoice = $this->returnService->mapDataInQuotation($item);
+        $mapInvoice = $this->returnService->mapDataInvoice($item);
 
         // Detail query
         $detailsQuery = $this->returnService->invoiceDetailsQuery($request);

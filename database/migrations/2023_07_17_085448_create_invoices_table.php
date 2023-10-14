@@ -17,7 +17,6 @@ return new class extends Migration
             $table->id();
             $table->string('invoice_number');
             $table->unsignedBigInteger('customer_id');
-            // $table->unsignedBigInteger('currency_id');
             $table->unsignedBigInteger('quotation_id')->nullable();
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable();

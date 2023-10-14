@@ -22,6 +22,7 @@ use App\Http\Controllers\Company\CompanyBankAccountController;
 use App\Http\Controllers\moduleCategory\ModuleTitleController;
 use App\Http\Controllers\PurchaseOrder\PurchaseOrderController;
 use App\Http\Controllers\Invoice\InvoiceNoQuotationIDController;
+use App\Http\Controllers\InvoiceFromCompanyBankAccountController;
 use App\Http\Controllers\moduleCategory\ModuleCategoryController;
 
 /*
@@ -106,20 +107,14 @@ Route::group([
 
     /** update status quotation */
     Route::put('update-quotation-status/{id}', [QuotationController::class, 'updateQuotationStatus'])->name('update.quotation.status')->middleware('role:company-admin|company-user');
-    /** update status in quotation_details */
-    //Route::put('update-detail-status/{id}', [QuotationController::class, 'updateDetailStatus'])->name('update.detail.status')->middleware('role:company-admin|company-user');
-
 
     /** CRUD Invoice */
     Route::post('add-invoice', [InvoiceController::class, 'addInvoice'])->name('add.invoice')->middleware('role:company-admin|company-user');
     Route::get('list-invoices', [InvoiceController::class, 'listInvoices']);
     Route::put('edit-invoice/{id}', [InvoiceController::class, 'editInvoice'])->name('edit.invoice')->middleware('role:company-admin|company-user');
     Route::delete('delete-invoice/{id}', [InvoiceController::class, 'deleteInvoice'])->name('delete.invoice')->middleware('role:company-admin|company-user');
-
     Route::post('add-invoice-detail/{id}', [InvoiceController::class, 'addInvoiceDetail'])->name('add.invoice.detail')->middleware('role:company-admin|company-user');
     Route::get('list-invoice-detail/{id}', [InvoiceController::class, 'listInvoiceDetail'])->name('list.invoice.detail');
-
-    //Route::put('edit-invoice-detail/{id}', [InvoiceController::class, 'editInvoiceDetail'])->name('edit.invoice.detail');
     Route::delete('delete-invoice-detail/{id}', [InvoiceController::class, 'deleteInvoiceDetail'])->name('delete.invoice.detail')->middleware('role:company-admin|company-user');
 
     /** update status in table Invoice */
@@ -142,24 +137,14 @@ Route::group([
     Route::put('edit-receipt/{id}', [ReceiptController::class, 'editReceipt'])->name('edit.receipt')->middleware('role:company-admin|company-user');
     Route::delete('delete-receipt/{id}', [ReceiptController::class, 'deleteReceipt'])->name('delete.receipt')->middleware('role:company-admin|company-user');
 
-    /** list-receipt-detail/{id} => {id} = ແມ່ນ id receipt  */
-   // Route::get('list-receipt-detail/{id}', [ReceiptController::class, 'listReceiptDetail'])->name('list.receipt.detail')->middleware('role:superadmin|admin');
-
-    /** delete-receipt-detail/{id} => {id} = ແມ່ນ ລຶບ id detail */
-    // Route::delete('delete-receipt-detail/{id}', [ReceiptController::class, 'deleteReceiptDetail'])->name('delete.receipt.detail');
-
 
     /** CRUD Purchaser Order */
     Route::post('add-purchase-order', [PurchaseOrderController::class, 'addPurchaseOrder'])->name('add.purchase.order');
     Route::get('list-purchase-orders', [PurchaseOrderController::class, 'listPurchaseOrders']);
     Route::put('edit-purchase-order/{id}', [PurchaseOrderController::class, 'editPurchaseOrder'])->name('edit.purchase.order');
     Route::delete('delete-purchase-order/{id}', [PurchaseOrderController::class, 'deletePurchaseOrder'])->name('delete.purchase.order');
-
-    /** list-purchase-detail/{id} => {id} = ແມ່ນ id purchase  *** And ***  add-purchase-detail/{id} = {id} = ແມ່ນ id purchase */
     Route::post('add-purchase-detail/{id}', [PurchaseOrderController::class, 'addPurchaseDetail'])->name('add.purchase.detail');
     Route::get('list-purchase-detail/{id}', [PurchaseOrderController::class, 'listPurchaseDetail'])->name('list.purchase.detail');
-
-    /** edit-purchase-detail/{id} => {id} = ແກ້ ໄຂ id detail  *** And ***  delete-purchase-detail/{id} => {id} = ແມ່ນ ລຶບ id detail */
     Route::put('edit-purchase-detail/{id}', [PurchaseOrderController::class, 'editPurchaseDetail'])->name('edit.purchase.detail');
     Route::delete('delete-purchase-detail/{id}', [PurchaseOrderController::class, 'deletePurchaseDetail'])->name('delete.purchase.detail');
 
@@ -195,13 +180,13 @@ Route::group([
     Route::get('report-company-customer', [ReportController::class, 'reportCompanyCustomer'])->middleware('role:superadmin|admin');
 
     /** CRUD company_bank_account */
-    Route::get('list-company-bank-accounts', [CompanyBankAccountController::class, 'listCompanyBankAccount'])->middleware('role:superadmin|admin');
-    Route::post('create-company-bank-account', [CompanyBankAccountController::class, 'createCompanyBankAccount'])->name('create.bank.account')->middleware('role:superadmin|admin');
-    Route::put('update-company-bank-account/{id}', [CompanyBankAccountController::class, 'updateCompanyBankAccount'])->name('update.bank.account')->middleware('role:superadmin|admin');
-    Route::delete('delete-company-bank-account/{id}', [CompanyBankAccountController::class, 'deleteCompanyBankAccount'])->name('delete.bank.account')->middleware('role:superadmin|admin');
+    Route::get('list-company-bank-accounts', [CompanyBankAccountController::class, 'listCompanyBankAccounts']);
+    Route::post('create-company-bank-account', [CompanyBankAccountController::class, 'createCompanyBankAccount'])->name('create.bank.account')->middleware('role:company-admin|company-user');
+    Route::put('update-company-bank-account/{id}', [CompanyBankAccountController::class, 'updateCompanyBankAccount'])->name('update.bank.account')->middleware('role:company-admin|company-user');
+    Route::delete('delete-company-bank-account/{id}', [CompanyBankAccountController::class, 'deleteCompanyBankAccount'])->name('delete.bank.account')->middleware('role:company-admin|company-user');
 
     /** update status */
-    Route::put('update-status-bank-account/{id}', [CompanyBankAccountController::class, 'updateStatusBankAccount'])->name('update.status.bank.account')->middleware('role:superadmin|admin');
+    Route::put('update-status-bank-account/{id}', [CompanyBankAccountController::class, 'updateStatusBankAccount'])->name('update.status.bank.account')->middleware('role:company-admin|company-user');
 
 
     /** CRUD module categories */
@@ -225,7 +210,6 @@ Route::group([
     Route::post('create-quotation-type', [QuotationTypeController::class, 'createQuotationType'])->name('create.quotation.type')->middleware('role:superadmin|admin');
     Route::put('update-quotation-type/{id}', [QuotationTypeController::class, 'updateQuotationType'])->name('update.quotation.type')->middleware('role:superadmin|admin');
     Route::delete('delete-quotation-type/{id}', [QuotationTypeController::class, 'deleteQuotationType'])->name('delete.quotation.type')->middleware('role:superadmin|admin');
-
 
     /** get quotation_rate */
     // Route::get('list-quotation-rates', [QuotationRateController::class, 'listQuotationRates']);

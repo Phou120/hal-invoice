@@ -4,15 +4,18 @@ namespace App\Services\returnData;
 
 use App\Models\User;
 use App\Models\Company;
+use App\Models\Invoice;
 use App\Models\Currency;
 use App\Traits\ResponseAPI;
 use App\Helpers\TableHelper;
 use App\Helpers\filterHelper;
-use App\Models\Invoice;
+use App\Models\CompanyBankAccount;
 use App\Models\InvoiceDetail;
 use App\Models\QuotationRate;
 use App\Models\QuotationDetail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use App\Models\CompanyInvoiceBankAccount;
 
 class ReturnService
 {
@@ -113,14 +116,22 @@ class ReturnService
         ];
     }
 
-    // /** return data in company and customer */
-    // public function returnData($company, $customer)
-    // {
-    //     return[
-    //         'customer' => $customer,
-    //         'company' => $company
-    //     ];
-    // }
+    ##### { Create Invoice From Company Bank Account } #####
+    public function InvoiceFromCompanyBandAccount($addInvoice)
+    {
+        $user = Auth::user();
+        $invoice = $addInvoice->where('created_by', $user->id)->first();
+        $companyBankAccount = CompanyBankAccount::orderBy('id', 'desc')->get();
+        return $companyBankAccount;
+        if(isset($invoice)){
+            $create = new CompanyInvoiceBankAccount();
+            $create->invoice_id = $addInvoice->id;
+            $create->save();
+
+                ### { save to array } ###
+            $accountArray[] = $create->toArray();
+        }
+    }
 
     /** update type_quotation in invoice */
     public function updateTypeQuotationInInvoice($getQuotation, $addInvoice)
@@ -133,6 +144,16 @@ class ReturnService
 
     /** map data in quotation */
     public function mapDataInQuotation($listQuotations)
+    {
+        $listQuotations->map(function ($item) {
+            TableHelper::loopDataInQuotation($item);
+        });
+
+        return $listQuotations;
+    }
+
+    /** map data in invoice */
+    public function mapDataInvoice($listQuotations)
     {
         $listQuotations->map(function ($item) {
             TableHelper::loopDataInvoice($item);
