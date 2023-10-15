@@ -12,6 +12,7 @@ class TableHelper
     /** loop data in invoice */
     public static function loopDataInvoice($item)
     {
+        $item->companyInvoiceBankAccount = DB::table('company_invoice_bank_accounts')->where('invoice_id', $item->id)->get();
         $item->invoiceRate = DB::table('invoice_rates')->where('invoice_id', $item->id)->get();
         $item->customer = DB::table('customers')->where('id', $item->customer_id)->first();
         $item->user = DB::table('users')->where('id', $item->created_by)->first();

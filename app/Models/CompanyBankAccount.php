@@ -10,4 +10,9 @@ class CompanyBankAccount extends Model
 {
     use HasFactory;
     use SoftDeletes;
+
+    public function company_invoice_bank_accounts()
+    {
+        return $this->hasMany(CompanyInvoiceBankAccount::class);
+    }
 }

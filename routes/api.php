@@ -180,10 +180,10 @@ Route::group([
     Route::get('report-company-customer', [ReportController::class, 'reportCompanyCustomer'])->middleware('role:superadmin|admin');
 
     /** CRUD company_bank_account */
-    Route::get('list-company-bank-accounts', [CompanyBankAccountController::class, 'listCompanyBankAccounts']);
-    Route::post('create-company-bank-account', [CompanyBankAccountController::class, 'createCompanyBankAccount'])->name('create.bank.account')->middleware('role:company-admin|company-user');
-    Route::put('update-company-bank-account/{id}', [CompanyBankAccountController::class, 'updateCompanyBankAccount'])->name('update.bank.account')->middleware('role:company-admin|company-user');
-    Route::delete('delete-company-bank-account/{id}', [CompanyBankAccountController::class, 'deleteCompanyBankAccount'])->name('delete.bank.account')->middleware('role:company-admin|company-user');
+    Route::get('list-company-bank-accounts', [CompanyBankAccountController::class, 'listCompanyBankAccounts'])->middleware('role:superadmin|admin');
+    Route::post('create-company-bank-account', [CompanyBankAccountController::class, 'createCompanyBankAccount'])->name('create.bank.account')->middleware('role:superadmin|admin');
+    Route::put('update-company-bank-account/{id}', [CompanyBankAccountController::class, 'updateCompanyBankAccount'])->name('update.bank.account')->middleware('role:superadmin|admin');
+    Route::delete('delete-company-bank-account/{id}', [CompanyBankAccountController::class, 'deleteCompanyBankAccount'])->name('delete.bank.account')->middleware('role:superadmin|admin');
 
     /** update status */
     Route::put('update-status-bank-account/{id}', [CompanyBankAccountController::class, 'updateStatusBankAccount'])->name('update.status.bank.account')->middleware('role:company-admin|company-user');

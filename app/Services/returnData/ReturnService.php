@@ -117,20 +117,27 @@ class ReturnService
     }
 
     ##### { Create Invoice From Company Bank Account } #####
-    public function InvoiceFromCompanyBandAccount($addInvoice)
+    public function InvoiceFromCompanyBandAccount($addInvoice, $user, $request)
     {
-        $user = Auth::user();
-        $invoice = $addInvoice->where('created_by', $user->id)->first();
-        $companyBankAccount = CompanyBankAccount::orderBy('id', 'desc')->get();
-        return $companyBankAccount;
-        if(isset($invoice)){
-            $create = new CompanyInvoiceBankAccount();
-            $create->invoice_id = $addInvoice->id;
-            $create->save();
+        $companyBankAccount = CompanyBankAccount::select('company_bank_accounts.*')
+                ->leftJoin('companies', 'company_bank_accounts.company_id', 'companies.id')
+                ->leftJoin('company_users', 'companies.id', 'company_users.company_id')
+                ->where('company_users.user_id', $user->id)
+                ->whereIn('company_bank_accounts.id',$request->company_bank_account_id)
+                ->orderBy('id', 'asc')
+                ->get();
 
-                ### { save to array } ###
-            $accountArray[] = $create->toArray();
-        }
+            if (count($companyBankAccount) > 0) {
+                $companyBankAccount->map(function ($item) use ($addInvoice) {
+                    $create = new CompanyInvoiceBankAccount();
+                    $create->invoice_id = $addInvoice->id;
+                    $create->company_bank_account_id = $item->id;
+                    $create->save();
+
+                    return $create->toArray();
+                })->all();
+
+            }
     }
 
     /** update type_quotation in invoice */

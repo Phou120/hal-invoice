@@ -176,9 +176,17 @@
       border-bottom: 1px solid #c9c6c6;
       width: 20%;
     }
-    .invoice .note{
+    /* .invoice .note{
       white-space: break-spaces;
+      /* margin-right: 30px;
+    } */
+
+    .account {
+        margin: -10px;
+        padding: -20px;
+        margin-left: 0;
     }
+
   </style>
   <body>
     <div class="container">
@@ -211,7 +219,7 @@
                         <p class="label">{{ $data['invoice_number'] }}</p>
                         <p class="sub-title">Created Date</p>
                         <p class="label">{{ \Carbon\Carbon::parse($data['start_date'])->format('Y-m-d') }}</p>
-                        <p class="sub-title">DUE DATE</p>
+                        <p class="sulabelb-title">DUE DATE</p>
                         <p class="label">{{ \Carbon\Carbon::parse($data['end_date'])->format('Y-m-d') }}</p>
                         <p class="sub-title">BALANCE DUE</p>
                         <p>{{ $data['currencyShortName'] }} {{ number_format($data['rateTotal'], 2) }}</p>
@@ -315,6 +323,15 @@
                         </p>
                     </div>
                   @endif
+                  <div class="account">
+                    @foreach ($data['company_invoice_bank_accounts'] as $item)
+                        <br>
+                        <p class="p1">{{ $item['company_bank_account']['bank_name'] }}</p>
+                        <p class="p2">{{ $item['company_bank_account']['account_name'] }}</p>
+                        <p class="p3">{{ $item['company_bank_account']['account_number'] }}</p>
+                    @endforeach
+                </div>
+
                 </div>
               </div>
             </div>

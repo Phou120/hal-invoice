@@ -29,15 +29,18 @@ class Invoice extends Model
             'rateTotal' => $this->rateTotal,
             'count_details' => $this->count_details,
             'status' => $this->status,
+            // 'accountNumber' => $this->accountNumber,
+            // 'bankName' => $this->bankName,
+            // 'accountName' => $this->accountName,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'quotation' => $this->quotation,
             'customer' => $this->customer,
             'created_by' => $this->createdBy,
             'company' => $this->createdBy->company_user->company,
-            // 'invoice_rates' => $this->invoice_rates,
-            // // 'currency' => $this->invoice_rates->first()->currency,
-            // 'currency' => $this->invoice_rates->pluck('currency')->toArray(),
+            'company_invoice_bank_accounts' => $this->company_invoice_bank_accounts->map(function ($item) {
+                return $item->only(['id', 'invoice_id', 'company_bank_account_id', 'created_at', 'updated_at', 'deleted_at']) + ['company_bank_account' => $item->company_bank_account->toArray()];
+            }),
             'details' => $this->invoice_details
         ];
     }
@@ -64,8 +67,8 @@ class Invoice extends Model
         return $this->hasMany(InvoiceDetail::class);
     }
 
-    // public function invoice_rates(){
-    //     return $this->hasMany(InvoiceRate::class);
-    // }
+    public function company_invoice_bank_accounts(){
+        return $this->hasMany(CompanyInvoiceBankAccount::class);
+    }
 
 }

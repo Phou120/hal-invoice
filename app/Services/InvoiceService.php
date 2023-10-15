@@ -36,6 +36,7 @@ class InvoiceService
     public function addInvoice($request)
     {
         $user = Auth::user();
+        // $id = $request->company_bank_account_id;
         $quotationDetailId = $request['quotation_detail_id'];
         $quotationDetail = QuotationDetail::find($quotationDetailId);
 
@@ -72,26 +73,11 @@ class InvoiceService
             $addInvoice->created_by = Auth::user('api')->id;
             $addInvoice->save();
 
-            /** update type_quotation in invoice */
+            ################ { update type_quotation in invoice to 1 } ################
             $this->returnService->updateTypeQuotationInInvoice($getQuotation, $addInvoice);
 
-            ################ { Create Invoice From Company Band Account }################
-            $companyBankAccount = CompanyBankAccount::select('company_bank_accounts.*')->join('companies', 'company_bank_accounts.company_id', 'companies.id')
-            ->join('company_users', 'company_users.company_id', 'companies.id')
-            ->where('company_users.user_id', $user->id)
-            ->orderBy('id', 'asc')->get();
-
-            if(count($companyBankAccount) > 0) {
-                foreach($companyBankAccount as $items){
-                    $create = new CompanyInvoiceBankAccount();
-                    $create->invoice_id = $addInvoice->id;
-                    $create->company_band_account_id = $items->id;
-                    $create->save();
-
-                        ### { save to array } ###
-                    $accountArray[] = $create->toArray();
-                }
-            }
+            ################ { Create Invoice From Company Band Account } ################
+            $this->returnService->InvoiceFromCompanyBandAccount($addInvoice, $user, $request);
 
             $totalHours = 0;
 
@@ -273,7 +259,7 @@ class InvoiceService
             $getInvoice = $listInvoice->paginate($perPage);
 
             // Map data
-            $mapInvoice = $this->returnService->mapDataInQuotation($getInvoice);
+            $mapInvoice = $this->returnService->mapDataInvoice($getInvoice);
 
             /** merge invoice data of super-admin and admin */
             $responseData = [
@@ -334,10 +320,15 @@ class InvoiceService
             'invoice_rates.tax as rateTax',
             'invoice_rates.total as rateTotal',
             'invoice_rates.rate as rate',
+            // 'company_bank_accounts.account_number as accountNumber',
+            // 'company_bank_accounts.bank_name as bankName',
+            // 'company_bank_accounts.account_name as accountName',
             DB::raw('(SELECT COUNT(*) FROM invoice_details WHERE invoice_details.invoice_id = invoices.id) as count_details')
         ])
         ->join('invoice_rates', 'invoice_rates.invoice_id', 'invoices.id')
         ->join('currencies', 'invoice_rates.currency_id', 'currencies.id')
+        // ->join('company_invoice_bank_accounts as companyInvoiceBankAccount', 'companyInvoiceBankAccount.invoice_id', 'invoices.id')
+        // ->join('company_bank_accounts', 'companyInvoiceBankAccount.company_bank_account_id', 'company_bank_accounts.id')
         ->where('invoice_rates.invoice_id', $invoiceRate->invoice_id)
         ->where('currencies.name', $name)
         ->orderBy('id', 'desc')

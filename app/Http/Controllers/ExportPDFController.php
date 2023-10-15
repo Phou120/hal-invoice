@@ -16,8 +16,8 @@ class ExportPDFController extends Controller
         $invoice = resolve(InvoiceService::class)->listInvoice($request);
 
         $view = view('invoices.invoice')
-            ->with('data', $invoice)
-            ->render();
+        ->with('data', $invoice)
+        ->render();
 
         $file_name = 'invoice' . '.pdf';
         $file_url = public_path('images/invoice/pdf/' . $file_name);

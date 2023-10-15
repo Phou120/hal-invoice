@@ -3,9 +3,11 @@
 namespace App\Http\Requests\Invoice;
 
 use App\Models\Invoice;
+use App\Models\CompanyUser;
 use App\Models\InvoiceDetail;
 use App\Models\QuotationDetail;
 use Illuminate\Validation\Rule;
+use App\Models\CompanyBankAccount;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -278,18 +280,6 @@ class InvoiceRequest extends FormRequest
                 //     'required',
                 //         'numeric'
                 // ],
-                // 'name' => [
-                //     'required',
-                //         'max:255'
-                // ],
-                // 'amount' => [
-                //     'required',
-                //         'numeric'
-                // ],
-                // 'price' => [
-                //     'required',
-                //         'numeric'
-                // ]
             ];
         }
 
@@ -336,48 +326,31 @@ class InvoiceRequest extends FormRequest
                             }
 
                 ],
-                // 'customer_id' => [
-                //     'required',
-                //         'numeric',
-                //             Rule::exists('customers', 'id')
-                //                 ->whereNull('deleted_at')
-                // ],
-                // 'quotation_id' => [
-                //     'nullable',
-                //         'numeric',
-                //             Rule::exists('quotations', 'id')
-                //                 ->whereNull('deleted_at')
-                // ],
-                // 'currency_id' => [
-                //     'nullable',
-                //         // 'numeric',
-                //         //     Rule::exists('currencies', 'id')
-                //         //         ->whereNull('deleted_at')
-                // ],
-                // 'discount' => [
-                //     'required',
-                //         'numeric'
-                // ],
-                // 'invoice_details' => [
-                //     'required',
-                //         'array'
-                // ],
-                // 'invoice_details.*.order' => [
-                //     'required',
-                //         'numeric'
-                // ],
-                // 'invoice_details.*.name' => [
-                //     'required',
-                //         'max:255'
-                // ],
-                // 'invoice_details.*.amount' => [
-                //     'required',
-                //         'numeric'
-                // ],
-                // 'invoice_details.*.price' => [
-                //     'required',
-                //         'numeric'
-                // ]
+                'company_bank_account_id' => [
+                    'required',
+                        'array',
+                            Rule::exists('company_bank_accounts', 'id')
+                            ->whereNull('deleted_at'),
+                            function ($attribute, $value, $fail) {
+                                $user = auth()->user();
+
+                                $userCompanyIds = CompanyUser::where('user_id', $user->id)
+                                    ->pluck('company_id')
+                                    ->toArray();
+
+                                $validBankAccounts = CompanyBankAccount::whereIn('id', $value)
+                                    ->whereIn('company_id', $userCompanyIds)
+                                    ->get();
+
+                                $validIds = $validBankAccounts->pluck('id')->toArray();
+
+                                $invalidIds = array_diff($value, $validIds);
+
+                                if (count($validBankAccounts) !== count($value)) {
+                                    $fail("ກະລຸນາເລືອກຈໍານວນລາຍການທີ່ຖືກຕ້ອງສໍາລັບຜູ້ໃຊ້ {$user->id}. ID ບັນຊີທະນາຄານຂອງບໍລິສັດບໍ່ຖືກຕ້ອງ: " . implode(', ', $invalidIds));
+                                }
+                            }
+                ],
             ];
         }
 
@@ -396,17 +369,6 @@ class InvoiceRequest extends FormRequest
             'end_date.date' => 'ຄວນເປັນວັນທີ...',
             'end_date.after_or_equal' => 'ວັນທີສິ້ນສຸດຄວນໃຫ່ຍກວ່າວັນທີເລີ່ມ...',
 
-            // 'customer_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
-            // 'customer_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
-            // 'customer_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
-
-            // 'quotation_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
-            // 'quotation_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
-
-            // 'currency_id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
-            // 'currency_id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
-            // 'currency_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
-
             'discount.required' => 'ກະລຸນາປ້ອນກ່ອນ...',
             'discount.numeric' => 'ຄວນເປັນໂຕເລກ...',
 
@@ -414,17 +376,9 @@ class InvoiceRequest extends FormRequest
             'quotation_detail_id.array' => 'quotation_detail_id ຄວນເປັນ array...',
             'quotation_detail_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
 
-            // 'invoice_details.*.order.required' => 'ກະລຸນາປ້ອນ order ກ່ອນ...',
-            // 'invoice_details.*.order.numeric' => 'order ຄວນເປັນໂຕເລກ...',
-
-            // 'invoice_details.*.name.required' => 'ກະລຸນາປ້ອນຊື່ກ່ອນ...',
-            // 'invoice_details.*.name.max' => 'ຊື່ບໍ່ຄວນເກີນ 255 ໂຕອັກສອນ...',
-
-            // 'invoice_details.*.amount.required' => 'ກະລຸນາປ້ອນຈຳນວນກ່ອນ...',
-            // 'invoice_details.*.amount.numeric' => 'ຈຳນວນຄວນເປັນໂຕເລກ...',
-
-            // 'invoice_details.*.price.required' => 'ກະລຸນາປ້ອນລາຄາກ່ອນ...',
-            // 'invoice_details.*.price.numeric' => 'ລາຄາຄວນເປັນໂຕເລກ...',
+            'company_bank_account_id.required' => 'ກະລຸນາປ້ອນກ່ອນ...',
+            'company_bank_account_id.array' => 'company_bank_account_id ຄວນເປັນ array...',
+            'company_bank_account_id.exists' => 'id ບໍ່ມີໃນລະບົບ...',
 
             'id.required' => 'ກະລຸນາປ້ອນ id ກ່ອນ...',
             'id.numeric' => 'id ຄວນເປັນໂຕເລກ...',
